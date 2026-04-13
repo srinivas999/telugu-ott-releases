@@ -671,6 +671,131 @@ main {
   text-align: center;
 }
 
+html[data-homepage-mode="ott_only"] .site-footer {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at top left, rgba(244, 114, 182, 0.18), transparent 34%),
+    radial-gradient(circle at top right, rgba(251, 191, 36, 0.18), transparent 28%),
+    linear-gradient(135deg, #09111f 0%, #0f172a 46%, #111827 100%);
+  border-top: 1px solid rgba(251, 191, 36, 0.24);
+  padding: clamp(2.4rem, 5vw, 3.2rem) 1.5rem 1.7rem;
+}
+
+html[data-homepage-mode="ott_only"] .site-footer::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, transparent 0, rgba(255, 255, 255, 0.05) 50%, transparent 100%),
+    repeating-linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.04) 0 2px,
+      transparent 2px 18px
+    );
+  opacity: 0.22;
+  pointer-events: none;
+}
+
+html[data-homepage-mode="ott_only"] .site-footer__inner {
+  position: relative;
+  z-index: 1;
+}
+
+html[data-homepage-mode="ott_only"] .site-footer__top {
+  grid-template-columns: minmax(0, 1.6fr) auto auto;
+  gap: clamp(1.75rem, 4vw, 3rem);
+}
+
+html[data-homepage-mode="ott_only"] .site-footer__brand {
+  padding: 1.4rem 1.5rem;
+  border-radius: 24px;
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.9), rgba(30, 41, 59, 0.75));
+  border: 1px solid rgba(248, 250, 252, 0.1);
+  box-shadow: 0 20px 50px rgba(2, 6, 23, 0.38);
+}
+
+html[data-homepage-mode="ott_only"] .site-footer__name {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin-bottom: 0.8rem;
+  color: #f8fafc;
+}
+
+html[data-homepage-mode="ott_only"] .site-footer__name::after {
+  content: "OTT";
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.7rem;
+  padding: 0.25rem 0.7rem;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #f59e0b, #f97316);
+  color: #111827;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+html[data-homepage-mode="ott_only"] .site-footer__tagline {
+  max-width: 32rem;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+html[data-homepage-mode="ott_only"] .site-footer__label {
+  margin-bottom: 0.8rem;
+  color: rgba(251, 191, 36, 0.78);
+}
+
+html[data-homepage-mode="ott_only"] .site-footer__nav ul,
+html[data-homepage-mode="ott_only"] .site-footer__social ul {
+  gap: 0.7rem;
+}
+
+html[data-homepage-mode="ott_only"] .site-footer__nav a,
+html[data-homepage-mode="ott_only"] .site-footer__social a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.4rem;
+  padding: 0.2rem 0.85rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.88);
+}
+
+html[data-homepage-mode="ott_only"] .site-footer__nav a:hover,
+html[data-homepage-mode="ott_only"] .site-footer__social a:hover {
+  background: rgba(245, 158, 11, 0.18);
+  border-color: rgba(251, 191, 36, 0.34);
+  color: #fff7ed;
+}
+
+html[data-homepage-mode="ott_only"] .site-footer__copy {
+  margin-top: 2.1rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(251, 191, 36, 0.18);
+  color: rgba(255, 255, 255, 0.6);
+}
+
+@media (max-width: 48rem) {
+  html[data-homepage-mode="ott_only"] .site-footer__top {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  html[data-homepage-mode="ott_only"] .site-footer__brand {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 30rem) {
+  html[data-homepage-mode="ott_only"] .site-footer__top {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* About page */
 
 .page-about {
