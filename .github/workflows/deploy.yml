@@ -1,0 +1,27 @@
+name: Deploy portfolio
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create Supabase config
+        run: |
+          cat > supabase-config.js <<'EOF'
+          window.SUPABASE_URL="${{ secrets.SUPABASE_URL }}"
+          window.SUPABASE_ANON_KEY="${{ secrets.SUPABASE_ANON_KEY }}"
+          EOF
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: .
