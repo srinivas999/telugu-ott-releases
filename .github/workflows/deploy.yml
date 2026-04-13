@@ -16,24 +16,24 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Create Supabase config
+      - name: Create deploy folder
         run: |
-          cat > supabase-config.js <<'EOF'
+          rm -rf deploy
+          mkdir deploy
+          rsync -av --exclude='.git' --exclude='.github' --exclude='deploy' --exclude='.gitignore' --exclude='README.md' ./ deploy/
+          cat > deploy/supabase-config.js <<'EOF'
           window.SUPABASE_URL="${{ secrets.SUPABASE_URL }}"
           window.SUPABASE_ANON_KEY="${{ secrets.SUPABASE_ANON_KEY }}"
           EOF
 
-      - name: Force add Supabase config
-        run: git add -f supabase-config.js
-
       - name: Show generated config
         run: |
-          ls -la
-          cat supabase-config.js
+          ls -la deploy
+          cat deploy/supabase-config.js
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
-          publish_dir: .
+          publish_dir: deploy
