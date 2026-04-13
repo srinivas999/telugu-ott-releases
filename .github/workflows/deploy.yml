@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
 
 jobs:
   deploy:
@@ -24,6 +25,11 @@ jobs:
 
       - name: Force add Supabase config
         run: git add -f supabase-config.js
+
+      - name: Show generated config
+        run: |
+          ls -la
+          cat supabase-config.js
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
