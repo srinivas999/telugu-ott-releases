@@ -46,41 +46,68 @@
       <div class="nav-backdrop" aria-hidden="true"></div>
     </header>
 
-    <main class="page-projects">
-      <div class="projects-page-inner">
-        <header class="projects-page-header">
-          <h1>Upcoming Telugu Movie OTT Rights &amp; OTT Release Dates 2026</h1>
-          <p class="projects-page-lede">
-            A clean, responsive release schedule for Telugu movies and series coming to streaming
-            platforms in 2026.
-          </p>
-        </header>
-
-        <div class="release-table-toolbar">
-          <label class="release-table-toolbar__label" for="ott-date-sort">Sort by date</label>
-          <select class="release-table-toolbar__select" id="ott-date-sort" name="ott-date-sort">
-            <option value="desc">Newest first</option>
-            <option value="asc">Oldest first</option>
-          </select>
+    <main class="page-ott">
+      <section class="ott-hero">
+         <p class="eyebrow">Telugu OTT releases</p>
+        <div class="ott-hero__visual">
+          <img src="images/ott-hero-banner.png" alt="Telugu OTT hero banner" class="hero-image" />
         </div>
+        <div class="ott-hero__panel">
+         
+          <h1>Premium OTT platform for Telugu movie streaming launches</h1>
+          <p class="ott-hero__tagline">
+            Discover upcoming OTT release dates, platform rights, and premium launch highlights with a
+            sleek dark interface built for streaming enthusiasts.
+          </p>
+        </div>
+      </section>
 
-        <p id="ott-movies-status" class="admin-status" hidden aria-live="polite"></p>
-        <div id="ott-movies-loading" class="admin-loading" hidden>Loading OTT releases...</div>
-
-        <div class="release-table-wrapper">
-          <table class="release-table">
+      <section class="ott-section ott-table-section">
+        <div class="section-heading">
+          <p class="eyebrow">All releases</p>
+          <h2>Upcoming Telugu OTT launches</h2>
+        </div>
+        <div class="ott-table-filters">
+          <div class="ott-filter-buttons">
+            <button data-platform-filter="all" class="ott-filter-button is-active">All platforms</button>
+            <button data-platform-filter="Netflix" class="ott-filter-button">Netflix</button>
+            <button data-platform-filter="Aha" class="ott-filter-button">Aha</button>
+            <button data-platform-filter="Prime Video" class="ott-filter-button">Prime Video</button>
+          </div>
+          <div class="ott-filter-actions">
+            <label for="ott-date-sort" class="ott-filter-label">Sort by date</label>
+            <select id="ott-date-sort" name="ott-date-sort" class="ott-select">
+              <option value="desc">Newest first</option>
+              <option value="asc">Oldest first</option>
+            </select>
+            <span id="ott-movie-count" class="ott-movie-count">Loading movies...</span>
+          </div>
+        </div>
+        <div class="ott-table-wrap">
+          <table class="ott-movies-table">
             <thead>
               <tr>
-                <th scope="col">Movie</th>
-                <th scope="col">Digital Release Date</th>
-                <th scope="col">Online Streaming Partner</th>
-                <th scope="col">Category</th>
+                <th>Movie</th>
+                <th>Release date</th>
+                <th>Platform</th>
+                <th>Language</th>
+                <th>Category</th>
               </tr>
             </thead>
             <tbody id="ott-movies-table-body"></tbody>
           </table>
         </div>
-      </div>
+        <p id="ott-movies-status" class="admin-status" hidden aria-live="polite"></p>
+        <div id="ott-movies-loading" class="admin-loading" hidden>Loading OTT releases...</div>
+      </section>
+
+      <section class="ott-section ott-trending">
+        <div class="section-heading">
+          <p class="eyebrow">Trending</p>
+          <h2>Buzzing Telugu OTT premieres</h2>
+        </div>
+        <div class="ott-trending-carousel" id="ott-trending-list" aria-label="Trending OTT releases"></div>
+      </section>
     </main>
 
     <footer class="site-footer">

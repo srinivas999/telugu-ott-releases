@@ -1,10 +1,14 @@
 const ottMoviesTableBody = document.getElementById("ott-movies-table-body");
+const ottTrendingList = document.getElementById("ott-trending-list");
 const ottMoviesStatus = document.getElementById("ott-movies-status");
 const ottMoviesLoading = document.getElementById("ott-movies-loading");
 const ottDateSort = document.getElementById("ott-date-sort");
+const ottMovieCount = document.getElementById("ott-movie-count");
+const ottFilters = Array.from(document.querySelectorAll("[data-platform-filter]"));
 
 const TABLE_NAME = "ott_movies";
 let ottMovies = [];
+let selectedPlatform = "all";
 
 function resolveSupabaseClient(options = {}) {
   if (typeof window.getSupabaseClient === "function") {
@@ -43,14 +47,22 @@ function setStatus(message, isError = false) {
   ottMoviesStatus.hidden = !message;
 }
 
+function normalizePlatform(value) {
+  if (!value) return "";
+  const lower = String(value).toLowerCase();
+  if (lower.includes("prime")) return "Prime Video";
+  if (lower.includes("netflix")) return "Netflix";
+  if (lower.includes("aha")) return "Aha";
+  if (lower.includes("hotstar")) return "JioHotstar";
+  return String(value).trim();
+}
+
 function formatReleaseDate(value) {
   if (!value) return "TBA";
-
   const date = new Date(`${value}T00:00:00`);
   if (Number.isNaN(date.getTime())) {
     return value;
   }
-
   return date.toLocaleDateString(undefined, {
     day: "2-digit",
     month: "short",
@@ -60,83 +72,109 @@ function formatReleaseDate(value) {
 
 function createMovieRow(movie) {
   const row = document.createElement("tr");
+  row.dataset.platform = movie.streaming_partner || "";
 
   const nameCell = document.createElement("td");
-  nameCell.textContent = movie.movie_name || "-";
+  nameCell.textContent = movie.movie_name || "Untitled";
 
   const dateCell = document.createElement("td");
   dateCell.textContent = formatReleaseDate(movie.digital_release_date);
 
   const partnerCell = document.createElement("td");
-  partnerCell.textContent = movie.streaming_partner || "-";
+  partnerCell.textContent = movie.streaming_partner || "TBA";
+
+  const languageCell = document.createElement("td");
+  languageCell.textContent = movie.language || "Telugu";
 
   const categoryCell = document.createElement("td");
-  categoryCell.textContent = movie.category || "-";
+  categoryCell.textContent = movie.category || "Film";
 
   row.appendChild(nameCell);
   row.appendChild(dateCell);
   row.appendChild(partnerCell);
+  row.appendChild(languageCell);
   row.appendChild(categoryCell);
 
   return row;
 }
 
-function getReleaseTime(movie) {
-  if (!movie?.digital_release_date) {
-    return Number.NEGATIVE_INFINITY;
-  }
-
-  const date = new Date(`${movie.digital_release_date}T00:00:00`);
-  if (Number.isNaN(date.getTime())) {
-    return Number.NEGATIVE_INFINITY;
-  }
-
-  return date.getTime();
+function sortMovies(entries) {
+  const sortOrder = ottDateSort?.value || "desc";
+  return [...entries].sort((a, b) => {
+    const firstTime = new Date(`${a.digital_release_date}T00:00:00`).getTime();
+    const secondTime = new Date(`${b.digital_release_date}T00:00:00`).getTime();
+    if (Number.isNaN(firstTime) || Number.isNaN(secondTime)) {
+      return 0;
+    }
+    const sorted = sortOrder === "asc" ? firstTime - secondTime : secondTime - firstTime;
+    return sorted !== 0 ? sorted : String(a.movie_name || "").localeCompare(String(b.movie_name || ""));
+  });
 }
 
 function renderMovies(movies) {
   if (!ottMoviesTableBody) return;
 
   ottMoviesTableBody.innerHTML = "";
-  movies.forEach((movie) => {
-    ottMoviesTableBody.appendChild(createMovieRow(movie));
+  if (ottMovieCount) {
+    ottMovieCount.textContent = `${movies.length} movie${movies.length === 1 ? "" : "s"} found`;
+  }
+
+  if (!movies.length) {
+    const emptyRow = document.createElement("tr");
+    const emptyCell = document.createElement("td");
+    emptyCell.colSpan = 5;
+    emptyCell.className = "ott-empty";
+    emptyCell.textContent = "No releases match your filter.";
+    emptyRow.appendChild(emptyCell);
+    ottMoviesTableBody.appendChild(emptyRow);
+    return;
+  }
+
+  movies.forEach((movie) => ottMoviesTableBody.appendChild(createMovieRow(movie)));
+}
+
+function createTrendingCard(movie) {
+  const partner = normalizePlatform(movie.streaming_partner) || "Partner";
+  const card = document.createElement("article");
+  card.className = "ott-trending-card";
+
+  card.innerHTML = `
+    <div class="ott-trending-card__stripe"></div>
+    <div class="ott-trending-card__body">
+      <span class="ott-trending-card__partner">${partner}</span>
+      <h3>${movie.movie_name || "Untitled"}</h3>
+      <p>${formatReleaseDate(movie.digital_release_date)}</p>
+    </div>
+  `;
+
+  return card;
+}
+
+function renderTrending(movies) {
+  if (!ottTrendingList) return;
+  ottTrendingList.innerHTML = "";
+  const trending = sortMovies(movies).slice(0, 6);
+  trending.forEach((movie) => ottTrendingList.appendChild(createTrendingCard(movie)));
+}
+
+function updateFilters() {
+  ottFilters.forEach((button) => {
+    button.classList.toggle("is-active", button.dataset.platformFilter === selectedPlatform);
   });
 }
 
-function applySort() {
-  if (!ottMovies.length) return;
-
-  const sortOrder = ottDateSort?.value || "desc";
-  const sortedMovies = [...ottMovies].sort((first, second) => {
-    const firstTime = getReleaseTime(first);
-    const secondTime = getReleaseTime(second);
-
-    if (firstTime === secondTime) {
-      return sortOrder === "asc"
-        ? String(first.movie_name || "").localeCompare(String(second.movie_name || ""))
-        : String(second.movie_name || "").localeCompare(String(first.movie_name || ""));
-    }
-
-    return sortOrder === "asc" ? firstTime - secondTime : secondTime - firstTime;
+function applyFilters() {
+  const filtered = ottMovies.filter((movie) => {
+    if (selectedPlatform === "all") return true;
+    return normalizePlatform(movie.streaming_partner) === selectedPlatform;
   });
 
-  renderMovies(sortedMovies);
-}
-
-function renderEmptyState(message) {
-  if (!ottMoviesTableBody) return;
-
-  ottMoviesTableBody.innerHTML = "";
-  const row = document.createElement("tr");
-  const cell = document.createElement("td");
-  cell.colSpan = 4;
-  cell.textContent = message;
-  row.appendChild(cell);
-  ottMoviesTableBody.appendChild(row);
+  renderMovies(sortMovies(filtered));
+  renderTrending(ottMovies);
 }
 
 async function loadOttMovies() {
-  if (!ottMoviesTableBody || !ottMoviesLoading) return;
+  if (!ottMoviesLoading || !ottMoviesTableBody) return;
 
   setStatus("");
   ottMoviesLoading.hidden = false;
@@ -154,21 +192,48 @@ async function loadOttMovies() {
   if (error) {
     console.error("Fetch OTT movies error:", error);
     setStatus("Unable to load OTT releases right now. Please refresh and try again.", true);
-    renderEmptyState("OTT releases could not be loaded.");
+    const errorRow = document.createElement("tr");
+    const errorCell = document.createElement("td");
+    errorCell.colSpan = 5;
+    errorCell.className = "ott-empty";
+    errorCell.textContent = "OTT releases could not be loaded.";
+    errorRow.appendChild(errorCell);
+    ottMoviesTableBody.appendChild(errorRow);
     return;
   }
 
   if (!data || data.length === 0) {
-    renderEmptyState("No OTT releases added yet.");
+    const emptyRow = document.createElement("tr");
+    const emptyCell = document.createElement("td");
+    emptyCell.colSpan = 5;
+    emptyCell.className = "ott-empty";
+    emptyCell.textContent = "No OTT releases added yet.";
+    emptyRow.appendChild(emptyCell);
+    ottMoviesTableBody.appendChild(emptyRow);
+    if (ottMovieCount) {
+      ottMovieCount.textContent = "0 movies found";
+    }
     return;
   }
 
-  ottMovies = data;
-  applySort();
+  ottMovies = data.map((movie) => ({
+    ...movie,
+    streaming_partner: normalizePlatform(movie.streaming_partner),
+  }));
+
+  applyFilters();
 }
 
+ottFilters.forEach((button) => {
+  button.addEventListener("click", () => {
+    selectedPlatform = button.dataset.platformFilter || "all";
+    updateFilters();
+    applyFilters();
+  });
+});
+
 if (ottDateSort) {
-  ottDateSort.addEventListener("change", applySort);
+  ottDateSort.addEventListener("change", applyFilters);
 }
 
 loadOttMovies();
