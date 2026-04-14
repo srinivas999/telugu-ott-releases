@@ -6,6 +6,18 @@ const ottDateSort = document.getElementById("ott-date-sort");
 const TABLE_NAME = "ott_movies";
 let ottMovies = [];
 
+function resolveSupabaseClient() {
+  if (typeof window.getSupabaseClient === "function") {
+    return window.getSupabaseClient();
+  }
+
+  if (!window.supabase || !window.SUPABASE_URL || !window.SUPABASE_ANON_KEY) {
+    throw new Error("Supabase client configuration is unavailable.");
+  }
+
+  return window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+}
+
 function setStatus(message, isError = false) {
   if (!ottMoviesStatus) return;
   ottMoviesStatus.textContent = message;
@@ -112,7 +124,7 @@ async function loadOttMovies() {
   ottMoviesLoading.hidden = false;
   ottMoviesTableBody.innerHTML = "";
 
-  const supabaseClient = window.getSupabaseClient();
+  const supabaseClient = resolveSupabaseClient();
   const { data, error } = await supabaseClient
     .from(TABLE_NAME)
     .select("*")

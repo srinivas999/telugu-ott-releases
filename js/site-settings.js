@@ -18,7 +18,19 @@
             ? "ott"
             : "home";
 
-  const supabaseClient = window.getSupabaseClient();
+  function resolveSupabaseClient() {
+    if (typeof window.getSupabaseClient === "function") {
+      return window.getSupabaseClient();
+    }
+
+    if (!window.supabase || !window.SUPABASE_URL || !window.SUPABASE_ANON_KEY) {
+      throw new Error("Supabase client configuration is unavailable.");
+    }
+
+    return window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+  }
+
+  const supabaseClient = resolveSupabaseClient();
 
   function setLinkVisibility(href, isVisible) {
     document.querySelectorAll(`a[href="${href}"]`).forEach((link) => {

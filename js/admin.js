@@ -41,7 +41,30 @@ const CONTACT_TABLE_NAME = "contact_submissions";
 const SITE_SETTINGS_TABLE_NAME = "site_settings";
 const SITE_SETTINGS_ROW_ID = 1;
 const SITE_SETTINGS_STORAGE_KEY = "siteSettingsCache";
-const supabaseClient = window.getSupabaseClient({ storageType: "session" });
+
+function resolveSupabaseClient(options = {}) {
+  if (typeof window.getSupabaseClient === "function") {
+    return window.getSupabaseClient(options);
+  }
+
+  if (!window.supabase || !window.SUPABASE_URL || !window.SUPABASE_ANON_KEY) {
+    throw new Error("Supabase client configuration is unavailable.");
+  }
+
+  const config =
+    options.storageType === "session"
+      ? {
+          auth: {
+            storage: window.sessionStorage,
+            persistSession: true,
+          },
+        }
+      : {};
+
+  return window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY, config);
+}
+
+const supabaseClient = resolveSupabaseClient({ storageType: "session" });
 let ottMoviesCache = [];
 
 function formatCreatedAt(value) {

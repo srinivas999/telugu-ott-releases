@@ -7,6 +7,18 @@ const submitButtonSpinner = submitButton?.querySelector(".contact-submit__spinne
 
 const TABLE_NAME = "contact_submissions";
 
+function resolveSupabaseClient() {
+  if (typeof window.getSupabaseClient === "function") {
+    return window.getSupabaseClient();
+  }
+
+  if (!window.supabase || !window.SUPABASE_URL || !window.SUPABASE_ANON_KEY) {
+    throw new Error("Supabase client configuration is unavailable.");
+  }
+
+  return window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+}
+
 function setLoading(isLoading) {
   if (submitButton) {
     submitButton.disabled = isLoading;
@@ -50,7 +62,7 @@ function initFormState() {
 initFormState();
 
 if (contactForm && contactSuccess) {
-  const supabaseClient = window.getSupabaseClient();
+  const supabaseClient = resolveSupabaseClient();
 
   contactForm.addEventListener("submit", async (event) => {
     event.preventDefault();
