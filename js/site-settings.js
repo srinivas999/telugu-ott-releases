@@ -18,16 +18,34 @@
             ? "ott"
             : "home";
 
-  function resolveSupabaseClient() {
+  function resolveSupabaseClient(options = {}) {
     if (typeof window.getSupabaseClient === "function") {
-      return window.getSupabaseClient();
+      return window.getSupabaseClient(options);
     }
 
     if (!window.supabase || !window.SUPABASE_URL || !window.SUPABASE_ANON_KEY) {
       throw new Error("Supabase client configuration is unavailable.");
     }
 
-    return window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+    const storageType = options.storageType === "session" ? "session" : "local";
+    const cacheKey = storageType === "session" ? "__SUPABASE_CLIENT_SESSION__" : "__SUPABASE_CLIENT_LOCAL__";
+
+    if (window[cacheKey]) {
+      return window[cacheKey];
+    }
+
+    const config =
+      storageType === "session"
+        ? {
+            auth: {
+              storage: window.sessionStorage,
+              persistSession: true,
+            },
+          }
+        : {};
+
+    window[cacheKey] = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY, config);
+    return window[cacheKey];
   }
 
   const supabaseClient = resolveSupabaseClient();

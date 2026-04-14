@@ -51,8 +51,15 @@ function resolveSupabaseClient(options = {}) {
     throw new Error("Supabase client configuration is unavailable.");
   }
 
+  const storageType = options.storageType === "session" ? "session" : "local";
+  const cacheKey = storageType === "session" ? "__SUPABASE_CLIENT_SESSION__" : "__SUPABASE_CLIENT_LOCAL__";
+
+  if (window[cacheKey]) {
+    return window[cacheKey];
+  }
+
   const config =
-    options.storageType === "session"
+    storageType === "session"
       ? {
           auth: {
             storage: window.sessionStorage,
@@ -61,7 +68,8 @@ function resolveSupabaseClient(options = {}) {
         }
       : {};
 
-  return window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY, config);
+  window[cacheKey] = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY, config);
+  return window[cacheKey];
 }
 
 const supabaseClient = resolveSupabaseClient({ storageType: "session" });
