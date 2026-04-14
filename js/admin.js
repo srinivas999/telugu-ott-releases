@@ -89,8 +89,9 @@ function formatCreatedAt(value) {
 
 function formatReleaseDate(value) {
   if (!value) return "TBA";
-  const date = new Date(`${value}T00:00:00`);
-  if (Number.isNaN(date.getTime())) return value;
+  const normalized = normalizeCsvDate(value) || String(value).trim();
+  const date = new Date(`${normalized}T00:00:00`);
+  if (Number.isNaN(date.getTime())) return String(value);
   return date.toLocaleDateString(undefined, {
     year: "numeric",
     month: "short",
@@ -201,6 +202,65 @@ function parseCsv(text) {
   return rows.filter((row) => row.some((cell) => String(cell || "").trim() !== ""));
 }
 
+function normalizeCsvDate(value) {
+  const raw = String(value || "").trim();
+  if (!raw) {
+    return null;
+  }
+
+  const cleaned = raw.replace(/\b(st|nd|rd|th)\b/gi, "").trim();
+
+  const isoDateMatch = cleaned.match(/^(\d{4})[\/\.\- ](\d{1,2})[\/\.\- ](\d{1,2})(?:[T ]\d{2}:\d{2}:\d{2})?$/);
+  if (isoDateMatch) {
+    const [, year, month, day] = isoDateMatch;
+    return `${year.padStart(4, "0")}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+  }
+
+  const europeanDateMatch = cleaned.match(/^(\d{1,2})[\/\.\- ](\d{1,2})[\/\.\- ](\d{2,4})(?:[T ]\d{2}:\d{2}:\d{2})?$/);
+  if (europeanDateMatch) {
+    const [, day, month, year] = europeanDateMatch;
+    const dayNumber = Number(day);
+    const monthNumber = Number(month);
+    const yearNumber = Number(year.length === 2 ? `20${year}` : year);
+    if (dayNumber >= 1 && dayNumber <= 31 && monthNumber >= 1 && monthNumber <= 12) {
+      return `${String(yearNumber).padStart(4, "0")}-${String(monthNumber).padStart(2, "0")}-${String(dayNumber).padStart(2, "0")}`;
+    }
+  }
+
+  const monthNames = {
+    jan: 1,
+    feb: 2,
+    mar: 3,
+    apr: 4,
+    may: 5,
+    jun: 6,
+    jul: 7,
+    aug: 8,
+    sep: 9,
+    sept: 9,
+    oct: 10,
+    nov: 11,
+    dec: 12,
+  };
+
+  const namedMonthMatch = cleaned.match(/^(\d{1,2})[\s\-\/\.]+([A-Za-z]+)[\s\-\/\.]+(\d{4})$/);
+  if (namedMonthMatch) {
+    const [, day, monthName, year] = namedMonthMatch;
+    const monthNumber = monthNames[monthName.toLowerCase().slice(0, 3)];
+    const dayNumber = Number(day);
+    if (monthNumber && dayNumber >= 1 && dayNumber <= 31) {
+      return `${year.padStart(4, "0")}-${String(monthNumber).padStart(2, "0")}-${String(dayNumber).padStart(2, "0")}`;
+    }
+  }
+
+  const parsed = new Date(cleaned);
+  if (!Number.isNaN(parsed.getTime())) {
+    return parsed.toISOString().slice(0, 10);
+  }
+
+  return null;
+}
+
 function buildCsvPayload(text) {
   const rows = parseCsv(text);
   if (!rows.length) {
@@ -215,16 +275,24 @@ function buildCsvPayload(text) {
     throw new Error(`Missing required column(s): ${missingRequiredColumns.join(", ")}`);
   }
 
-  return rows.slice(1).map((row) => {
+  return rows.slice(1).map((row, rowIndex) => {
     const record = {};
     headers.forEach((header, headerIndex) => {
       record[header] = row[headerIndex]?.trim() ?? "";
     });
 
+    const normalizedDate = normalizeCsvDate(record.digital_release_date);
+    if (record.digital_release_date && normalizedDate === null) {
+      throw new Error(
+        `Invalid date format in CSV row ${rowIndex + 2}: "${record.digital_release_date}". ` +
+          `Expected formats like 13-03-2026, 2026-03-13, or 13 Mar 2026.`
+      );
+    }
+
     return {
       id: record.id ? Number(record.id) : null,
       movie_name: record.movie_name || "",
-      digital_release_date: record.digital_release_date || null,
+      digital_release_date: normalizedDate,
       streaming_partner: record.streaming_partner || "",
       category: record.category || "",
       language: record.language || "",
