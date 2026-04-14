@@ -1,15 +1,28 @@
-const ottMoviesTableBody = document.getElementById("ott-movies-table-body");
-const ottTrendingList = document.getElementById("ott-trending-list");
-const ottMoviesStatus = document.getElementById("ott-movies-status");
-const ottMoviesLoading = document.getElementById("ott-movies-loading");
-const ottDateSort = document.getElementById("ott-date-sort");
-const ottPlatformSelect = document.getElementById("ott-platform-select");
-const ottMovieCount = document.getElementById("ott-movie-count");
-const ottFilters = Array.from(document.querySelectorAll("[data-platform-filter]"));
+const ottMoviesTableBody = getPageElement("ott-movies-table-body");
+const ottTrendingList = getPageElement("ott-trending-list");
+const ottMoviesStatus = getPageElement("ott-movies-status");
+const ottMoviesLoading = getPageElement("ott-movies-loading");
+const ottDateSort = getPageElement("ott-date-sort");
+const ottPlatformSelect = getPageElement("ott-platform-select");
+const ottMovieCount = getPageElement("ott-movie-count");
+const ottFilters = Array.from(getVisiblePageContainer().querySelectorAll("[data-platform-filter]"));
 
 const TABLE_NAME = "ott_movies";
 let ottMovies = [];
 let selectedPlatform = "all";
+
+function getVisiblePageContainer() {
+  return (
+    document.querySelector(".page-ott:not([hidden])") ||
+    document.querySelector(".page-projects:not([hidden])") ||
+    document.documentElement
+  );
+}
+
+function getPageElement(id) {
+  const page = getVisiblePageContainer();
+  return page.querySelector(`#${id}`) || document.getElementById(id);
+}
 
 function resolveSupabaseClient(options = {}) {
   if (typeof window.getSupabaseClient === "function") {
