@@ -198,6 +198,9 @@
 
     applyVisibility(data);
     applyHomepageMode(data);
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new Event("homepageModeApplied"));
+    }
   }
 
   loadSiteSettings();

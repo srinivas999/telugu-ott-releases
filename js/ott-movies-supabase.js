@@ -1,28 +1,71 @@
-const ottMoviesTableBody = getPageElement("ott-movies-table-body");
-const ottTrendingList = getPageElement("ott-trending-list");
-const ottMoviesStatus = getPageElement("ott-movies-status");
-const ottMoviesLoading = getPageElement("ott-movies-loading");
-const ottDateSort = getPageElement("ott-date-sort");
-const ottPlatformSelect = getPageElement("ott-platform-select");
-const ottMovieCount = getPageElement("ott-movie-count");
-const ottFilters = Array.from(getVisiblePageContainer().querySelectorAll("[data-platform-filter]"));
+function getOttPageContainer() {
+  const ottPage = document.querySelector(".page-ott");
+  const projectsPage = document.querySelector(".page-projects");
+  const homepageMode = document.documentElement.dataset.homepageMode;
 
-const TABLE_NAME = "ott_movies";
-let ottMovies = [];
-let selectedPlatform = "all";
+  if (ottPage && projectsPage) {
+    if (homepageMode === "ott_only") {
+      return ottPage;
+    }
+    if (homepageMode === "portfolio") {
+      return projectsPage;
+    }
+  }
 
-function getVisiblePageContainer() {
   return (
     document.querySelector(".page-ott:not([hidden])") ||
     document.querySelector(".page-projects:not([hidden])") ||
+    ottPage ||
+    projectsPage ||
     document.documentElement
   );
 }
 
 function getPageElement(id) {
-  const page = getVisiblePageContainer();
-  return page.querySelector(`#${id}`) || document.getElementById(id);
+  const page = getOttPageContainer();
+  return page ? page.querySelector(`#${id}`) : document.querySelector(`#${id}`);
 }
+
+function getPageElements(selector) {
+  const page = getOttPageContainer();
+  return page ? Array.from(page.querySelectorAll(selector)) : Array.from(document.querySelectorAll(selector));
+}
+
+function getOttMoviesTableBody() {
+  return getPageElement("ott-movies-table-body");
+}
+
+function getOttTrendingList() {
+  return getPageElement("ott-trending-list");
+}
+
+function getOttMoviesStatus() {
+  return getPageElement("ott-movies-status");
+}
+
+function getOttMoviesLoading() {
+  return getPageElement("ott-movies-loading");
+}
+
+function getOttDateSort() {
+  return getPageElement("ott-date-sort");
+}
+
+function getOttPlatformSelect() {
+  return getPageElement("ott-platform-select");
+}
+
+function getOttMovieCount() {
+  return getPageElement("ott-movie-count");
+}
+
+function getOttFilters() {
+  return getPageElements("[data-platform-filter]");
+}
+
+const TABLE_NAME = "ott_movies";
+let ottMovies = [];
+let selectedPlatform = "all";
 
 function resolveSupabaseClient(options = {}) {
   if (typeof window.getSupabaseClient === "function") {
@@ -55,6 +98,7 @@ function resolveSupabaseClient(options = {}) {
 }
 
 function setStatus(message, isError = false) {
+  const ottMoviesStatus = getOttMoviesStatus();
   if (!ottMoviesStatus) return;
   ottMoviesStatus.textContent = message;
   ottMoviesStatus.classList.toggle("admin-status--error", isError);
@@ -168,7 +212,7 @@ function createMovieRow(movie) {
 }
 
 function sortMovies(entries) {
-  const sortOrder = ottDateSort?.value || "desc";
+  const sortOrder = getOttDateSort()?.value || "desc";
   return [...entries].sort((a, b) => {
     const firstTime = new Date(`${a.digital_release_date}T00:00:00`).getTime();
     const secondTime = new Date(`${b.digital_release_date}T00:00:00`).getTime();
@@ -181,6 +225,8 @@ function sortMovies(entries) {
 }
 
 function renderMovies(movies) {
+  const ottMoviesTableBody = getOttMoviesTableBody();
+  const ottMovieCount = getOttMovieCount();
   if (!ottMoviesTableBody) return;
 
   ottMoviesTableBody.innerHTML = "";
@@ -220,6 +266,7 @@ function createTrendingCard(movie) {
 }
 
 function renderTrending(movies) {
+  const ottTrendingList = getOttTrendingList();
   if (!ottTrendingList) return;
   ottTrendingList.innerHTML = "";
   const trending = sortMovies(movies).slice(0, 6);
@@ -227,10 +274,11 @@ function renderTrending(movies) {
 }
 
 function updateFilters() {
-  ottFilters.forEach((button) => {
+  getOttFilters().forEach((button) => {
     button.classList.toggle("is-active", button.dataset.platformFilter === selectedPlatform);
   });
 
+  const ottPlatformSelect = getOttPlatformSelect();
   if (ottPlatformSelect) {
     ottPlatformSelect.value = selectedPlatform;
   }
@@ -248,6 +296,8 @@ function applyFilters() {
 }
 
 async function loadOttMovies() {
+  const ottMoviesLoading = getOttMoviesLoading();
+  const ottMoviesTableBody = getOttMoviesTableBody();
   if (!ottMoviesLoading || !ottMoviesTableBody) return;
 
   setStatus("");
@@ -284,6 +334,7 @@ async function loadOttMovies() {
     emptyCell.textContent = "No OTT releases added yet.";
     emptyRow.appendChild(emptyCell);
     ottMoviesTableBody.appendChild(emptyRow);
+    const ottMovieCount = getOttMovieCount();
     if (ottMovieCount) {
       ottMovieCount.textContent = "0 movies found";
     }
@@ -298,24 +349,46 @@ async function loadOttMovies() {
   applyFilters();
 }
 
-ottFilters.forEach((button) => {
-  button.addEventListener("click", () => {
-    selectedPlatform = button.dataset.platformFilter || "all";
-    updateFilters();
-    applyFilters();
-  });
-});
+let ottMoviesInitialized = false;
 
-if (ottPlatformSelect) {
-  ottPlatformSelect.addEventListener("change", () => {
-    selectedPlatform = ottPlatformSelect.value || "all";
-    updateFilters();
-    applyFilters();
+function initializeOttMovies() {
+  if (ottMoviesInitialized) return;
+
+  const ottPage = document.querySelector(".page-ott");
+  const projectsPage = document.querySelector(".page-projects");
+  const homepageMode = document.documentElement.dataset.homepageMode;
+
+  if (ottPage && projectsPage && typeof homepageMode === "undefined") {
+    return;
+  }
+
+  ottMoviesInitialized = true;
+
+  getOttFilters().forEach((button) => {
+    button.addEventListener("click", () => {
+      selectedPlatform = button.dataset.platformFilter || "all";
+      updateFilters();
+      applyFilters();
+    });
   });
+
+  const ottPlatformSelectElement = getOttPlatformSelect();
+  if (ottPlatformSelectElement) {
+    ottPlatformSelectElement.addEventListener("change", () => {
+      selectedPlatform = ottPlatformSelectElement.value || "all";
+      updateFilters();
+      applyFilters();
+    });
+  }
+
+  const ottDateSortElement = getOttDateSort();
+  if (ottDateSortElement) {
+    ottDateSortElement.addEventListener("change", applyFilters);
+  }
+
+  loadOttMovies();
 }
 
-if (ottDateSort) {
-  ottDateSort.addEventListener("change", applyFilters);
-}
-
-loadOttMovies();
+initializeOttMovies();
+window.addEventListener("homepageModeApplied", initializeOttMovies);
+window.addEventListener("load", initializeOttMovies);
