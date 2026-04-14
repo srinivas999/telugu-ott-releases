@@ -24,23 +24,7 @@
     <meta name="twitter:image" content="images/ott-hero-banner.png" />
     <meta name="twitter:site" content="@Srinivas" />
     <meta name="twitter:creator" content="@Srinivas" />
-    <script>
-      (function () {
-        var currentUrl = window.location.href.replace(/\/$/, "");
-        var canonical = document.querySelector('link[rel="canonical"]');
-        var ogUrl = document.querySelector('meta[property="og:url"]');
-        var jsonLd = document.getElementById("site-jsonld");
-        if (canonical) canonical.href = currentUrl;
-        if (ogUrl) ogUrl.content = currentUrl;
-        if (jsonLd && jsonLd.textContent) {
-          try {
-            var data = JSON.parse(jsonLd.textContent);
-            data.url = currentUrl;
-            jsonLd.textContent = JSON.stringify(data, null, 2);
-          } catch (e) {}
-        }
-      })();
-    </script>
+    <script src="js/update-meta.js"></script>
     <script type="application/ld+json" id="site-jsonld">
       {
         "@context": "https://schema.org",
