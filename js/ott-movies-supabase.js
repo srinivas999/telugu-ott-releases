@@ -58,6 +58,61 @@ function normalizePlatform(value) {
   return String(value).trim();
 }
 
+const ottSeoJsonLd = document.getElementById("ott-jsonld");
+const defaultSeoTitle = "OTT Movies | Srinivas";
+const defaultSeoDescription =
+  "Discover upcoming Telugu OTT release dates, platform partners, and streaming availability for Telugu movies.";
+const ottJsonLdDomain = "https://svteluguott.in/";
+
+function setMeta(selector, content) {
+  if (!content) return;
+  const meta = document.querySelector(selector);
+  if (meta) {
+    meta.setAttribute("content", content);
+  }
+}
+
+function updateSeoTags(filteredMovies) {
+  const movie = filteredMovies[0] || ottMovies[0];
+  const currentUrl = window.location.href.replace(/\/$/, "");
+  const title = movie
+    ? `${movie.movie_name} on ${movie.streaming_partner || "OTT"} — Telugu OTT release`
+    : defaultSeoTitle;
+  const description = movie
+    ? `${movie.movie_name} is coming to ${movie.streaming_partner || "OTT"} on ${formatReleaseDate(
+        movie.digital_release_date
+      )}. Browse upcoming Telugu OTT movie releases and streaming schedules.`
+    : defaultSeoDescription;
+
+  document.title = title;
+  setMeta('meta[name="description"]', description);
+  setMeta('meta[property="og:title"]', title);
+  setMeta('meta[property="og:description"]', description);
+  setMeta('meta[name="twitter:title"]', title);
+  setMeta('meta[name="twitter:description"]', description);
+  setMeta('meta[property="og:url"]', currentUrl);
+
+  if (ottSeoJsonLd) {
+    const items = filteredMovies.slice(0, 10).map((movieEntry) => ({
+      "@type": "Movie",
+      name: movieEntry.movie_name || "Untitled",
+      datePublished: movieEntry.digital_release_date || "",
+      sameAs: ottJsonLdDomain,
+    }));
+
+    ottSeoJsonLd.textContent = JSON.stringify(
+      {
+        "@context": "https://schema.org",
+        "@type": "ItemList",
+        "name": "Latest Telugu OTT Releases",
+        itemListElement: items,
+      },
+      null,
+      2
+    );
+  }
+}
+
 function formatReleaseDate(value) {
   if (!value) return "TBA";
   const date = new Date(`${value}T00:00:00`);
@@ -176,6 +231,7 @@ function applyFilters() {
 
   renderMovies(sortMovies(filtered));
   renderTrending(ottMovies);
+  updateSeoTags(filtered);
 }
 
 async function loadOttMovies() {

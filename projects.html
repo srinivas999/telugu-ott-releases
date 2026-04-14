@@ -8,7 +8,48 @@
       http-equiv="Content-Security-Policy"
       content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https:; connect-src 'self' https://uhimmowvkrmdbpniveps.supabase.co https://cdn.jsdelivr.net; font-src 'self' data: https://fonts.gstatic.com; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests"
     />
-    <meta name="description" content="Selected UX projects by Srinivas" />
+    <meta name="description" content="Explore Srinivas's UX projects, OTT tools, and design work." />
+    <meta name="keywords" content="UX portfolio, projects, OTT tools, design case studies, Srinivas" />
+    <meta name="robots" content="index,follow" />
+    <link rel="canonical" href="" />
+    <meta property="og:title" content="Projects | Srinivas" />
+    <meta property="og:description" content="Explore Srinivas's UX projects, OTT tools, and design work." />
+    <meta property="og:image" content="images/ott-hero-banner.png" />
+    <meta property="og:url" content="" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Srinivas OTT Movies" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Projects | Srinivas" />
+    <meta name="twitter:description" content="Explore Srinivas's UX projects, OTT tools, and design work." />
+    <meta name="twitter:image" content="images/ott-hero-banner.png" />
+    <meta name="twitter:site" content="@Srinivas" />
+    <meta name="twitter:creator" content="@Srinivas" />
+    <script>
+      (function () {
+        var currentUrl = window.location.href.replace(/\/$/, "");
+        var canonical = document.querySelector('link[rel="canonical"]');
+        var ogUrl = document.querySelector('meta[property="og:url"]');
+        var jsonLd = document.getElementById("site-jsonld");
+        if (canonical) canonical.href = currentUrl;
+        if (ogUrl) ogUrl.content = currentUrl;
+        if (jsonLd && jsonLd.textContent) {
+          try {
+            var data = JSON.parse(jsonLd.textContent);
+            data.url = currentUrl;
+            jsonLd.textContent = JSON.stringify(data, null, 2);
+          } catch (e) {}
+        }
+      })();
+    </script>
+    <script type="application/ld+json" id="site-jsonld">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "Srinivas OTT Movies",
+        "url": "",
+        "description": "Explore Srinivas's UX projects, OTT tools, and design work."
+      }
+    </script>
     <title>Projects | Srinivas</title>
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ctext x='50%25' y='50%25' dy='.35em' text-anchor='middle' font-size='12'%3E%F0%9F%8E%A5%3C/text%3E%3C/svg%3E" />
     <script src="js/site-settings-init.js"></script>
