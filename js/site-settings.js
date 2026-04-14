@@ -161,6 +161,19 @@
   function applyHomepageMode(settings) {
     const homepageMode = settings.homepage_mode || "portfolio";
     document.documentElement.dataset.homepageMode = homepageMode;
+
+    if (currentPage === "home") {
+      const projectPage = document.querySelector(".page-projects");
+      const ottPage = document.querySelector(".page-ott");
+
+      if (projectPage) {
+        projectPage.hidden = homepageMode === "ott_only";
+      }
+
+      if (ottPage) {
+        ottPage.hidden = homepageMode !== "ott_only";
+      }
+    }
   }
 
   async function loadSiteSettings() {

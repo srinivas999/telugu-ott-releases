@@ -27,6 +27,19 @@
     root.dataset.hideOttTab = String(homepageMode === "portfolio");
     root.dataset.hideSiteHeader = String(homepageMode === "ott_only");
     root.dataset.homepageMode = homepageMode;
+
+    if (currentPage === "home") {
+      const projectPage = document.querySelector(".page-projects");
+      const ottPage = document.querySelector(".page-ott");
+
+      if (projectPage) {
+        projectPage.hidden = homepageMode === "ott_only";
+      }
+
+      if (ottPage) {
+        ottPage.hidden = homepageMode !== "ott_only";
+      }
+    }
   } catch (error) {
     console.error("Site settings init error:", error);
   }
