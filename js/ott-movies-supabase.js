@@ -36,27 +36,27 @@ function getOttMoviesTableBody() {
 }
 
 function getOttTrendingList() {
-  return getPageElement("ott-trending-list");
+  return getPageElement("ott-trending-list") || document.getElementById("ott-trending-list");
 }
 
 function getOttMoviesStatus() {
-  return getPageElement("ott-movies-status");
+  return getPageElement("ott-movies-status") || document.getElementById("ott-movies-status");
 }
 
 function getOttMoviesLoading() {
-  return getPageElement("ott-movies-loading");
+  return getPageElement("ott-movies-loading") || document.getElementById("ott-movies-loading");
 }
 
 function getOttDateSort() {
-  return getPageElement("ott-date-sort");
+  return getPageElement("ott-date-sort") || document.getElementById("ott-date-sort");
 }
 
 function getOttPlatformSelect() {
-  return getPageElement("ott-platform-select");
+  return getPageElement("ott-platform-select") || document.getElementById("ott-platform-select");
 }
 
 function getOttMovieCount() {
-  return getPageElement("ott-movie-count");
+  return getPageElement("ott-movie-count") || document.getElementById("ott-movie-count");
 }
 
 function getOttFilters() {
@@ -112,6 +112,9 @@ function normalizePlatform(value) {
   if (lower.includes("netflix")) return "Netflix";
   if (lower.includes("aha")) return "Aha";
   if (lower.includes("hotstar")) return "JioHotstar";
+  if (lower.includes("zee")) return "Zee5";
+  if (lower.includes("sun nxt") || lower.includes("sun")) return "Sun NXT";
+  if (lower.includes("etv")) return "ETV Win";
   return String(value).trim();
 }
 
@@ -231,7 +234,12 @@ function renderMovies(movies) {
 
   ottMoviesTableBody.innerHTML = "";
   if (ottMovieCount) {
-    ottMovieCount.textContent = `${movies.length} movie${movies.length === 1 ? "" : "s"} found`;
+    if (selectedPlatform === "all") {
+      ottMovieCount.hidden = true;
+    } else {
+      ottMovieCount.hidden = false;
+      ottMovieCount.textContent = `${movies.length} movie${movies.length === 1 ? "" : "s"} found`;
+    }
   }
 
   if (!movies.length) {
@@ -286,8 +294,20 @@ function updateFilters() {
 
 function applyFilters() {
   const filtered = ottMovies.filter((movie) => {
+    const normalized = normalizePlatform(movie.streaming_partner);
     if (selectedPlatform === "all") return true;
-    return normalizePlatform(movie.streaming_partner) === selectedPlatform;
+    if (selectedPlatform === "other") {
+      return ![
+        "Netflix",
+        "Aha",
+        "Prime Video",
+        "JioHotstar",
+        "Zee5",
+        "Sun NXT",
+        "ETV Win",
+      ].includes(normalized);
+    }
+    return normalized === selectedPlatform;
   });
 
   renderMovies(sortMovies(filtered));
@@ -298,7 +318,13 @@ function applyFilters() {
 async function loadOttMovies() {
   const ottMoviesLoading = getOttMoviesLoading();
   const ottMoviesTableBody = getOttMoviesTableBody();
+  const ottMovieCount = getOttMovieCount();
   if (!ottMoviesLoading || !ottMoviesTableBody) return;
+
+  if (ottMovieCount) {
+    ottMovieCount.textContent = "";
+    ottMovieCount.hidden = selectedPlatform === "all";
+  }
 
   setStatus("");
   ottMoviesLoading.hidden = false;
@@ -390,6 +416,20 @@ function initializeOttMovies() {
   loadOttMovies();
 }
 
+function resetScrollOnLoad() {
+  if (!window.location.hash) {
+    window.scrollTo(0, 0);
+  }
+}
+
 initializeOttMovies();
 window.addEventListener("homepageModeApplied", initializeOttMovies);
-window.addEventListener("load", initializeOttMovies);
+window.addEventListener("load", () => {
+  initializeOttMovies();
+  resetScrollOnLoad();
+});
+window.addEventListener("pageshow", (event) => {
+  if (event.persisted && !window.location.hash) {
+    resetScrollOnLoad();
+  }
+});

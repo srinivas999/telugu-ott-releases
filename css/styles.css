@@ -1977,6 +1977,13 @@ html[data-hide-contact="true"] #contact {
   color: rgba(248, 250, 252, 0.75);
 }
 
+.ott-movie-count {
+  display: block;
+  margin: 0 0 0.75rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
 .page-ott .ott-table-section {
   background: rgba(255, 255, 255, 0.08);
   border-radius: 28px;
@@ -2059,6 +2066,8 @@ html[data-hide-contact="true"] #contact {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
+  justify-content: flex-end;
+  margin-left: auto;
   gap: 0.75rem;
 }
 
@@ -2387,18 +2396,21 @@ html[data-hide-contact="true"] #contact {
     align-items: stretch;
   }
 
-  .ott-filter-buttons,
+  .ott-filter-buttons {
+    width: 100%;
+    display: none;
+    justify-content: stretch;
+  }
+
   .ott-filter-actions {
     width: 100%;
+    justify-content: space-between;
+    gap: 0.75rem;
+    align-items: center;
   }
 
   .ott-filter-mobile {
     display: block;
-  }
-
-  .ott-filter-buttons {
-    display: none;
-    justify-content: stretch;
   }
 
   .ott-filter-button,
@@ -2408,11 +2420,6 @@ html[data-hide-contact="true"] #contact {
 
   .ott-filter-button {
     justify-content: center;
-  }
-
-  .ott-filter-actions {
-    justify-content: space-between;
-    gap: 0.75rem;
   }
 
   .ott-filter-actions .ott-select {

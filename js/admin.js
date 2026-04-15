@@ -290,7 +290,6 @@ function buildCsvPayload(text) {
     }
 
     return {
-      id: record.id ? Number(record.id) : null,
       movie_name: record.movie_name || "",
       digital_release_date: normalizedDate,
       streaming_partner: record.streaming_partner || "",
@@ -303,7 +302,7 @@ function buildCsvPayload(text) {
 async function uploadMovieRows(rows) {
   const { data: existingMovies, error: fetchError } = await supabaseClient
     .from(OTT_TABLE_NAME)
-    .select("movie_name");
+    .select("id, movie_name");
 
   if (fetchError) {
     throw fetchError;
@@ -315,6 +314,11 @@ async function uploadMovieRows(rows) {
       .filter(Boolean)
   );
 
+  const highestExistingId = (existingMovies || [])
+    .map((movie) => Number(movie.id) || 0)
+    .reduce((max, current) => Math.max(max, current), 0);
+  let nextId = highestExistingId + 1;
+
   const uniqueNewRows = [];
 
   rows.forEach((row) => {
@@ -324,8 +328,7 @@ async function uploadMovieRows(rows) {
     }
 
     existingMovieNames.add(movieNameKey);
-    const { id, ...insertRow } = row;
-    uniqueNewRows.push(insertRow);
+    uniqueNewRows.push({ id: nextId++, ...row });
   });
 
   if (!uniqueNewRows.length) {
