@@ -227,6 +227,10 @@ function sortMovies(entries) {
   });
 }
 
+function isAllPlatformSelected() {
+  return String(selectedPlatform || "").trim().toLowerCase() === "all";
+}
+
 function renderMovies(movies) {
   const ottMoviesTableBody = getOttMoviesTableBody();
   const ottMovieCount = getOttMovieCount();
@@ -234,12 +238,9 @@ function renderMovies(movies) {
 
   ottMoviesTableBody.innerHTML = "";
   if (ottMovieCount) {
-    if (selectedPlatform === "all") {
-      ottMovieCount.hidden = true;
-    } else {
-      ottMovieCount.hidden = false;
-      ottMovieCount.textContent = `${movies.length} movie${movies.length === 1 ? "" : "s"} found`;
-    }
+    const hideCount = isAllPlatformSelected();
+    ottMovieCount.hidden = hideCount;
+    ottMovieCount.textContent = hideCount ? "" : `${movies.length} movie${movies.length === 1 ? "" : "s"} found`;
   }
 
   if (!movies.length) {
@@ -295,7 +296,7 @@ function updateFilters() {
 function applyFilters() {
   const filtered = ottMovies.filter((movie) => {
     const normalized = normalizePlatform(movie.streaming_partner);
-    if (selectedPlatform === "all") return true;
+    if (isAllPlatformSelected()) return true;
     if (selectedPlatform === "other") {
       return ![
         "Netflix",
@@ -323,7 +324,7 @@ async function loadOttMovies() {
 
   if (ottMovieCount) {
     ottMovieCount.textContent = "";
-    ottMovieCount.hidden = selectedPlatform === "all";
+    ottMovieCount.hidden = isAllPlatformSelected();
   }
 
   setStatus("");
@@ -424,6 +425,7 @@ function resetScrollOnLoad() {
 
 initializeOttMovies();
 window.addEventListener("homepageModeApplied", initializeOttMovies);
+window.addEventListener("sharedContentLoaded", initializeOttMovies);
 window.addEventListener("load", () => {
   initializeOttMovies();
   resetScrollOnLoad();

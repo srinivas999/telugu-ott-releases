@@ -1695,7 +1695,8 @@ html[data-hide-ott-tab="true"] li:has(> a[href="ott-movies.html"]) {
   display: none;
 }
 
-html[data-hide-site-header="true"] .site-header {
+html[data-hide-site-header="true"] .site-header,
+body.ott-screen .site-header {
   display: none;
 }
 
