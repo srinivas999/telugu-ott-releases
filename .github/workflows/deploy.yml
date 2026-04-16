@@ -24,13 +24,12 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build Next.js static export
+      - name: Build Next.js static output
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
         run: |
           npm run build
-          npx next export out
 
       - name: Add Supabase runtime config
         run: |
