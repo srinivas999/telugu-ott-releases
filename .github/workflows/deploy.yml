@@ -1,4 +1,4 @@
-name: Deploy portfolio
+name: Deploy static site
 
 on:
   push:
@@ -16,23 +16,33 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Create deploy folder
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Next.js static export
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
         run: |
-          rm -rf deploy
-          mkdir deploy
-          rsync -av --exclude='.git' --exclude='.github' --exclude='deploy' --exclude='.gitignore' --exclude='README.md' ./ deploy/
-          cat > deploy/supabase-config.js <<'EOF'
+          npm run build
+          npx next export -o out
+
+      - name: Add Supabase runtime config
+        run: |
+          mkdir -p out
+          cat > out/supabase-config.js <<'EOF'
           window.SUPABASE_URL="${{ secrets.SUPABASE_URL }}"
           window.SUPABASE_ANON_KEY="${{ secrets.SUPABASE_ANON_KEY }}"
           EOF
-
-      - name: Show deploy folder
-        run: |
-          ls -la deploy
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
-          publish_dir: deploy
+          publish_dir: out

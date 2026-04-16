@@ -19,24 +19,34 @@ The project also includes Supabase integration for storing contact form submissi
 - `lib/supabaseClient.js` — Supabase client configuration
 - `package.json` — Next.js build and dependency configuration
 - `public/images/` — static image assets served by Next.js
-- `supabase-config.example.js` — local Supabase config template
+- `supabase-config.example.js` — local Supabase config template for legacy client scripts
 - `.env.local.example` — example environment variables for Supabase
 
 ## Setup
 
 1. Open the project in a code editor.
-2. Copy `supabase-config.example.js` to `supabase-config.js` or populate `.env.local` from `.env.local.example`.
-3. Replace the placeholder values with your Supabase project URL and anon key.
-4. Install dependencies:
+2. Create `.env.local` from `.env.local.example` and set:
+   - `NEXT_PUBLIC_SUPABASE_URL`
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+3. Install dependencies:
    ```bash
    npm install
    ```
-5. Start the development server:
+4. Start the development server:
    ```bash
    npm run dev
    ```
 
-> `.env.local` is ignored by Git and should not be committed. Deployments can use environment variables or secrets to configure Supabase.
+> `.env.local` is ignored by Git and should not be committed. Deployments use GitHub repository secrets instead of committing Supabase keys.
+
+## GitHub Pages Deployment
+
+This repo uses GitHub Actions to build and export the Next.js app as static files. Set these repository secrets before pushing:
+
+- `SUPABASE_URL`
+- `SUPABASE_ANON_KEY`
+
+The workflow will pass those secrets into the Next.js build as `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`, then publish the generated `out` directory to the `gh-pages` branch.
 
 ## Search Console
 
