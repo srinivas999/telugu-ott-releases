@@ -1,2 +1,2 @@
-window.SUPABASE_URL=""
-window.SUPABASE_ANON_KEY=""
+window.SUPABASE_URL="https://uhimmowvkrmdbpniveps.supabase.co"
+window.SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVoaW1tb3d2a3JtZGJwbml2ZXBzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5NTI3MjgsImV4cCI6MjA5MTUyODcyOH0.WC5WqSTbqyi6DIdiKtRfxQJBhApjifLCqEHM0kzYMYo"
