@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+<!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-GYPWT0N5WN"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-GYPWT0N5WN');
+    </script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https:; connect-src 'self' https://uhimmowvkrmdbpniveps.supabase.co https://cdn.jsdelivr.net https://www.google-analytics.com https://www.googletagmanager.com; font-src 'self' data: https://fonts.gstatic.com; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests"
+    />
+    <meta
+      name="description"
+      content="Admin view for OTT movie management, contact submissions, and site settings"
+    />
+    <meta name="keywords" content="admin, OTT management, site settings, contact submissions" />
+    <meta name="robots" content="noindex,nofollow" />
+    <link rel="canonical" href="" />
+    <meta property="og:title" content="Admin | Srinivas" />
+    <meta property="og:description" content="Admin view for OTT movie management, contact submissions, and site settings" />
+    <meta property="og:image" content="images/ott-hero-banner.png" />
+    <meta property="og:url" content="" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Srinivas OTT Movies" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Admin | Srinivas" />
+    <meta name="twitter:description" content="Admin view for OTT movie management, contact submissions, and site settings" />
+    <meta name="twitter:image" content="images/ott-hero-banner.png" />
+    <meta name="twitter:site" content="@Srinivas" />
+    <meta name="twitter:creator" content="@Srinivas" />
+    <script src="js/update-meta.js"></script>
+    <script type="application/ld+json" id="site-jsonld">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "Srinivas OTT Movies Admin",
+        "url": "",
+        "description": "Admin view for OTT movie management, contact submissions, and site settings."
+      }
+    </script>
+    <title>Admin | Srinivas</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ctext x='50%25' y='50%25' dy='.35em' text-anchor='middle' font-size='12'%3E%F0%9F%8E%A5%3C/text%3E%3C/svg%3E" />
+    <link rel="stylesheet" href="css/styles.css?v=20260415" />
+    <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js/dist/umd/supabase.min.js"></script>
+    <script src="supabase-config.js"></script>
+  </head>
+  <body>
+    <header class="site-header">
+      <nav class="site-nav" aria-label="Primary">
+        <a href="index.html" class="logo">Srinivas</a>
+        <button
+          type="button"
+          class="nav-toggle"
+          aria-expanded="false"
+          aria-controls="primary-menu"
+          aria-label="Open menu"
+        >
+          <span class="nav-toggle__lines" aria-hidden="true">
+            <span class="nav-toggle__bar"></span>
+            <span class="nav-toggle__bar"></span>
+            <span class="nav-toggle__bar"></span>
+          </span>
+        </button>
+        <div id="primary-menu" class="nav-menu">
+          <ul class="nav-links">
+            <li><a href="index.html" data-nav-link>Home</a></li>
+            <li><a href="about.html" data-nav-link>About</a></li>
+            <li><a href="projects.html" data-nav-link>Projects</a></li>
+            <li><a href="ott-movies.html" data-nav-link>OTT MOVIES</a></li>
+            <li><a href="contact.html" data-nav-link>Contact</a></li>
+            <li><a href="admin.html" data-nav-link>Admin</a></li>
+          </ul>
+        </div>
+      </nav>
+      <div class="nav-backdrop" aria-hidden="true"></div>
+    </header>
+
+    <main class="page-admin">
+      <div class="admin-page-inner">
+        <section class="admin-intro section" aria-labelledby="admin-heading">
+          <h1 id="admin-heading">Admin Dashboard</h1>
+          <p>
+            Sign in with your Supabase email and password to manage OTT releases, review contact
+            submissions, and control which sections of the public site are visible.
+          </p>
+        </section>
+
+        <section id="admin-auth-section" class="admin-auth section" aria-labelledby="admin-auth-heading">
+          <div class="admin-auth-card">
+            <div class="admin-auth-card__header">
+              <h2 id="admin-auth-heading">Admin login</h2>
+              <p>Use the email/password credentials you created in Supabase Authentication.</p>
+            </div>
+
+            <p id="admin-auth-status" class="admin-status" hidden aria-live="polite"></p>
+
+            <form id="admin-login-form" class="admin-form">
+              <div class="contact-field">
+                <label class="contact-label" for="admin-email">Email</label>
+                <input
+                  class="contact-input"
+                  type="email"
+                  id="admin-email"
+                  name="email"
+                  autocomplete="email"
+                  required
+                />
+              </div>
+
+              <div class="contact-field">
+                <label class="contact-label" for="admin-password">Password</label>
+                <input
+                  class="contact-input"
+                  type="password"
+                  id="admin-password"
+                  name="password"
+                  autocomplete="current-password"
+                  required
+                />
+              </div>
+
+              <button type="submit" class="contact-submit" id="admin-login-button">
+                <span class="contact-submit__text">Sign In</span>
+                <span class="contact-submit__spinner" hidden aria-hidden="true"></span>
+              </button>
+            </form>
+          </div>
+        </section>
+
+        <section
+          id="admin-dashboard-section"
+          class="admin-dashboard section"
+          aria-labelledby="admin-dashboard-heading"
+          hidden
+        >
+          <div class="admin-dashboard__header">
+            <div>
+              <h2 id="admin-dashboard-heading">Manage Content</h2>
+              <p id="admin-session-label" class="admin-session-label"></p>
+            </div>
+            <button type="button" id="admin-logout-button" class="submission-card__button">
+              Sign Out
+            </button>
+          </div>
+
+          <div class="admin-tabs" role="tablist" aria-label="Admin sections">
+            <button
+              type="button"
+              class="admin-tab-button is-active"
+              id="admin-tab-ott"
+              data-admin-tab-button="ott"
+              role="tab"
+              aria-selected="true"
+              aria-controls="admin-panel-ott"
+            >
+              OTT Movies
+            </button>
+            <button
+              type="button"
+              class="admin-tab-button"
+              id="admin-tab-contact"
+              data-admin-tab-button="contact"
+              role="tab"
+              aria-selected="false"
+              aria-controls="admin-panel-contact"
+            >
+              Contact Form
+            </button>
+            <button
+              type="button"
+              class="admin-tab-button"
+              id="admin-tab-site"
+              data-admin-tab-button="site"
+              role="tab"
+              aria-selected="false"
+              aria-controls="admin-panel-site"
+            >
+              Site Settings
+            </button>
+          </div>
+
+          <section
+            id="admin-panel-ott"
+            class="admin-tab-panel"
+            data-admin-tab-panel="ott"
+            role="tabpanel"
+            aria-labelledby="admin-tab-ott"
+          >
+            <div class="admin-dashboard-grid">
+              <div class="admin-panel">
+                <div class="admin-panel__header">
+                  <h3>Add new release</h3>
+                  <p>New movies added here will appear automatically on the OTT movies page.</p>
+                </div>
+
+                <p id="movie-form-status" class="admin-status" hidden aria-live="polite"></p>
+
+              <form id="movie-form" class="admin-form">
+                  <div class="contact-field">
+                    <label class="contact-label" for="movie-name">Movie Name</label>
+                    <input
+                      class="contact-input"
+                      type="text"
+                      id="movie-name"
+                      name="movie_name"
+                      required
+                    />
+                  </div>
+
+                  <div class="contact-field">
+                    <label class="contact-label" for="movie-release-date">Digital Release Date</label>
+                    <input
+                      class="contact-input"
+                      type="date"
+                      id="movie-release-date"
+                      name="digital_release_date"
+                    />
+                  </div>
+
+                  <div class="contact-field">
+                    <label class="contact-label" for="movie-streaming-partner">
+                      Online Streaming Partner
+                    </label>
+                    <input
+                      class="contact-input"
+                      type="text"
+                      id="movie-streaming-partner"
+                      name="streaming_partner"
+                    />
+                  </div>
+
+                  <div class="contact-field">
+                    <label class="contact-label" for="movie-category">Category</label>
+                    <select class="contact-select" id="movie-category" name="category" required>
+                      <option value="Film">Film</option>
+                      <option value="Series">Series</option>
+                      <option value="Show">Show</option>
+                    </select>
+                  </div>
+
+                  <div class="contact-field">
+                    <label class="contact-label" for="movie-language">Language</label>
+                    <input
+                      class="contact-input"
+                      type="text"
+                      id="movie-language"
+                      name="language"
+                      value="Telugu"
+                    />
+                  </div>
+
+                <button type="submit" class="contact-submit" id="movie-submit-button">
+                  <span class="contact-submit__text">Add Movie</span>
+                  <span class="contact-submit__spinner" hidden aria-hidden="true"></span>
+                </button>
+              </form>
+
+              <div class="admin-import-export">
+                <div class="admin-import-export__header">
+                  <h4>CSV tools</h4>
+                  <p>
+                    Download the current movie list as CSV, or upload a CSV with these columns:
+                    id, movie_name, digital_release_date, streaming_partner, category, language.
+                  </p>
+                </div>
+
+                <p id="ott-csv-status" class="admin-status" hidden aria-live="polite"></p>
+
+                <div class="admin-import-export__actions">
+                  <button type="button" class="submission-card__button" id="ott-download-button">
+                    Download CSV
+                  </button>
+                </div>
+
+                <div class="admin-import-export__upload">
+                  <label class="contact-label" for="ott-csv-file">Bulk upload CSV</label>
+                  <input
+                    class="contact-input"
+                    type="file"
+                    id="ott-csv-file"
+                    name="ott_csv_file"
+                    accept=".csv,text/csv"
+                  />
+                  <button type="button" class="contact-submit" id="ott-upload-button">
+                    <span class="contact-submit__text">Upload CSV</span>
+                    <span class="contact-submit__spinner" hidden aria-hidden="true"></span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+              <div class="admin-panel">
+                <div class="admin-submissions__header">
+                  <div class="admin-panel__header">
+                    <h3>Recently added movies</h3>
+                    <p>Newest entries are shown first.</p>
+                  </div>
+                  <p id="admin-data-status" class="admin-status" hidden aria-live="polite"></p>
+                </div>
+
+                <div id="admin-loading" class="admin-loading" hidden>Loading movies...</div>
+                <div id="movies-list" class="admin-submissions-list"></div>
+              </div>
+            </div>
+          </section>
+
+          <section
+            id="admin-panel-contact"
+            class="admin-tab-panel"
+            data-admin-tab-panel="contact"
+            role="tabpanel"
+            aria-labelledby="admin-tab-contact"
+            hidden
+          >
+            <div class="admin-panel">
+              <div class="admin-submissions__header">
+                <div class="admin-panel__header">
+                  <h3>Contact submissions</h3>
+                  <p>Review all submitted messages below. Newest submissions appear first.</p>
+                </div>
+                <p id="contact-admin-status" class="admin-status" hidden aria-live="polite"></p>
+              </div>
+
+              <div id="contact-admin-loading" class="admin-loading" hidden>Loading submissions...</div>
+              <div id="contact-submissions-list" class="admin-submissions-list"></div>
+            </div>
+          </section>
+
+          <section
+            id="admin-panel-site"
+            class="admin-tab-panel"
+            data-admin-tab-panel="site"
+            role="tabpanel"
+            aria-labelledby="admin-tab-site"
+            hidden
+          >
+            <div class="admin-panel">
+              <div class="admin-panel__header">
+                <h3>Public site controls</h3>
+                <p>
+                  Choose whether the site opens in your normal portfolio mode or goes straight to
+                  OTT movies, and show or hide the main public tabs.
+                </p>
+              </div>
+
+              <p id="site-settings-status" class="admin-status" hidden aria-live="polite"></p>
+
+              <form id="site-settings-form" class="admin-form">
+                <div class="contact-field">
+                  <label class="contact-label" for="homepage-mode">Homepage mode</label>
+                  <select class="contact-select" id="homepage-mode" name="homepage_mode" required>
+                    <option value="portfolio">Portfolio mode</option>
+                    <option value="ott_only">OTT movies only</option>
+                  </select>
+                </div>
+
+                <fieldset class="admin-checkbox-group">
+                  <legend class="contact-label">Visible main tabs</legend>
+
+                  <label class="admin-checkbox-item" for="setting-show-home">
+                    <input type="checkbox" id="setting-show-home" name="show_home" checked />
+                    <span>Home</span>
+                  </label>
+
+                  <label class="admin-checkbox-item" for="setting-show-about">
+                    <input type="checkbox" id="setting-show-about" name="show_about" checked />
+                    <span>About</span>
+                  </label>
+
+                  <label class="admin-checkbox-item" for="setting-show-projects">
+                    <input type="checkbox" id="setting-show-projects" name="show_projects" checked />
+                    <span>Projects</span>
+                  </label>
+
+                  <label class="admin-checkbox-item" for="setting-show-contact">
+                    <input type="checkbox" id="setting-show-contact" name="show_contact" checked />
+                    <span>Contact</span>
+                  </label>
+                </fieldset>
+
+                <div class="contact-field">
+                  <label class="contact-label" for="site-update-date">Site update date</label>
+                  <input
+                    type="date"
+                    id="site-update-date"
+                    name="site_update_date"
+                    class="contact-input"
+                  />
+                </div>
+
+                <button type="submit" class="contact-submit" id="site-settings-submit-button">
+                  <span class="contact-submit__text">Save Settings</span>
+                  <span class="contact-submit__spinner" hidden aria-hidden="true"></span>
+                </button>
+              </form>
+            </div>
+          </section>
+        </section>
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <div class="site-footer__inner">
+        <div class="site-footer__top">
+          <div class="site-footer__brand">
+            <p class="site-footer__name">Srinivas</p>
+            <p class="site-footer__tagline">
+              UX designer crafting digital experiences people actually enjoy using.
+            </p>
+          </div>
+          <nav class="site-footer__nav" aria-label="Footer">
+            <p class="site-footer__label" id="footer-nav-label">Navigate</p>
+            <ul aria-labelledby="footer-nav-label">
+              <li><a href="index.html">Home</a></li>
+              <li><a href="about.html">About</a></li>
+              <li><a href="projects.html">Projects</a></li>
+              <li><a href="ott-movies.html">OTT MOVIES</a></li>
+              <li><a href="contact.html">Contact</a></li>
+            </ul>
+          </nav>
+          <div class="site-footer__social">
+            <p class="site-footer__label" id="footer-social-label">Connect</p>
+            <ul aria-labelledby="footer-social-label">
+              <li>
+                <a
+                  href="https://www.linkedin.com/in/srinivas-villa-30222560/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  >LinkedIn</a
+                >
+              </li>
+              <li>
+                <a href="https://dribbble.com/srinivasv" target="_blank" rel="noopener noreferrer"
+                  >Dribbble</a
+                >
+              </li>
+              <li>
+                <a href="https://github.com/srinivas999/" target="_blank" rel="noopener noreferrer"
+                  >GitHub</a
+                >
+              </li>
+            </ul>
+          </div>
+        </div>
+        <p class="site-footer__copy">
+          &copy; <span id="year"></span> Srinivas. All rights reserved.
+        </p>
+      </div>
+    </footer>
+
+    <script defer src="js/admin.js"></script>
+    <script src="js/script.js" defer></script>
+  </body>
+</html>
