@@ -46,6 +46,16 @@ The project also includes Supabase integration for storing contact form submissi
 
 Then open `http://localhost:8000` in your browser.
 
+## Search Console
+
+1. Open Google Search Console and add your site property: `https://svteluguott.in`
+2. Verify ownership through your hosting provider or DNS record.
+3. In Search Console, go to "Sitemaps" and submit:
+   - `https://svteluguott.in/sitemap.xml`
+4. Use the URL inspection tool to request indexing for important pages like `/`, `/ott-movies.html`, and `/about.html`.
+
+This helps Google discover your sitemap faster and index your Telugu OTT content more quickly.
+
 ## Supabase Notes
 
 - The contact form submits data to the `contact_submissions` table.
