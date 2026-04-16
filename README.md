@@ -13,38 +13,30 @@ The project also includes Supabase integration for storing contact form submissi
 
 ## Files
 
-- `index.html` — main landing page
-- `about.html` — about page
-- `projects.html` — projects overview page
-- `contact.html` — contact page with submission form
-- `admin.html` — admin dashboard for submission review
-- `css/styles.css` — project styles
-- `js/script.js` — shared UI behavior and navigation
-- `js/contact-supabase.js` — Supabase contact form submission logic
-- `js/admin.js` — Supabase admin fetch and update logic
+- `pages/` — React/Next.js page components for the main site
+- `components/` — shared React UI components and layout
+- `css/styles.css` — project styles imported by Next.js
+- `lib/supabaseClient.js` — Supabase client configuration
+- `package.json` — Next.js build and dependency configuration
+- `public/images/` — static image assets served by Next.js
 - `supabase-config.example.js` — local Supabase config template
+- `.env.local.example` — example environment variables for Supabase
 
 ## Setup
 
 1. Open the project in a code editor.
-2. Copy `supabase-config.example.js` to `supabase-config.js`.
-3. Replace the placeholder values in `supabase-config.js` with your Supabase project URL and anon key.
-4. Serve the site using a local HTTP server for best compatibility (recommended).
+2. Copy `supabase-config.example.js` to `supabase-config.js` or populate `.env.local` from `.env.local.example`.
+3. Replace the placeholder values with your Supabase project URL and anon key.
+4. Install dependencies:
+   ```bash
+   npm install
+   ```
+5. Start the development server:
+   ```bash
+   npm run dev
+   ```
 
-> `supabase-config.js` is ignored by Git and should not be committed. Deployments use GitHub Secrets to generate this file.
-
-### Example local server commands
-
-- Python 3:
-  ```bash
-  python -m http.server 8000
-  ```
-- Node.js (if you have `serve` installed):
-  ```bash
-  npx serve .
-  ```
-
-Then open `http://localhost:8000` in your browser.
+> `.env.local` is ignored by Git and should not be committed. Deployments can use environment variables or secrets to configure Supabase.
 
 ## Search Console
 
