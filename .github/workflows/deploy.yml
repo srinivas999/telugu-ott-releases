@@ -30,7 +30,7 @@ jobs:
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
         run: |
           npm run build
-          npx next export -o out
+          npx next export out
 
       - name: Add Supabase runtime config
         run: |
