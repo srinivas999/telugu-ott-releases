@@ -448,14 +448,266 @@ main {
   color: #4338ca;
 }
 
-@media (max-width: 900px) {
-  .ott-home-header__inner {
-    flex-direction: column;
-    align-items: stretch;
+.theatre-hero {
+  background: linear-gradient(135deg, #111827 0%, #4338ca 100%);
+  color: #f8fafc;
+  border-radius: 28px;
+  padding: 2rem 2.25rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 30px 80px rgba(67, 56, 202, 0.22);
+}
+
+.theatre-hero__content {
+  max-width: 66rem;
+}
+
+.theatre-hero__title {
+  margin: 0.5rem 0 1rem;
+  font-size: clamp(2.25rem, 4vw, 3.75rem);
+  line-height: 1.02;
+  letter-spacing: -0.04em;
+}
+
+.theatre-hero__subtitle {
+  max-width: 58rem;
+  font-size: 1rem;
+  line-height: 1.8;
+  color: rgba(248, 250, 252, 0.88);
+  margin-bottom: 1.75rem;
+}
+
+.theatre-hero__stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.theatre-hero__stats div {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 18px;
+  padding: 1.2rem 1.4rem;
+}
+
+.theatre-hero__stats span {
+  display: block;
+  font-size: 1.75rem;
+  font-weight: 800;
+  margin-bottom: 0.35rem;
+}
+
+.theatre-hero__stats p {
+  margin: 0;
+  color: rgba(248, 250, 252, 0.8);
+}
+
+.theatre-hero__controls {
+  margin-top: 1.25rem;
+}
+
+.theatre-hero__toggle {
+  background: rgba(255, 255, 255, 0.14);
+  color: #f8fafc;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 999px;
+  padding: 0.8rem 1.25rem;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.theatre-hero__toggle:hover,
+.theatre-hero__toggle:focus-visible {
+  background: rgba(255, 255, 255, 0.22);
+  transform: translateY(-1px);
+}
+
+.tmdb-release-section {
+  margin-top: 1rem;
+}
+
+.tmdb-release-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+
+.tmdb-release-grid--compact {
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 1rem;
+}
+
+@media (min-width: 900px) {
+  .tmdb-release-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .ott-home-header__nav {
-    justify-content: center;
+  .tmdb-release-grid--compact {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1200px) {
+  .tmdb-release-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .tmdb-release-grid--compact {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.tmdb-release-card {
+  grid-template-rows: auto 1fr;
+  background: linear-gradient(180deg, #ffffff 0%, #f9fafb 100%);
+  border-radius: 22px;
+  overflow: hidden;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.tmdb-release-card--compact {
+  border-radius: 20px;
+  box-shadow: 0 16px 30px rgba(15, 23, 42, 0.08);
+}
+
+.tmdb-release-card--compact .tmdb-release-card__poster {
+  min-height: 150px;
+}
+
+.tmdb-release-card--compact .tmdb-release-card__body {
+  padding: 0.85rem;
+  gap: 0.75rem;
+}
+
+.tmdb-release-card--compact .tmdb-release-card__overview {
+  font-size: 0.84rem;
+  min-height: 2rem;
+}
+
+.tmdb-release-card--compact .tmdb-release-card__tag,
+.tmdb-release-card--compact .tmdb-release-card__score {
+  padding: 0.35rem 0.6rem;
+  font-size: 0.78rem;
+}
+
+.tmdb-release-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 26px 50px rgba(15, 23, 42, 0.12);
+}
+
+.tmdb-release-card__poster {
+  position: relative;
+  min-height: 180px;
+  overflow: hidden;
+}
+
+.tmdb-release-card__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.3s ease;
+}
+
+.tmdb-release-card:hover .tmdb-release-card__image {
+  transform: scale(1.02);
+}
+
+.tmdb-release-card__badge {
+  left: 0.9rem;
+  top: 0.9rem;
+  background: rgba(17, 24, 39, 0.86);
+  color: #f8fafc;
+  padding: 0.45rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.tmdb-release-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 0.8rem;
+}
+
+.tmdb-release-card__heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.tmdb-release-card__title {
+  margin: 0;
+  font-size: 1.05rem;
+  line-height: 1.25;
+  color: #111827;
+}
+
+.tmdb-release-card__score {
+  background: linear-gradient(135deg, #f59e0b, #ef4444);
+  color: #fff;
+  font-weight: 700;
+  padding: 0.45rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+.tmdb-release-card__overview {
+  margin: 0;
+  color: #475569;
+  line-height: 1.5;
+  font-size: 0.85rem;
+  min-height: 1.8rem;
+}
+
+.tmdb-release-card__footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.tmdb-release-card__tag {
+  background: rgba(99, 102, 241, 0.1);
+  color: #3730a3;
+  padding: 0.55rem 0.9rem;
+  border-radius: 999px;
+  font-size: 0.82rem;
+}
+
+.tmdb-release-card__placeholder {
+  display: grid;
+  place-items: center;
+  min-height: 280px;
+  color: #6b7280;
+  background: linear-gradient(180deg, #e2e8f0 0%, #f8fafc 100%);
+  padding: 1rem;
+  text-align: center;
+}
+
+@media (max-width: 900px) {
+  .theatre-hero {
+    padding: 1.75rem 1.5rem;
+  }
+
+  .theatre-hero__stats {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 680px) {
+  .tmdb-release-card__poster {
+    min-height: 240px;
+  }
+
+  .tmdb-release-card__heading {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }
 

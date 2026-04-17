@@ -39,14 +39,43 @@ The project also includes Supabase integration for storing contact form submissi
 
 > `.env.local` is ignored by Git and should not be committed. Deployments use GitHub repository secrets instead of committing Supabase keys.
 
-## GitHub Pages Deployment
+## Deployment
 
-This repo uses GitHub Actions to build and export the Next.js app as static files. Set these repository secrets before pushing:
+This project now uses Next.js API routes for TMDb and Supabase integration, so GitHub Pages static hosting is no longer a compatible deployment target.
 
-- `SUPABASE_URL`
-- `SUPABASE_ANON_KEY`
+Recommended deployment options:
 
-The workflow will pass those secrets into the Next.js build as `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`, then publish the generated `out` directory to the `gh-pages` branch.
+- Vercel
+- Render
+- Railway
+
+### Vercel
+
+1. Connect this repository to Vercel.
+2. Add these environment variables in your Vercel project settings:
+   - `NEXT_PUBLIC_SUPABASE_URL`
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+   - `NEXT_PUBLIC_TMDB_API_KEY`
+   - `TMDB_API_KEY`
+   - `TMDB_API_READ_ACCESS_TOKEN`
+3. Deploy the project with the default build command:
+   ```bash
+   npm install
+   npm run build
+   ```
+
+### Render
+
+1. Create a new Web Service on Render.
+2. Use `npm install && npm run build` as the build command.
+3. Use `npm run start` as the start command.
+4. Add the same environment variables in Render dashboard.
+
+### Railway
+
+1. Connect your repository to Railway.
+2. Set up a Node.js deployment with the same build and start commands.
+3. Add the same environment variables in Railway settings.
 
 ## Search Console
 

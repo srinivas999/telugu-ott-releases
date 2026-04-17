@@ -24,6 +24,12 @@ export default function AdminPage() {
   });
   const [siteSettingsLoading, setSiteSettingsLoading] = useState(false);
   const [siteSettingsActionLoading, setSiteSettingsActionLoading] = useState(false);
+  const [tmdbSyncLoading, setTmdbSyncLoading] = useState(false);
+  const [tmdbSyncStatus, setTmdbSyncStatus] = useState('');
+  const [tmdbSyncError, setTmdbSyncError] = useState(false);
+  const [tmdbFetchLoading, setTmdbFetchLoading] = useState(false);
+  const [tmdbFetchStatus, setTmdbFetchStatus] = useState('');
+  const [tmdbFetchError, setTmdbFetchError] = useState(false);
   const [activeTab, setActiveTab] = useState('add');
   const [csvFile, setCsvFile] = useState(null);
   const [csvStatus, setCsvStatus] = useState('');
@@ -98,6 +104,144 @@ export default function AdminPage() {
         ...current,
         site_update_date: data.site_update_date || current.site_update_date,
       }));
+    }
+  };
+
+  const handleSyncTmdbMetadata = async () => {
+    if (!supabase) {
+      setTmdbSyncError(true);
+      setTmdbSyncStatus('Supabase is not configured.');
+      return;
+    }
+
+    setTmdbSyncLoading(true);
+    setTmdbSyncStatus('');
+    setTmdbSyncError(false);
+
+    try {
+      const { data: currentMovies, error } = await supabase
+        .from('ott_movies')
+        .select('id,movie_name,digital_release_date');
+
+      if (error) {
+        throw error;
+      }
+
+      if (!currentMovies || currentMovies.length === 0) {
+        setTmdbSyncStatus('No movies available to sync.');
+        return;
+      }
+
+      const moviesToSync = currentMovies.filter((movie) => !movie.digital_release_date && movie.movie_name?.trim());
+      if (moviesToSync.length === 0) {
+        setTmdbSyncStatus('All movies already have release dates. No TMDb sync needed.');
+        return;
+      }
+
+      const updates = [];
+      const stats = {
+        total: moviesToSync.length,
+        updated: 0,
+        noMatch: 0,
+        noReleaseDate: 0,
+        failedRequests: 0,
+      };
+
+      for (const movie of moviesToSync) {
+        const title = movie.movie_name.trim();
+        const response = await fetch(`/api/tmdb/search?query=${encodeURIComponent(title)}`);
+
+        if (!response.ok) {
+          stats.failedRequests += 1;
+          continue;
+        }
+
+        const metadata = await response.json();
+        const result = metadata.results?.[0];
+        if (!result) {
+          stats.noMatch += 1;
+          continue;
+        }
+
+        const releaseDate = result.release_date?.trim();
+        if (!releaseDate) {
+          stats.noReleaseDate += 1;
+          continue;
+        }
+
+        updates.push({
+          id: movie.id,
+          digital_release_date: releaseDate,
+        });
+        stats.updated += 1;
+      }
+
+      if (updates.length > 0) {
+        const { error: updateError } = await supabase
+          .from('ott_movies')
+          .upsert(updates, { onConflict: 'id' });
+
+        if (updateError) {
+          throw updateError;
+        }
+      }
+
+      await fetchMovies();
+
+      let statusMessage = `${stats.updated} movie release date(s) synced from TMDb.`;
+      if (stats.noMatch > 0) {
+        statusMessage += ` ${stats.noMatch} title(s) were not found.`;
+      }
+      if (stats.noReleaseDate > 0) {
+        statusMessage += ` ${stats.noReleaseDate} title(s) were found but had no release date.`;
+      }
+      if (stats.failedRequests > 0) {
+        statusMessage += ` ${stats.failedRequests} request(s) failed.`;
+      }
+      if (stats.updated === 0 && stats.noMatch === 0 && stats.noReleaseDate === 0 && stats.failedRequests === 0) {
+        statusMessage = 'TMDb search completed, but no updateable titles were found.';
+      }
+
+      setTmdbSyncStatus(statusMessage);
+    } catch (error) {
+      setTmdbSyncStatus(error?.message || 'Unable to sync TMDb metadata.');
+      setTmdbSyncError(true);
+    } finally {
+      setTmdbSyncLoading(false);
+    }
+  };
+
+  const handleFetchLatestTollywoodMovies = async () => {
+    if (!supabase) {
+      setTmdbFetchError(true);
+      setTmdbFetchStatus('Supabase is not configured.');
+      return;
+    }
+
+    setTmdbFetchLoading(true);
+    setTmdbFetchStatus('');
+    setTmdbFetchError(false);
+
+    try {
+      const response = await fetch('/api/tmdb/latest');
+      if (!response.ok) {
+        const errorBody = await response.text();
+        throw new Error(`TMDb request failed (${response.status}): ${errorBody}`);
+      }
+
+      const payload = await response.json();
+      const results = payload.results || [];
+      if (results.length === 0) {
+        setTmdbFetchStatus('No recent Tollywood titles were returned by TMDb.');
+        return;
+      }
+
+      setTmdbFetchStatus(`Fetched ${results.length} Tollywood movie(s) from TMDb. They were not saved to the database.`);
+    } catch (error) {
+      setTmdbFetchStatus(error?.message || 'Unable to fetch latest Tollywood movies from TMDb.');
+      setTmdbFetchError(true);
+    } finally {
+      setTmdbFetchLoading(false);
     }
   };
 
@@ -628,7 +772,34 @@ export default function AdminPage() {
                         <button type="submit" className="admin-button" disabled={siteSettingsActionLoading}>
                           {siteSettingsActionLoading ? 'Saving…' : 'Save settings'}
                         </button>
+                        <button
+                          type="button"
+                          className="admin-button"
+                          onClick={handleSyncTmdbMetadata}
+                          disabled={tmdbSyncLoading || siteSettingsActionLoading}
+                        >
+                          {tmdbSyncLoading ? 'Syncing TMDb…' : 'Sync TMDb metadata'}
+                        </button>
+                        <button
+                          type="button"
+                          className="admin-button"
+                          onClick={handleFetchLatestTollywoodMovies}
+                          disabled={tmdbFetchLoading || siteSettingsActionLoading}
+                        >
+                          {tmdbFetchLoading ? 'Fetching latest movies…' : 'Fetch latest Tollywood movies'}
+                        </button>
                       </div>
+
+                      {tmdbSyncStatus ? (
+                        <p className={`admin-status ${tmdbSyncError ? 'admin-status--error' : ''}`}>
+                          {tmdbSyncStatus}
+                        </p>
+                      ) : null}
+                      {tmdbFetchStatus ? (
+                        <p className={`admin-status ${tmdbFetchError ? 'admin-status--error' : ''}`}>
+                          {tmdbFetchStatus}
+                        </p>
+                      ) : null}
                     </form>
                   )}
                 </div>
