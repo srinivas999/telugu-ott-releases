@@ -1023,18 +1023,6 @@ html[data-hide-home="true"] li:has(> a[href="index.html"]) {
   display: none;
 }
 
-html[data-hide-about="true"] li:has(> a[href="about.html"]) {
-  display: none;
-}
-
-html[data-hide-projects="true"] li:has(> a[href="projects.html"]) {
-  display: none;
-}
-
-html[data-hide-contact="true"] li:has(> a[href="contact.html"]) {
-  display: none;
-}
-
 html[data-hide-ott-tab="true"] li:has(> a[href="ott-movies.html"]) {
   display: none;
 }

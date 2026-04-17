@@ -130,30 +130,15 @@
 
   function applyVisibility(settings) {
     const root = document.documentElement;
-    const homepageMode = settings.homepage_mode || "portfolio";
+    const homepageMode = settings.homepage_mode || "ott_only";
     const showHome = settings.show_home !== false;
-    const showAbout = settings.show_about !== false;
-    const showProjects = settings.show_projects !== false;
-    const showContact = settings.show_contact !== false;
 
     root.dataset.hideOttTab = String(homepageMode === "portfolio");
     root.dataset.hideSiteHeader = String(homepageMode === "ott_only");
     root.dataset.hideHome = String(!showHome);
-    root.dataset.hideAbout = String(!showAbout);
-    root.dataset.hideProjects = String(!showProjects);
-    root.dataset.hideContact = String(!showContact);
 
     setLinkVisibility("index.html", showHome);
-    setLinkVisibility("about.html", showAbout);
-    setLinkVisibility("projects.html", showProjects);
-    setLinkVisibility("contact.html", showContact);
-    setLinkVisibility("ott-movies.html", homepageMode !== "portfolio");
-
-    if (currentPage === "home") {
-      setElementVisibility("#about", showAbout);
-      setElementVisibility("#projects", showProjects);
-      setElementVisibility("#contact", showContact);
-    }
+    setLinkVisibility("ott-movies.html", true);
 
     applyFooterContent(settings);
   }

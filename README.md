@@ -1,4 +1,4 @@
-# Srinivas Portfolio
+# Telugu OTT Releases
 
 A simple static portfolio site for a UX designer, built with HTML, CSS, and JavaScript.
 
