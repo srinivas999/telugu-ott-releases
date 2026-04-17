@@ -118,6 +118,9 @@ export default function OttMoviesPage({ home = false }) {
 
   const shareUrl = `https://svteluguott.in${router.asPath}`;
   const shareText = encodeURIComponent('Check the latest Telugu OTT movie releases this week.');
+  const whatsappShareUrl = `https://api.whatsapp.com/send?text=${shareText}%20${encodeURIComponent(shareUrl)}`;
+  const telegramShareUrl = `https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${shareText}`;
+  const twitterShareUrl = `https://twitter.com/intent/tweet?text=${shareText}&url=${encodeURIComponent(shareUrl)}`;
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -146,123 +149,184 @@ export default function OttMoviesPage({ home = false }) {
         jsonLd={jsonLd}
       />
 
-      <section className="page-projects">
+      <section className="page-projects page-ott">
         <div className="projects-page-inner">
-          <header className="projects-page-header">
-            <h1>Telugu OTT releases this week</h1>
-            <p className="projects-page-lede">
-              Weekly Telugu OTT release schedule for upcoming Telugu movies on Netflix, Aha, Prime Video, JioHotstar, Zee5, Sun NXT, and ETV Win.
-            </p>
-            <div className="share-buttons">
-              <a
-                className="share-button share-button--whatsapp"
-                href={`https://api.whatsapp.com/send?text=${shareText}%20${encodeURIComponent(shareUrl)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                WhatsApp
-              </a>
-              <a
-                className="share-button share-button--telegram"
-                href={`https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${shareText}`}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Telegram
-              </a>
-              <a
-                className="share-button share-button--twitter"
-                href={`https://twitter.com/intent/tweet?text=${shareText}&url=${encodeURIComponent(shareUrl)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Twitter
-              </a>
+          <section className="ott-hero">
+            <p className="eyebrow">Telugu OTT releases</p>
+            <div className="ott-hero__visual">
+              <img
+                src="/images/ott-hero-banner.png"
+                alt="Telugu OTT hero banner"
+                className="hero-image"
+                loading="lazy"
+              />
             </div>
-          </header>
+            <div className="ott-hero__panel">
+              <h1>Telugu OTT releases this week</h1>
+              <p className="ott-hero__tagline">
+                Find upcoming Telugu OTT movies on Netflix, Aha, Prime Video, JioHotstar, Zee5, Sun NXT and ETV Win with release dates and platform availability.
+              </p>
+              <div className="ott-hero__actions share-buttons">
+                <a
+                  className="share-button share-button--whatsapp"
+                  href={whatsappShareUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Share on WhatsApp"
+                >
+                  WhatsApp
+                </a>
+                <a
+                  className="share-button share-button--telegram"
+                  href={telegramShareUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Share on Telegram"
+                >
+                  Telegram
+                </a>
+                <a
+                  className="share-button share-button--twitter"
+                  href={twitterShareUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Share on Twitter"
+                >
+                  Twitter
+                </a>
+              </div>
+            </div>
+          </section>
 
-          <div className="release-table-toolbar">
-            <label className="release-table-toolbar__label" htmlFor="ott-date-sort">
-              Sort by date
-            </label>
-            <select
-              className="release-table-toolbar__select"
-              id="ott-date-sort"
-              name="ott-date-sort"
-              value={sortOrder}
-              onChange={(event) => setSortOrder(event.target.value)}
-            >
-              <option value="desc">Newest first</option>
-              <option value="asc">Oldest first</option>
-            </select>
+          <section className="ott-section ott-seo-copy" itemScope itemType="https://schema.org/Article">
+            <div className="section-heading">
+              <p className="eyebrow">OTT guide</p>
+              <h2 itemProp="headline">Upcoming OTT movies Telugu April 2026</h2>
+            </div>
+            <div itemProp="articleBody">
+              <p>
+                This page is your weekly Telugu OTT schedule for new streaming releases, verified digital release dates, and platform rights. Use it to track the latest Telugu OTT premieres on Netflix, Aha, Prime Video, JioHotstar, Zee5, Sun NXT, and ETV Win.
+              </p>
+              <p>
+                If you're searching for "Telugu OTT releases this week" or "upcoming OTT movies Telugu April 2026," this page helps you find the latest Telugu streaming launch dates and movie details in one place.
+              </p>
+            </div>
+          </section>
 
-            <label className="release-table-toolbar__label" htmlFor="ott-platform-select">
-              Filter by platform
-            </label>
-            <select
-              className="release-table-toolbar__select"
-              id="ott-platform-select"
-              name="ott-platform-select"
-              value={selectedPlatform}
-              onChange={(event) => setSelectedPlatform(event.target.value)}
-            >
-              {platformOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </div>
+          <section className="ott-section ott-table-section">
+            <div className="section-heading">
+              <p className="eyebrow">All releases</p>
+              <h2>Upcoming Telugu OTT launches</h2>
+            </div>
 
-          {error ? (
-            <p className="admin-status admin-status--error" aria-live="assertive">
+            <div className="ott-table-filters">
+              <div className="ott-filter-buttons">
+                {platformOptions.map((option) => (
+                  <button
+                    key={option.value}
+                    type="button"
+                    data-platform-filter={option.value}
+                    className={`ott-filter-button ${selectedPlatform === option.value ? 'is-active' : ''}`}
+                    onClick={() => setSelectedPlatform(option.value)}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+
+              <div className="ott-filter-mobile">
+                <label htmlFor="ott-platform-select" className="ott-filter-label">
+                  Platform
+                </label>
+                <select
+                  id="ott-platform-select"
+                  name="ott-platform-select"
+                  className="ott-select"
+                  value={selectedPlatform}
+                  onChange={(event) => setSelectedPlatform(event.target.value)}
+                >
+                  {platformOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="ott-filter-actions">
+                <label htmlFor="ott-date-sort" className="ott-filter-label">
+                  Sort by date
+                </label>
+                <select
+                  id="ott-date-sort"
+                  name="ott-date-sort"
+                  className="ott-select"
+                  value={sortOrder}
+                  onChange={(event) => setSortOrder(event.target.value)}
+                >
+                  <option value="desc">Newest first</option>
+                  <option value="asc">Oldest first</option>
+                </select>
+              </div>
+            </div>
+
+            <span className="ott-movie-count">
+              {loading ? 'Loading movies...' : `${filteredMovies.length} releases`}
+            </span>
+
+            <div className="ott-table-wrap">
+              <table className="ott-movies-table">
+                <thead>
+                  <tr>
+                    <th scope="col">Movie</th>
+                    <th scope="col">Release date</th>
+                    <th scope="col">Platform</th>
+                    <th scope="col">Language</th>
+                    <th scope="col">Category</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredMovies.length === 0 ? (
+                    <tr>
+                      <td className="ott-empty" colSpan="5">
+                        {loading ? 'Loading OTT releases...' : 'No releases match your filter.'}
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredMovies.map((movie) => (
+                      <tr key={movie.id || `${movie.movie_name}-${movie.digital_release_date}`} itemScope itemType="https://schema.org/Movie">
+                        <td>
+                          <span itemProp="name">{movie.movie_name || 'Untitled'}</span>
+                        </td>
+                        <td>
+                          <time itemProp="datePublished" dateTime={movie.digital_release_date || ''}>
+                            {formatReleaseDate(movie.digital_release_date)}
+                          </time>
+                        </td>
+                        <td>{movie.streaming_partner || 'TBA'}</td>
+                        <td>{movie.language || movie.movie_language || 'Telugu'}</td>
+                        <td itemProp="genre">{movie.category || 'Film'}</td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            <p id="ott-movies-status" className="admin-status" hidden={!error} aria-live="polite">
               {error}
             </p>
-          ) : null}
-          {loading ? (
-            <div className="admin-loading">Loading OTT releases...</div>
-          ) : null}
+            <div id="ott-movies-loading" className="admin-loading" hidden={!loading}>
+              Loading OTT releases...
+            </div>
+          </section>
 
-          <div className="release-table-wrapper">
-            <table className="release-table">
-              <thead>
-                <tr>
-                  <th scope="col">Movie</th>
-                  <th scope="col">Digital Release Date</th>
-                  <th scope="col">Online Streaming Partner</th>
-                  <th scope="col">Category</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredMovies.length === 0 ? (
-                  <tr>
-                    <td className="ott-empty" colSpan="4">
-                      {loading ? 'Loading OTT releases...' : 'No releases match your filter.'}
-                    </td>
-                  </tr>
-                ) : (
-                  filteredMovies.map((movie) => (
-                    <tr key={movie.id || `${movie.movie_name}-${movie.digital_release_date}`} itemScope itemType="https://schema.org/Movie">
-                      <td>
-                        <span itemProp="name">{movie.movie_name || 'Untitled'}</span>
-                      </td>
-                      <td>
-                        <time itemProp="datePublished" dateTime={movie.digital_release_date || ''}>
-                          {formatReleaseDate(movie.digital_release_date)}
-                        </time>
-                      </td>
-                      <td>{movie.streaming_partner || 'TBA'}</td>
-                      <td itemProp="genre">{movie.category || 'Film'}</td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-
-          <section className="ott-trending section" aria-labelledby="trending-heading">
-            <h2 id="trending-heading">Trending releases</h2>
-            <div className="ott-trending-list">
+          <section className="ott-section ott-trending" aria-labelledby="trending-heading">
+            <div className="section-heading">
+              <p className="eyebrow">Trending</p>
+              <h2 id="trending-heading">Buzzing Telugu OTT premieres</h2>
+            </div>
+            <div className="ott-trending-carousel" aria-label="Trending OTT releases">
               {trendingMovies.map((movie) => (
                 <article key={`${movie.movie_name}-${movie.digital_release_date}`} className="ott-trending-card">
                   <div className="ott-trending-card__stripe" />

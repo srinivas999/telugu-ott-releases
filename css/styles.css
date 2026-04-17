@@ -926,6 +926,7 @@ html[data-homepage-mode="ott_only"] .site-footer__copy {
   background: #f8fafc;
   display: grid;
   place-items: center;
+  width: 100%;
 }
 
 .admin-panel {
@@ -1060,6 +1061,32 @@ html[data-homepage-mode="ott_only"] .site-footer__copy {
 .admin-action-button--danger:hover,
 .admin-action-button--danger:focus-visible {
   background: rgba(254, 226, 226, 0.8);
+}
+
+.admin-settings-fieldset {
+  margin: 1rem 0 0;
+  padding: 1rem 1rem 0.75rem;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 16px;
+  background: #f8fafc;
+}
+
+.admin-settings-fieldset legend {
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.admin-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0.75rem 0 0;
+  color: #475569;
+}
+
+.admin-checkbox-label input {
+  width: 1rem;
+  height: 1rem;
 }
 
 .admin-table {

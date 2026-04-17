@@ -19,6 +19,16 @@ export default function AdminPage() {
   const [movieForm, setMovieForm] = useState(EMPTY_MOVIE);
   const [editingMovieId, setEditingMovieId] = useState(null);
   const [actionLoading, setActionLoading] = useState(false);
+  const [siteSettings, setSiteSettings] = useState({
+    homepage_mode: 'ott_only',
+    show_home: true,
+    show_about: false,
+    show_projects: false,
+    show_contact: false,
+    site_update_date: '',
+  });
+  const [siteSettingsLoading, setSiteSettingsLoading] = useState(false);
+  const [siteSettingsActionLoading, setSiteSettingsActionLoading] = useState(false);
 
   useEffect(() => {
     if (!supabase) return undefined;
@@ -45,6 +55,7 @@ export default function AdminPage() {
       return;
     }
     fetchMovies();
+    fetchSiteSettings();
   }, [user]);
 
   const fetchMovies = async () => {
@@ -63,6 +74,70 @@ export default function AdminPage() {
     }
 
     setMovies(data || []);
+  };
+
+  const fetchSiteSettings = async () => {
+    if (!supabase) return;
+    setSiteSettingsLoading(true);
+
+    const { data, error } = await supabase
+      .from('site_settings')
+      .select('*')
+      .eq('id', 1)
+      .maybeSingle();
+
+    setSiteSettingsLoading(false);
+
+    if (error) {
+      setStatus(error.message || 'Unable to load site settings.');
+      return;
+    }
+
+    if (data) {
+      setSiteSettings((current) => ({
+        ...current,
+        homepage_mode: data.homepage_mode || current.homepage_mode,
+        show_home: data.show_home !== false,
+        show_about: data.show_about === true,
+        show_projects: data.show_projects === true,
+        show_contact: data.show_contact === true,
+        site_update_date: data.site_update_date || current.site_update_date,
+      }));
+    }
+  };
+
+  const handleSaveSiteSettings = async (event) => {
+    event.preventDefault();
+    if (!supabase) {
+      setStatus('Supabase is not configured.');
+      return;
+    }
+
+    setSiteSettingsActionLoading(true);
+    setStatus('');
+
+    const payload = {
+      id: 1,
+      homepage_mode: siteSettings.homepage_mode,
+      show_home: siteSettings.show_home,
+      show_about: siteSettings.show_about,
+      show_projects: siteSettings.show_projects,
+      show_contact: siteSettings.show_contact,
+      site_update_date: siteSettings.site_update_date || null,
+    };
+
+    const { error } = await supabase
+      .from('site_settings')
+      .upsert([payload], { onConflict: 'id' });
+
+    setSiteSettingsActionLoading(false);
+
+    if (error) {
+      setStatus(error.message || 'Unable to save site settings.');
+      return;
+    }
+
+    setStatus('Site settings saved successfully.');
   };
 
   const handleSignIn = async (event) => {
@@ -325,6 +400,81 @@ export default function AdminPage() {
                       ))}
                     </tbody>
                   </table>
+                )}
+              </div>
+
+              <div className="admin-management-card">
+                <div className="admin-management-card__header">
+                  <div>
+                    <h2>Site settings</h2>
+                    <p className="admin-management-card__subtitle">Manage the site settings stored in Supabase.</p>
+                  </div>
+                </div>
+
+                {siteSettingsLoading ? (
+                  <p className="admin-status">Loading site settings…</p>
+                ) : (
+                  <form className="admin-form" onSubmit={handleSaveSiteSettings}>
+                    <label htmlFor="homepage-mode">Homepage mode</label>
+                    <select
+                      id="homepage-mode"
+                      value={siteSettings.homepage_mode}
+                      onChange={(event) => setSiteSettings((current) => ({ ...current, homepage_mode: event.target.value }))}
+                    >
+                      <option value="ott_only">OTT only</option>
+                      <option value="portfolio">Portfolio</option>
+                    </select>
+
+                    <label htmlFor="site-update-date">Site update date</label>
+                    <input
+                      id="site-update-date"
+                      type="date"
+                      value={siteSettings.site_update_date || ''}
+                      onChange={(event) => setSiteSettings((current) => ({ ...current, site_update_date: event.target.value }))}
+                    />
+
+                    <fieldset className="admin-settings-fieldset">
+                      <legend>Navigation visibility</legend>
+                      <label className="admin-checkbox-label">
+                        <input
+                          type="checkbox"
+                          checked={siteSettings.show_home}
+                          onChange={(event) => setSiteSettings((current) => ({ ...current, show_home: event.target.checked }))}
+                        />
+                        Show home link
+                      </label>
+                      <label className="admin-checkbox-label">
+                        <input
+                          type="checkbox"
+                          checked={siteSettings.show_about}
+                          onChange={(event) => setSiteSettings((current) => ({ ...current, show_about: event.target.checked }))}
+                        />
+                        Show about link
+                      </label>
+                      <label className="admin-checkbox-label">
+                        <input
+                          type="checkbox"
+                          checked={siteSettings.show_projects}
+                          onChange={(event) => setSiteSettings((current) => ({ ...current, show_projects: event.target.checked }))}
+                        />
+                        Show projects link
+                      </label>
+                      <label className="admin-checkbox-label">
+                        <input
+                          type="checkbox"
+                          checked={siteSettings.show_contact}
+                          onChange={(event) => setSiteSettings((current) => ({ ...current, show_contact: event.target.checked }))}
+                        />
+                        Show contact link
+                      </label>
+                    </fieldset>
+
+                    <div className="admin-form-actions">
+                      <button type="submit" className="admin-button" disabled={siteSettingsActionLoading}>
+                        {siteSettingsActionLoading ? 'Saving…' : 'Save settings'}
+                      </button>
+                    </div>
+                  </form>
                 )}
               </div>
             </div>
