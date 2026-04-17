@@ -18,9 +18,9 @@
   --leading-tight: 1.2;
   --leading-body: 1.7;
   --leading-relaxed: 1.75;
-  --space-section-y: clamp(3.75rem, 9vw, 6rem);
-  --space-section-y-tight: clamp(3rem, 6vw, 4.5rem);
-  --space-inner: clamp(2.25rem, 4vw, 3.25rem);
+  --space-section-y: clamp(0.5rem, 1vw, 1rem);
+  --space-section-y-tight: clamp(1rem, 1.5vw, 1.5rem);
+  --space-inner: clamp(1.25rem, 3vw, 2.25rem);
   --btn-radius: 9999px;
   --btn-transition: transform 0.22s ease, box-shadow 0.22s ease, filter 0.22s ease,
     background-color 0.22s ease, color 0.22s ease;
@@ -375,8 +375,88 @@ main {
   padding: var(--space-section-y-tight) 1.5rem;
 }
 
+.page-ott .projects-page-inner {
+  padding-top: 1.75rem;
+  padding-bottom: var(--space-section-y-tight);
+}
+
 .projects-page-header {
   margin-bottom: clamp(2rem, 4vw, 3rem);
+}
+
+.ott-home-header {
+  margin-bottom: clamp(1.5rem, 3vw, 2rem);
+  padding: 1.25rem 1.5rem;
+  background: #fff;
+  border-radius: 22px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.06);
+}
+
+.ott-home-header__inner {
+  max-width: var(--page-max-width);
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.ott-home-header__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  text-decoration: none;
+}
+
+.ott-home-header__text {
+  font-family: var(--font-heading);
+  font-size: 1.45rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.ott-home-header__text--accent {
+  color: #d97706;
+}
+
+.ott-home-header__text--brand {
+  color: #111827;
+}
+
+.ott-home-header__nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.ott-home-header__link {
+  color: #111827;
+  text-decoration: none;
+  font-weight: 600;
+  padding: 0.75rem 1rem;
+  border-radius: 999px;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.ott-home-header__link:hover,
+.ott-home-header__link:focus-visible {
+  background: rgba(79, 70, 229, 0.12);
+  color: #4338ca;
+}
+
+@media (max-width: 900px) {
+  .ott-home-header__inner {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .ott-home-header__nav {
+    justify-content: center;
+  }
 }
 
 .projects-page-header h1 {
