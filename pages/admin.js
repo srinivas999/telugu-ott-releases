@@ -20,16 +20,15 @@ export default function AdminPage() {
   const [editingMovieId, setEditingMovieId] = useState(null);
   const [actionLoading, setActionLoading] = useState(false);
   const [siteSettings, setSiteSettings] = useState({
-    homepage_mode: 'ott_only',
-    show_home: true,
-    show_about: false,
-    show_projects: false,
-    show_contact: false,
     site_update_date: '',
   });
   const [siteSettingsLoading, setSiteSettingsLoading] = useState(false);
   const [siteSettingsActionLoading, setSiteSettingsActionLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('add');
+  const [csvFile, setCsvFile] = useState(null);
+  const [csvStatus, setCsvStatus] = useState('');
+  const [csvStatusError, setCsvStatusError] = useState(false);
+  const [csvLoading, setCsvLoading] = useState(false);
 
   useEffect(() => {
     if (!supabase) return undefined;
@@ -97,11 +96,6 @@ export default function AdminPage() {
     if (data) {
       setSiteSettings((current) => ({
         ...current,
-        homepage_mode: data.homepage_mode || current.homepage_mode,
-        show_home: data.show_home !== false,
-        show_about: data.show_about === true,
-        show_projects: data.show_projects === true,
-        show_contact: data.show_contact === true,
         site_update_date: data.site_update_date || current.site_update_date,
       }));
     }
@@ -119,11 +113,6 @@ export default function AdminPage() {
 
     const payload = {
       id: 1,
-      homepage_mode: siteSettings.homepage_mode,
-      show_home: siteSettings.show_home,
-      show_about: siteSettings.show_about,
-      show_projects: siteSettings.show_projects,
-      show_contact: siteSettings.show_contact,
       site_update_date: siteSettings.site_update_date || null,
     };
 
@@ -265,6 +254,168 @@ export default function AdminPage() {
     fetchMovies();
   };
 
+  const escapeCsvValue = (value) => {
+    const stringValue = String(value ?? '').trim();
+    if (/"|,|\n|\r/.test(stringValue)) {
+      return `"${stringValue.replace(/"/g, '""')}"`;
+    }
+    return stringValue;
+  };
+
+  const buildCsvContent = (rows) => {
+    const headers = ['movie_name', 'streaming_partner', 'digital_release_date'];
+    const lines = [headers.join(',')];
+    rows.forEach((movie) => {
+      lines.push([
+        escapeCsvValue(movie.movie_name),
+        escapeCsvValue(movie.streaming_partner),
+        escapeCsvValue(movie.digital_release_date),
+      ].join(','));
+    });
+    return lines.join('\r\n');
+  };
+
+  const parseCsvLine = (line) => {
+    const values = [];
+    let current = '';
+    let inQuotes = false;
+    for (let index = 0; index < line.length; index += 1) {
+      const char = line[index];
+      if (inQuotes) {
+        if (char === '"') {
+          if (line[index + 1] === '"') {
+            current += '"';
+            index += 1;
+          } else {
+            inQuotes = false;
+          }
+        } else {
+          current += char;
+        }
+      } else if (char === '"') {
+        inQuotes = true;
+      } else if (char === ',') {
+        values.push(current);
+        current = '';
+      } else {
+        current += char;
+      }
+    }
+    values.push(current);
+    return values;
+  };
+
+  const parseCsv = (text) => {
+    const rows = text
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter((line) => line.length > 0);
+
+    if (rows.length === 0) {
+      return [];
+    }
+
+    const headers = parseCsvLine(rows[0]).map((header) => header.trim().toLowerCase());
+    return rows.slice(1).map((row) => {
+      const values = parseCsvLine(row);
+      const record = {};
+      headers.forEach((header, index) => {
+        record[header] = values[index] ?? '';
+      });
+      return record;
+    });
+  };
+
+  const handleDownloadCsv = () => {
+    setCsvStatus('');
+    setCsvStatusError(false);
+    if (movies.length === 0) {
+      setCsvStatus('There are no movies available to export.');
+      setCsvStatusError(true);
+      return;
+    }
+
+    const csv = buildCsvContent(movies);
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'ott-movies.csv';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    setCsvStatus('CSV downloaded successfully.');
+  };
+
+  const handleUploadCsv = async () => {
+    if (!csvFile) {
+      setCsvStatus('Choose a CSV file before uploading.');
+      setCsvStatusError(true);
+      return;
+    }
+
+    setCsvLoading(true);
+    setCsvStatus('');
+    setCsvStatusError(false);
+
+    try {
+      const text = await csvFile.text();
+      const rows = parseCsv(text);
+      if (rows.length === 0) {
+        throw new Error('The CSV file is empty or invalid.');
+      }
+
+      const newMovies = rows
+        .map((row) => ({
+          movie_name: String(row.movie_name || '').trim(),
+          streaming_partner: String(row.streaming_partner || '').trim(),
+          digital_release_date: String(row.digital_release_date || '').trim(),
+        }))
+        .filter((row) => row.movie_name && row.digital_release_date);
+
+      if (newMovies.length === 0) {
+        throw new Error('No valid movie rows were found in the CSV.');
+      }
+
+      const existingKeys = new Set(
+        movies.map((movie) =>
+          `${String(movie.movie_name || '').trim().toLowerCase()}|${String(movie.digital_release_date || '').trim()}`,
+        ),
+      );
+
+      const rowsToInsert = newMovies.filter(
+        (movie) => !existingKeys.has(`${movie.movie_name.toLowerCase()}|${movie.digital_release_date}`),
+      );
+
+      if (rowsToInsert.length === 0) {
+        setCsvStatus('CSV checked successfully. All movies already exist, so no new rows were added.');
+        return;
+      }
+
+      const { error } = await supabase.from('ott_movies').insert(rowsToInsert);
+      if (error) {
+        throw error;
+      }
+
+      await fetchMovies();
+      setCsvStatus(`${rowsToInsert.length} new movie row(s) added from CSV.`);
+      setCsvFile(null);
+    } catch (error) {
+      setCsvStatus(error?.message || 'Unable to upload the CSV file. Please check the file and try again.');
+      setCsvStatusError(true);
+    } finally {
+      setCsvLoading(false);
+    }
+  };
+
+  const handleCsvFileChange = (event) => {
+    setCsvFile(event.target.files?.[0] || null);
+    setCsvStatus('');
+    setCsvStatusError(false);
+  };
+
   return (
     <main className="admin-page">
       <Seo
@@ -344,6 +495,15 @@ export default function AdminPage() {
                   aria-selected={activeTab === 'settings'}
                 >
                   Site settings
+                </button>
+                <button
+                  type="button"
+                  className={`admin-tab-button ${activeTab === 'csv' ? 'is-active' : ''}`}
+                  onClick={() => setActiveTab('csv')}
+                  role="tab"
+                  aria-selected={activeTab === 'csv'}
+                >
+                  Import / export
                 </button>
               </div>
 
@@ -456,16 +616,6 @@ export default function AdminPage() {
                     <p className="admin-status">Loading site settings…</p>
                   ) : (
                     <form className="admin-form" onSubmit={handleSaveSiteSettings}>
-                      <label htmlFor="homepage-mode">Homepage mode</label>
-                      <select
-                        id="homepage-mode"
-                        value={siteSettings.homepage_mode}
-                        onChange={(event) => setSiteSettings((current) => ({ ...current, homepage_mode: event.target.value }))}
-                      >
-                        <option value="ott_only">OTT only</option>
-                        <option value="portfolio">Portfolio</option>
-                      </select>
-
                       <label htmlFor="site-update-date">Site update date</label>
                       <input
                         id="site-update-date"
@@ -474,42 +624,6 @@ export default function AdminPage() {
                         onChange={(event) => setSiteSettings((current) => ({ ...current, site_update_date: event.target.value }))}
                       />
 
-                      <fieldset className="admin-settings-fieldset">
-                        <legend>Navigation visibility</legend>
-                        <label className="admin-checkbox-label">
-                          <input
-                            type="checkbox"
-                            checked={siteSettings.show_home}
-                            onChange={(event) => setSiteSettings((current) => ({ ...current, show_home: event.target.checked }))}
-                          />
-                          Show home link
-                        </label>
-                        <label className="admin-checkbox-label">
-                          <input
-                            type="checkbox"
-                            checked={siteSettings.show_about}
-                            onChange={(event) => setSiteSettings((current) => ({ ...current, show_about: event.target.checked }))}
-                          />
-                          Show about link
-                        </label>
-                        <label className="admin-checkbox-label">
-                          <input
-                            type="checkbox"
-                            checked={siteSettings.show_projects}
-                            onChange={(event) => setSiteSettings((current) => ({ ...current, show_projects: event.target.checked }))}
-                          />
-                          Show projects link
-                        </label>
-                        <label className="admin-checkbox-label">
-                          <input
-                            type="checkbox"
-                            checked={siteSettings.show_contact}
-                            onChange={(event) => setSiteSettings((current) => ({ ...current, show_contact: event.target.checked }))}
-                          />
-                          Show contact link
-                        </label>
-                      </fieldset>
-
                       <div className="admin-form-actions">
                         <button type="submit" className="admin-button" disabled={siteSettingsActionLoading}>
                           {siteSettingsActionLoading ? 'Saving…' : 'Save settings'}
@@ -517,6 +631,42 @@ export default function AdminPage() {
                       </div>
                     </form>
                   )}
+                </div>
+              </div>
+
+              <div className="admin-tab-panel" hidden={activeTab !== 'csv'}>
+                <div className="admin-management-card admin-import-export">
+                  <div className="admin-import-export__header">
+                    <div>
+                      <h2>Import / export CSV</h2>
+                      <p>Upload movies from a CSV file or export the current release table.</p>
+                    </div>
+                  </div>
+
+                  <div className="admin-import-export__upload">
+                    <label htmlFor="csv-file">Select a CSV file</label>
+                    <input
+                      id="csv-file"
+                      type="file"
+                      accept=".csv,text/csv"
+                      onChange={handleCsvFileChange}
+                    />
+                  </div>
+
+                  <div className="admin-form-actions">
+                    <button type="button" className="admin-button" onClick={handleUploadCsv} disabled={csvLoading}>
+                      {csvLoading ? 'Uploading…' : 'Upload CSV'}
+                    </button>
+                    <button type="button" className="admin-action-button" onClick={handleDownloadCsv} disabled={csvLoading || movies.length === 0}>
+                      Download CSV
+                    </button>
+                  </div>
+
+                  {csvStatus ? (
+                    <p className={`admin-status ${csvStatusError ? 'admin-status--error' : ''}`}>
+                      {csvStatus}
+                    </p>
+                  ) : null}
                 </div>
               </div>
             </div>
