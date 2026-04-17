@@ -529,12 +529,22 @@ main {
 .tmdb-release-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 1.5rem;
+  gap: 1.25rem;
 }
 
 .tmdb-release-grid--compact {
   grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
-  gap: 1rem;
+  gap: 0.85rem;
+}
+
+@media (min-width: 900px) {
+  .tmdb-release-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .tmdb-release-grid--compact {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 
 @media (min-width: 900px) {
@@ -558,38 +568,23 @@ main {
 }
 
 .tmdb-release-card {
-  grid-template-rows: auto 1fr;
-  background: linear-gradient(180deg, #ffffff 0%, #f9fafb 100%);
-  border-radius: 22px;
+  position: relative;
+  height: 220px;
+  background: #0f172a;
+  border-radius: 24px;
   overflow: hidden;
-  border: 1px solid rgba(15, 23, 42, 0.08);
-  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  box-shadow: 0 28px 60px rgba(15, 23, 42, 0.22);
   transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
 .tmdb-release-card--compact {
   border-radius: 20px;
-  box-shadow: 0 16px 30px rgba(15, 23, 42, 0.08);
+  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.18);
+  height: 205px;
 }
 
-.tmdb-release-card--compact .tmdb-release-card__poster {
-  min-height: 150px;
-}
-
-.tmdb-release-card--compact .tmdb-release-card__body {
-  padding: 0.85rem;
-  gap: 0.75rem;
-}
-
-.tmdb-release-card--compact .tmdb-release-card__overview {
-  font-size: 0.84rem;
-  min-height: 2rem;
-}
-
-.tmdb-release-card--compact .tmdb-release-card__tag,
-.tmdb-release-card--compact .tmdb-release-card__score {
-  padding: 0.35rem 0.6rem;
-  font-size: 0.78rem;
+.tmdb-release-card--compact {
 }
 
 .tmdb-release-card:hover {
@@ -599,7 +594,8 @@ main {
 
 .tmdb-release-card__poster {
   position: relative;
-  min-height: 180px;
+  width: 100%;
+  height: 100%;
   overflow: hidden;
 }
 
@@ -607,6 +603,7 @@ main {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: top center;
   display: block;
   transition: transform 0.3s ease;
 }
@@ -615,75 +612,105 @@ main {
   transform: scale(1.02);
 }
 
+.tmdb-release-card__pill,
 .tmdb-release-card__badge {
-  left: 0.9rem;
-  top: 0.9rem;
-  background: rgba(17, 24, 39, 0.86);
-  color: #f8fafc;
-  padding: 0.45rem 0.75rem;
+  position: absolute;
+  top: 0.5rem;
+  z-index: 2;
+  color: #fff;
+  padding: 0.35rem 0.65rem;
   border-radius: 999px;
-  font-size: 0.78rem;
+  font-size: 0.72rem;
+  font-weight: 700;
   letter-spacing: 0.02em;
   text-transform: uppercase;
+  backdrop-filter: blur(10px);
 }
 
-.tmdb-release-card__body {
+.tmdb-release-card__pill {
+  left: 0.5rem;
+  background: rgba(15, 23, 42, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.tmdb-release-card__badge {
+  right: 0.5rem;
+  background: rgba(217, 119, 6, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.tmdb-release-card__overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  padding: 0.85rem;
+  background: linear-gradient(180deg, rgba(2, 6, 23, 0.04) 28%, rgba(2, 6, 23, 0.9) 100%);
+}
+
+.tmdb-release-card__content {
+  width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
-  padding: 0.8rem;
-}
-
-.tmdb-release-card__heading {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 0.75rem;
+  gap: 0.45rem;
 }
 
 .tmdb-release-card__title {
   margin: 0;
-  font-size: 1.05rem;
-  line-height: 1.25;
-  color: #111827;
+  font-size: clamp(1rem, 1.8vw, 1.15rem);
+  line-height: 1.15;
+  color: #f8fafc;
+  text-shadow: 0 6px 20px rgba(15, 23, 42, 0.45);
 }
 
-.tmdb-release-card__score {
-  background: linear-gradient(135deg, #f59e0b, #ef4444);
-  color: #fff;
-  font-weight: 700;
-  padding: 0.45rem 0.7rem;
-  border-radius: 999px;
-  font-size: 0.85rem;
-  white-space: nowrap;
-}
-
-.tmdb-release-card__overview {
+.tmdb-release-card__meta {
   margin: 0;
-  color: #475569;
-  line-height: 1.5;
-  font-size: 0.85rem;
-  min-height: 1.8rem;
+  color: rgba(226, 232, 240, 0.88);
+  font-size: 0.8rem;
+  line-height: 1.35;
+  text-shadow: 0 4px 14px rgba(15, 23, 42, 0.4);
 }
 
-.tmdb-release-card__footer {
+.tmdb-release-card__actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.75rem;
+  gap: 0.5rem;
+  margin-top: 0.15rem;
 }
 
-.tmdb-release-card__tag {
-  background: rgba(99, 102, 241, 0.1);
-  color: #3730a3;
-  padding: 0.55rem 0.9rem;
+.tmdb-release-card__action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2rem;
+  padding: 0.45rem 0.8rem;
   border-radius: 999px;
-  font-size: 0.82rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.tmdb-release-card__action:hover,
+.tmdb-release-card__action:focus-visible {
+  transform: translateY(-1px);
+}
+
+.tmdb-release-card__action--primary {
+  background: #f8fafc;
+  color: #0f172a;
+}
+
+.tmdb-release-card__action--secondary {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #f8fafc;
 }
 
 .tmdb-release-card__placeholder {
   display: grid;
   place-items: center;
-  min-height: 280px;
+  min-height: 100%;
   color: #6b7280;
   background: linear-gradient(180deg, #e2e8f0 0%, #f8fafc 100%);
   padding: 1rem;
@@ -701,13 +728,22 @@ main {
 }
 
 @media (max-width: 680px) {
-  .tmdb-release-card__poster {
-    min-height: 240px;
+  .tmdb-release-card,
+  .tmdb-release-card--compact {
+    height: 210px;
   }
 
-  .tmdb-release-card__heading {
-    flex-direction: column;
-    align-items: flex-start;
+  .tmdb-release-card__overlay {
+    padding: 0.75rem;
+  }
+
+  .tmdb-release-card__actions {
+    gap: 0.4rem;
+  }
+
+  .tmdb-release-card__action {
+    min-height: 1.9rem;
+    padding: 0.4rem 0.75rem;
   }
 }
 

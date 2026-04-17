@@ -5,6 +5,55 @@ import Seo from '../components/Seo';
 const TMDB_POSTER_BASE = 'https://image.tmdb.org/t/p/w500';
 const CACHE_KEY = 'theatreReleaseMoviesCache';
 const CACHE_TTL = 1000 * 60 * 60; // 1 hour
+const TMDB_MOVIE_URL_BASE = 'https://www.themoviedb.org/movie';
+const YOUTUBE_SEARCH_URL_BASE = 'https://www.youtube.com/results?search_query=';
+const TMDB_GENRES = {
+  28: 'Action',
+  12: 'Adventure',
+  16: 'Animation',
+  35: 'Comedy',
+  80: 'Crime',
+  99: 'Documentary',
+  18: 'Drama',
+  10751: 'Family',
+  14: 'Fantasy',
+  36: 'History',
+  27: 'Horror',
+  10402: 'Music',
+  9648: 'Mystery',
+  10749: 'Romance',
+  878: 'Sci-Fi',
+  10770: 'TV Movie',
+  53: 'Thriller',
+  10752: 'War',
+  37: 'Western',
+};
+
+function formatReleaseDate(date) {
+  if (!date) return 'TBA';
+
+  const parsed = new Date(date);
+  if (Number.isNaN(parsed.getTime())) return date;
+
+  return parsed.toLocaleDateString('en-IN', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  });
+}
+
+function getMovieGenres(genreIds) {
+  if (!Array.isArray(genreIds) || genreIds.length === 0) {
+    return 'Genre N/A';
+  }
+
+  const names = genreIds
+    .map((genreId) => TMDB_GENRES[genreId])
+    .filter(Boolean)
+    .slice(0, 2);
+
+  return names.length > 0 ? names.join(', ') : 'Genre N/A';
+}
 
 export default function TheatreReleasePage() {
   const [movies, setMovies] = useState([]);
@@ -81,7 +130,7 @@ export default function TheatreReleasePage() {
             <div className="theatre-hero__content">
               <p className="eyebrow">Theatre Release</p>
               <h1 className="theatre-hero__title">Latest Tollywood theatre releases</h1>
-                             <div className="theatre-hero__controls">
+              <div className="theatre-hero__controls">
                 <button
                   type="button"
                   className="theatre-hero__toggle"
@@ -95,7 +144,7 @@ export default function TheatreReleasePage() {
 
           <section className="tmdb-release-section">
             {loading ? (
-              <p className="admin-status">Loading theatre release movies…</p>
+              <p className="admin-status">Loading theatre release movies...</p>
             ) : error ? (
               <p className="admin-status admin-status--error">{error}</p>
             ) : movies.length === 0 ? (
@@ -117,18 +166,35 @@ export default function TheatreReleasePage() {
                           <span>No poster available</span>
                         </div>
                       )}
-                      <div className="tmdb-release-card__badge">{movie.release_date || 'TBA'}</div>
-                    </div>
 
-                    <div className="tmdb-release-card__body">
-                      <div className="tmdb-release-card__heading">
-                        <h2 className="tmdb-release-card__title">{movie.title || movie.original_title || 'Untitled'}</h2>
-                        <span className="tmdb-release-card__score">{movie.vote_average ? movie.vote_average.toFixed(1) : 'N/A'}</span>
-                      </div>
-                      <p className="tmdb-release-card__overview">{movie.overview || 'No description is available for this movie yet.'}</p>
-                      <div className="tmdb-release-card__footer">
-                        <span className="tmdb-release-card__tag">{movie.original_language?.toUpperCase() || 'LANG N/A'}</span>
-                        <span className="tmdb-release-card__tag">{movie.genre_ids?.length ? `${movie.genre_ids.length} genre(s)` : 'Genre N/A'}</span>
+                      <div className="tmdb-release-card__pill">{formatReleaseDate(movie.release_date)}</div>
+                      <div className="tmdb-release-card__badge">OTT</div>
+
+                      <div className="tmdb-release-card__overlay">
+                        <div className="tmdb-release-card__content">
+                          <h2 className="tmdb-release-card__title">{movie.title || movie.original_title || 'Untitled'}</h2>
+                          <p className="tmdb-release-card__meta">
+                            {getMovieGenres(movie.genre_ids)} &middot; {movie.vote_average ? movie.vote_average.toFixed(1) : 'NR'}
+                          </p>
+                          <div className="tmdb-release-card__actions">
+                            <a
+                              href={`${TMDB_MOVIE_URL_BASE}/${movie.id}`}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="tmdb-release-card__action tmdb-release-card__action--primary"
+                            >
+                              Details
+                            </a>
+                            <a
+                              href={`${YOUTUBE_SEARCH_URL_BASE}${encodeURIComponent(`${movie.title || movie.original_title || 'Movie'} trailer`)}`}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="tmdb-release-card__action tmdb-release-card__action--secondary"
+                            >
+                              Trailer
+                            </a>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </article>
