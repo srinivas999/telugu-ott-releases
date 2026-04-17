@@ -930,7 +930,7 @@ html[data-homepage-mode="ott_only"] .site-footer__copy {
 }
 
 .admin-panel {
-  width: min(100%, 40rem);
+  width: 100%;
 }
 
 .admin-panel__card {
@@ -939,6 +939,27 @@ html[data-homepage-mode="ott_only"] .site-footer__copy {
   background: #fff;
   box-shadow: 0 28px 80px rgba(15, 23, 42, 0.08);
   border: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.admin-dashboard-card {
+  width: 100%;
+  background: #fff;
+  padding: 2rem;
+  border-radius: 24px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  box-shadow: 0 28px 80px rgba(15, 23, 42, 0.08);
+}
+
+@media (min-width: 40rem) {
+  .admin-panel {
+    min-width: 40rem;
+  }
+}
+
+@media (min-width: 56rem) {
+  .admin-dashboard-card {
+    min-width: 56rem;
+  }
 }
 
 .admin-panel__card h1 {
@@ -952,6 +973,12 @@ html[data-homepage-mode="ott_only"] .site-footer__copy {
   margin: 0 0 2rem;
   color: #475569;
   line-height: 1.75;
+}
+
+.admin-panel__subtitle {
+  margin: 0.25rem 0 0;
+  color: #475569;
+  line-height: 1.6;
 }
 
 .admin-form {
