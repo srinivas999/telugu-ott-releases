@@ -7,6 +7,7 @@ export default function Seo({
   image = '/images/ott-hero-banner.png',
   keywords,
   jsonLd,
+  robots = 'index,follow',
 }) {
   const pageTitle = title ? `${title} | Srinivas OTT Movies` : 'Srinivas OTT Movies';
   const pageUrl = url ? `https://svteluguott.in${url}` : 'https://svteluguott.in';
@@ -29,7 +30,7 @@ export default function Seo({
       <meta name="twitter:image" content={image} />
       <meta name="twitter:site" content="@Srinivas" />
       <meta name="twitter:creator" content="@Srinivas" />
-      <meta name="robots" content="index,follow" />
+      <meta name="robots" content={robots} />
       {jsonLd ? (
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       ) : null}

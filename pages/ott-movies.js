@@ -53,13 +53,15 @@ function sortMovies(movies, sortOrder) {
   });
 }
 
-export default function OttMoviesPage() {
+export default function OttMoviesPage({ home = false }) {
   const router = useRouter();
   const [ottMovies, setOttMovies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [selectedPlatform, setSelectedPlatform] = useState('all');
   const [sortOrder, setSortOrder] = useState('desc');
+
+  const pageUrl = home ? '/' : '/ott-movies';
 
   useEffect(() => {
     async function loadMovies() {
@@ -139,7 +141,7 @@ export default function OttMoviesPage() {
       <Seo
         title="Telugu OTT releases this week | OTT Movies"
         description={defaultSeoDescription}
-        url="/ott-movies"
+        url={pageUrl}
         keywords="Telugu OTT releases this week, upcoming OTT movies Telugu, Netflix Telugu, Aha Telugu, Prime Video Telugu"
         jsonLd={jsonLd}
       />
