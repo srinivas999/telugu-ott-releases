@@ -2,7 +2,6 @@
   const PLACEHOLDER_ID = "ott-section-placeholder";
 
   function setHomepageModeVisibility() {
-    const homepageMode = document.documentElement.dataset.homepageMode;
     const projectPage = document.querySelector(".page-projects");
     const ottPage = document.querySelector(".page-ott");
 
@@ -10,18 +9,9 @@
       return;
     }
 
-    if (!homepageMode && projectPage) {
-      ottPage.hidden = true;
-      return;
-    }
-
-    if (homepageMode === "ott_only") {
-      ottPage.hidden = false;
-      if (projectPage) {
-        projectPage.hidden = true;
-      }
-    } else if (homepageMode === "portfolio") {
-      ottPage.hidden = true;
+    ottPage.hidden = false;
+    if (projectPage) {
+      projectPage.hidden = true;
     }
   }
 

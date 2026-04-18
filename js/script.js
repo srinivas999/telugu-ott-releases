@@ -82,22 +82,6 @@
     return href === "#home" || href === "index.html#home";
   }
 
-  function isAboutLink(href) {
-    if (!href) return false;
-    return href === "about.html" || /\/about\.html$/i.test(href.split("#")[0]);
-  }
-
-  function isProjectsLink(href) {
-    if (!href) return false;
-    const path = href.split("#")[0];
-    return (
-      href === "#projects" ||
-      href.endsWith("#projects") ||
-      path === "projects.html" ||
-      /\/projects\.html$/i.test(path)
-    );
-  }
-
   function isOttMoviesLink(href) {
     if (!href) return false;
     const path = href.split("#")[0];
@@ -110,27 +94,13 @@
     return path === "admin.html" || /\/admin\.html$/i.test(path);
   }
 
-  function isContactLink(href) {
-    if (!href) return false;
-    const path = href.split("#")[0];
-    return (
-      href === "#contact" ||
-      href.endsWith("#contact") ||
-      path === "contact.html" ||
-      /\/contact\.html$/i.test(path)
-    );
-  }
-
   function setNavHighlight(active) {
     navLinks.forEach((a) => {
       const href = a.getAttribute("href");
       let match = false;
       if (active === "home") match = isHomeLink(href);
-      else if (active === "about") match = isAboutLink(href);
-      else if (active === "projects") match = isProjectsLink(href);
       else if (active === "ott-movies") match = isOttMoviesLink(href);
       else if (active === "admin") match = isAdminLink(href);
-      else if (active === "contact") match = isContactLink(href);
       a.classList.toggle("is-active", match);
       if (match) {
         a.setAttribute("aria-current", "page");
@@ -147,21 +117,8 @@
   }
 
   const path = window.location.pathname || "";
-  const onAboutPage = /about\.html$/i.test(path) || /[/\\]about$/i.test(path);
-  const onProjectsPage = /projects\.html$/i.test(path) || /[/\\]projects$/i.test(path);
   const onOttMoviesPage = /ott-movies\.html$/i.test(path) || /[/\\]ott-movies$/i.test(path);
   const onAdminPage = /admin\.html$/i.test(path) || /[/\\]admin$/i.test(path);
-  const onContactPage = /contact\.html$/i.test(path) || /[/\\]contact$/i.test(path);
-
-  if (navLinks.length && onAboutPage) {
-    setNavHighlight("about");
-    return;
-  }
-
-  if (navLinks.length && onProjectsPage) {
-    setNavHighlight("projects");
-    return;
-  }
 
   if (navLinks.length && onOttMoviesPage) {
     setNavHighlight("ott-movies");
@@ -170,11 +127,6 @@
 
   if (navLinks.length && onAdminPage) {
     setNavHighlight("admin");
-    return;
-  }
-
-  if (navLinks.length && onContactPage) {
-    setNavHighlight("contact");
     return;
   }
 

@@ -11,6 +11,8 @@ out/
 *API*
 *api*
 supabase-config.js
+supabase-config.example.js
+.env.local.example
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*

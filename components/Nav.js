@@ -3,11 +3,11 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 
 const navLinks = [
-  { href: '/', label: 'Home' },
-  { href: '/about', label: 'About' },
-  { href: '/projects', label: 'Projects' },
-  { href: '/ott-movies', label: 'OTT MOVIES' },
-  { href: '/contact', label: 'Contact' },
+  { href: '/', label: 'OTT MOVIES' },
+  { href: '/theatre-release', label: 'THEATRE' },
+  { href: '/web-series', label: 'WEB SERIES' },
+  { href: '/blog', label: 'BLOG' },
+  { href: '/contact', label: 'CONTACT' }
 ];
 
 export default function Nav() {

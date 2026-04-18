@@ -1,24 +1,9 @@
 function getOttPageContainer() {
   const ottPage = document.querySelector(".page-ott");
-  const projectsPage = document.querySelector(".page-projects");
-  const homepageMode = document.documentElement.dataset.homepageMode;
-
-  if (ottPage && projectsPage) {
-    if (homepageMode === "ott_only") {
-      return ottPage;
-    }
-    if (homepageMode === "portfolio") {
-      return projectsPage;
-    }
+  if (ottPage) {
+    return ottPage;
   }
-
-  return (
-    document.querySelector(".page-ott:not([hidden])") ||
-    document.querySelector(".page-projects:not([hidden])") ||
-    ottPage ||
-    projectsPage ||
-    document.documentElement
-  );
+  return document.documentElement;
 }
 
 function getPageElement(id) {
@@ -395,14 +380,6 @@ let ottMoviesInitialized = false;
 
 function initializeOttMovies() {
   if (ottMoviesInitialized) return;
-
-  const ottPage = document.querySelector(".page-ott");
-  const projectsPage = document.querySelector(".page-projects");
-  const homepageMode = document.documentElement.dataset.homepageMode;
-
-  if (ottPage && projectsPage && typeof homepageMode === "undefined") {
-    return;
-  }
 
   ottMoviesInitialized = true;
 
