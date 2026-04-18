@@ -531,6 +531,29 @@ main {
   padding-bottom: 1rem;
 }
 
+.movie-carousel {
+  margin-bottom: 2rem;
+  overflow-x: auto;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+.movie-carousel::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, and Opera */
+}
+
+.movie-carousel__inner {
+  display: flex;
+  gap: 1rem;
+  padding: 0 1.5rem;
+  min-width: max-content;
+}
+
+.movie-carousel .tmdb-release-card {
+  flex: 0 0 200px;
+  height: 300px;
+}
+
 .movie-detail-hero {
   position: relative;
   overflow: hidden;

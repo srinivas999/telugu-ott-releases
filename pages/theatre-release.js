@@ -119,9 +119,9 @@ export default function TheatreReleasePage() {
     <Layout>
       <Seo
         title="Telugu theatre releases"
-        description="Latest Tollywood theatre release movies from TMDb, displayed in a card layout."
+        description="Latest Tollywood theatre release movies, displayed in a card layout."
         url="/theatre-release"
-        keywords="Telugu theatre releases, Tollywood theatre movies, TMDb theatre list"
+        keywords="Telugu theatre releases, Tollywood theatre movies, theatre movie list"
       />
 
       <main className="page-projects page-ott">
@@ -141,6 +141,42 @@ export default function TheatreReleasePage() {
               </div>
             </div>
           </section>
+
+          {!loading && !error && movies.length > 0 && (
+            <section className="movie-carousel">
+              <div className="movie-carousel__inner">
+                {movies.map((carouselMovie) => (
+                  <article key={carouselMovie.id} className="tmdb-release-card movie-carousel__card">
+                    <div className="tmdb-release-card__poster">
+                      {carouselMovie.poster_path ? (
+                        <img
+                          src={`${TMDB_POSTER_BASE}${carouselMovie.poster_path}`}
+                          alt={carouselMovie.title || carouselMovie.original_title}
+                          className="tmdb-release-card__image"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <div className="tmdb-release-card__image tmdb-release-card__placeholder">
+                          <span>No poster available</span>
+                        </div>
+                      )}
+
+                      <div className="tmdb-release-card__pill">{formatReleaseDate(carouselMovie.release_date)}</div>
+
+                      <div className="tmdb-release-card__overlay movie-carousel__overlay">
+                        <div className="tmdb-release-card__content">
+                          <h2 className="tmdb-release-card__title">{carouselMovie.title || carouselMovie.original_title || 'Untitled'}</h2>
+                          <p className="tmdb-release-card__meta">
+                            {getMovieGenres(carouselMovie.genre_ids)} &middot; {carouselMovie.vote_average ? carouselMovie.vote_average.toFixed(1) : 'NR'}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            </section>
+          )}
 
           <section className="tmdb-release-section">
             {loading ? (
@@ -168,7 +204,7 @@ export default function TheatreReleasePage() {
                       )}
 
                       <div className="tmdb-release-card__pill">{formatReleaseDate(movie.release_date)}</div>
-                      <div className="tmdb-release-card__badge">OTT</div>
+                      {/* <div className="tmdb-release-card__badge">OTT</div> */}
 
                       <div className="tmdb-release-card__overlay">
                         <div className="tmdb-release-card__content">

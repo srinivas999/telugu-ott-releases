@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "clean": "rimraf .next"
   },
   "dependencies": {
     "@supabase/supabase-js": "2.34.0",
@@ -16,6 +17,7 @@
   },
   "devDependencies": {
     "eslint": "^9.39.4",
-    "eslint-config-next": "^15.2.5"
+    "eslint-config-next": "^15.2.5",
+    "rimraf": "^6.1.3"
   }
 }

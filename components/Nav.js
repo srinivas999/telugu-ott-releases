@@ -3,7 +3,11 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 
 const navLinks = [
-  { href: '/ott-movies', label: 'OTT MOVIES' }
+  { href: '/', label: 'OTT MOVIES' },
+  { href: '/theatre-release', label: 'THEATRE' },
+  { href: '/web-series', label: 'WEB SERIES' },
+  { href: '/blog', label: 'BLOG' },
+  { href: '/contact', label: 'CONTACT' }
 ];
 
 export default function Nav() {
@@ -38,7 +42,7 @@ export default function Nav() {
         <div id="primary-menu" className="nav-menu">
           <ul className="nav-links">
             {navLinks.map((link) => {
-              const active = router.pathname === link.href || (router.pathname === '/' && link.href === '/ott-movies');
+              const active = router.pathname === link.href;
               return (
                 <li key={link.href}>
                   <Link
