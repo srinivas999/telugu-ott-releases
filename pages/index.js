@@ -186,18 +186,28 @@ export default function HomePage() {
       setTheatreLoading(true);
       setTheatreError('');
       try {
-        const tmdbApiKey = process.env.NEXT_PUBLIC_TMDB_API_KEY;
-        if (!tmdbApiKey) {
-          console.error('TMDB API key is not configured');
-          setTheatreMovies([]);
-          setTheatreError('Configuration issue: TMDB API key not found.');
-          setTheatreLoading(false);
-          return;
-        }
+        // Check deployment mode
+        const isGitHubDeploy = process.env.NEXT_PUBLIC_IS_GITHUB_DEPLOY === 'true';
+        let response;
 
-        const response = await fetch(
-          `https://api.themoviedb.org/3/movie/now_playing?api_key=${tmdbApiKey}&language=te-IN&page=1`
-        );
+        if (isGitHubDeploy) {
+          // GitHub Pages: Direct TMDB API call
+          const tmdbApiKey = process.env.NEXT_PUBLIC_TMDB_API_KEY;
+          if (!tmdbApiKey) {
+            console.error('TMDB API key is not configured');
+            setTheatreMovies([]);
+            setTheatreError('Configuration issue: TMDB API key not found.');
+            setTheatreLoading(false);
+            return;
+          }
+
+          response = await fetch(
+            `https://api.themoviedb.org/3/movie/now_playing?api_key=${tmdbApiKey}&language=te-IN&page=1`
+          );
+        } else {
+          // Next.js Dynamic: Use API route
+          response = await fetch('/api/tmdb/latest');
+        }
 
         if (!response.ok) {
           const body = await response.text();

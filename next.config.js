@@ -1,11 +1,13 @@
 /** @type {import('next').NextConfig} */
+const isGitHubDeploy = process.env.IS_GITHUB_DEPLOY === 'true';
+
 const nextConfig = {
-  output: 'export',
+  ...(isGitHubDeploy && { output: 'export' }),
   reactStrictMode: true,
   images: {
     unoptimized: true,
   },
-  trailingSlash: true,
+  ...(isGitHubDeploy && { trailingSlash: true }),
 };
 
 module.exports = nextConfig;
