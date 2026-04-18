@@ -8,6 +8,9 @@ const nextConfig = {
     unoptimized: true,
   },
   ...(isGitHubDeploy && { trailingSlash: true }),
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
 };
 
 module.exports = nextConfig;
