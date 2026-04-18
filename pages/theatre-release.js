@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
+import Link from 'next/link';
 import Layout from '../components/Layout';
 import Seo from '../components/Seo';
 
 const TMDB_POSTER_BASE = 'https://image.tmdb.org/t/p/w500';
 const CACHE_KEY = 'theatreReleaseMoviesCache';
 const CACHE_TTL = 1000 * 60 * 60; // 1 hour
-const TMDB_MOVIE_URL_BASE = 'https://www.themoviedb.org/movie';
 const YOUTUBE_SEARCH_URL_BASE = 'https://www.youtube.com/results?search_query=';
 const TMDB_GENRES = {
   28: 'Action',
@@ -177,14 +177,12 @@ export default function TheatreReleasePage() {
                             {getMovieGenres(movie.genre_ids)} &middot; {movie.vote_average ? movie.vote_average.toFixed(1) : 'NR'}
                           </p>
                           <div className="tmdb-release-card__actions">
-                            <a
-                              href={`${TMDB_MOVIE_URL_BASE}/${movie.id}`}
-                              target="_blank"
-                              rel="noreferrer"
+                            <Link
+                              href={`/theatre-release/${movie.id}`}
                               className="tmdb-release-card__action tmdb-release-card__action--primary"
                             >
                               Details
-                            </a>
+                            </Link>
                             <a
                               href={`${YOUTUBE_SEARCH_URL_BASE}${encodeURIComponent(`${movie.title || movie.original_title || 'Movie'} trailer`)}`}
                               target="_blank"
