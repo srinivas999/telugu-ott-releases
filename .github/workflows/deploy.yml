@@ -28,7 +28,7 @@ jobs:
         env:
           IS_GITHUB_DEPLOY: 'true'
           NEXT_PUBLIC_IS_GITHUB_DEPLOY: 'true'
-          USE_GITHUB_PAGES_SUBDIRECTORY: 'false'
+          USE_GITHUB_PAGES_SUBDIRECTORY: 'true'
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
           NEXT_PUBLIC_TMDB_API_KEY: ${{ secrets.NEXT_PUBLIC_TMDB_API_KEY }}
