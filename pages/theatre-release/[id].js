@@ -206,7 +206,7 @@ export default function MovieDetailsPage() {
             <h1 className="projects-page-title">Movie details</h1>
           </div>
 
-       {/*    {loading ? (
+          {loading ? (
             <p className="admin-status">Loading movie details…</p>
           ) : error ? (
             <p className="admin-status admin-status--error">{error}</p>
@@ -263,7 +263,7 @@ export default function MovieDetailsPage() {
                   </div>
                 </section>
               )}
- */}
+
               <section className="movie-detail-hero">
               {movie.backdrop_path ? (
                 <img
