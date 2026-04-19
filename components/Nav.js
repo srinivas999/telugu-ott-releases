@@ -3,13 +3,32 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 
 const navLinks = [
-  { href: '/', label: 'OTT MOVIES' },
-  { href: '/theatre-release', label: 'THEATRE' },
-  { href: '/web-series', label: 'WEB SERIES' },
-  { href: '/blog', label: 'BLOG' },
-  { href: '/contact', label: 'CONTACT' }
+  { href: '/', label: 'Home' },
+  { href: '/theatre-release', label: 'Theatre Release' },
+  { href: '/web-series', label: 'Web Series' },
+  { href: '/blog', label: 'Blog' },
+  { href: '/contact', label: 'Contact Us' }
 ];
-
+/* 
+                <div className="projects-page-inner">
+          <div className="ott-home-header">
+            <div className="ott-home-header__inner">
+              <a href="/" className="ott-home-header__brand">
+                <span className="ott-home-header__text ott-home-header__text--brand">telugu</span>
+                <span className="ott-home-header__text ott-home-header__text--accent">OTT</span>
+                <span className="ott-home-header__text ott-home-header__text--brand">Releases</span>
+              </a>
+              <nav className="ott-home-header__nav" aria-label="Primary site navigation">
+                <a href="/" className="ott-home-header__link">Home</a>
+                <a href="/theatre-release" className="ott-home-header__link">Theatre Release</a>
+                <a href="/web-series" className="ott-home-header__link">Web Series</a>
+                <a href="/blog" className="ott-home-header__link">Blog</a>
+                <a href="/contact" className="ott-home-header__link">Contact Us</a>
+              </nav>
+            </div>
+          </div>
+        
+        </div> */
 export default function Nav() {
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -22,8 +41,11 @@ export default function Nav() {
     <header className={`site-header ${menuOpen ? 'is-open' : ''}`}>
       <nav className="site-nav" aria-label="Primary">
         <Link className="logo" href="/">
-          Srinivas
+          <span className="ott-home-header__text ott-home-header__text--brand">Telugu</span>
+          <span className="ott-home-header__text ott-home-header__text--accent">OTT</span>
+          <span className="ott-home-header__text ott-home-header__text--brand">Releases</span>
         </Link>
+        
         <button
           type="button"
           className="nav-toggle"

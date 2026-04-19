@@ -113,6 +113,7 @@ h3 {
   text-decoration: none;
   letter-spacing: -0.02em;
   flex-shrink: 0;
+  gap: 0.5rem ;
   min-height: var(--touch-min);
   padding: 0.35rem 0.25rem;
   display: inline-flex;
@@ -201,7 +202,7 @@ h3 {
   align-items: center;
   justify-content: space-evenly;
   flex: 1;
-  max-width: 28rem;
+  max-width: 35rem;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -298,6 +299,7 @@ h3 {
 
   .nav-links li {
     width: 100%;
+    background-color:white
   }
 
   .nav-links a {
