@@ -249,6 +249,7 @@ export default function HomePage() {
   const shareUrl = `https://svteluguott.in${router.asPath}`;
   const shareText = encodeURIComponent('Check the latest Telugu OTT movie releases this week.');
   const whatsappShareUrl = `https://api.whatsapp.com/send?text=${shareText}%20${encodeURIComponent(shareUrl)}`;
+  const facebookShareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;
   const telegramShareUrl = `https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${shareText}`;
   const twitterShareUrl = `https://twitter.com/intent/tweet?text=${shareText}&url=${encodeURIComponent(shareUrl)}`;
 
@@ -350,13 +351,23 @@ export default function HomePage() {
                   WhatsApp
                 </a>
                 <a
+                  className="share-button share-button--facebook"
+                  href={facebookShareUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Share on Facebook"
+                >
+                  <span className="share-button__icon" aria-hidden="true">✈️</span>
+                  Facebook
+                </a>
+                <a
                   className="share-button share-button--telegram"
                   href={telegramShareUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Share on Telegram"
                 >
-                  <span className="share-button__icon" aria-hidden="true">✈️</span>
+                  <span className="share-button__icon" aria-hidden="true">Telegram</span>
                   Telegram
                 </a>
                 <a
@@ -470,17 +481,21 @@ export default function HomePage() {
                   ) : (
                     filteredMovies.map((movie) => (
                       <tr key={movie.id || `${movie.movie_name}-${movie.digital_release_date}`} itemScope itemType="https://schema.org/Movie">
-                        <td>
+                        <td data-label="Movie">
                           <span itemProp="name">{movie.movie_name || 'Untitled'}</span>
                         </td>
-                        <td>
+                        <td data-label="Release Date">
                           <time itemProp="datePublished" dateTime={movie.digital_release_date || ''}>
                             {formatReleaseDate(movie.digital_release_date)}
                           </time>
                         </td>
-                        <td>{movie.streaming_partner || 'TBA'}</td>
-                        <td>{movie.language || movie.movie_language || 'Telugu'}</td>
-                        <td itemProp="genre">{movie.category || 'Film'}</td>
+                        <td data-label="Platform">
+                          <span>{movie.streaming_partner || 'TBA'}</span>
+                        </td>
+                        <td data-label="Language">{movie.language || movie.movie_language || 'Telugu'}</td>
+                        <td data-label="Category" itemProp="genre">
+                          <span>{movie.category || 'Film'}</span>
+                        </td>
                       </tr>
                     ))
                   )}

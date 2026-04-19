@@ -49,6 +49,8 @@
 html {
   -webkit-text-size-adjust: 100%;
   scroll-behavior: smooth;
+  overflow-x: clip;
+  overscroll-behavior-x: none;
 }
 
 body {
@@ -61,6 +63,9 @@ body {
   line-height: var(--leading-body);
   color: var(--color-text);
   background-color: #ffffff;
+  max-width: 100%;
+  overflow-x: clip;
+  overscroll-behavior-x: none;
 }
 
 img {
@@ -258,6 +263,12 @@ h3 {
 }
 
 @media (max-width: 767.98px) {
+  .site-header {
+    left: 0;
+    right: 0;
+    width: 100%;
+  }
+
   .nav-toggle {
     display: inline-flex;
   }
@@ -311,8 +322,8 @@ h3 {
   }
 
   .main-inner {
-    padding-left: 1rem;
-    padding-right: 1rem;
+    padding-left: 0.85rem;
+    padding-right: 0.85rem;
   }
 
   .skills {
@@ -334,8 +345,8 @@ h3 {
   }
 
   .site-footer {
-    padding-left: 1.15rem;
-    padding-right: 1.15rem;
+    padding-left: 0.9rem;
+    padding-right: 0.9rem;
   }
 
   .site-footer__nav a,
@@ -357,6 +368,25 @@ main {
   margin: 0;
   padding: 0;
   max-width: none;
+  max-width: 100%;
+  overflow-x: clip;
+}
+
+@media (max-width: 640px) {
+  .site-nav {
+    padding: 0.55rem 0.85rem;
+  }
+
+  .projects-page-inner,
+  .page-projects {
+    padding-left: 0.8rem;
+    padding-right: 0.8rem;
+  }
+
+  .page-ott .projects-page-inner {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+  }
 }
 
 .main-inner {
@@ -375,11 +405,30 @@ main {
   max-width: 72rem;
   margin: 0 auto;
   padding: var(--space-section-y-tight) 1.5rem;
+  width: 100%;
+  min-width: 0;
+  overflow-x: clip;
 }
 
 .page-ott .projects-page-inner {
   padding-top: 1.75rem;
   padding-bottom: var(--space-section-y-tight);
+}
+
+@media (max-width: 640px) {
+  .site-nav {
+    padding: 0.5rem 0.75rem;
+  }
+
+  .projects-page-inner,
+  .page-projects {
+    padding: 0.8rem 0.55rem;
+  }
+
+  .page-ott .projects-page-inner {
+    padding-top: 0.7rem;
+    padding-bottom: 0.8rem;
+  }
 }
 
 .projects-page-header {
