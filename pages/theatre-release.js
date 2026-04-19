@@ -85,7 +85,19 @@ export default function TheatreReleasePage() {
           }
         }
 
-        const response = await fetch('/api/tmdb/latest');
+        const isGitHubDeploy =
+          process.env.NEXT_PUBLIC_IS_GITHUB_DEPLOY === 'true' ||
+          (typeof window !== 'undefined' && window.location.hostname.includes('github.io'));
+        const tmdbApiKey = process.env.NEXT_PUBLIC_TMDB_API_KEY;
+        const requestUrl = isGitHubDeploy
+          ? `https://api.themoviedb.org/3/movie/now_playing?api_key=${tmdbApiKey}&language=te-IN&page=1`
+          : '/api/tmdb/latest';
+
+        if (isGitHubDeploy && !tmdbApiKey) {
+          throw new Error('TMDB API key is not configured for GitHub Pages deployment.');
+        }
+
+        const response = await fetch(requestUrl);
         if (!response.ok) {
           const body = await response.text();
           throw new Error(`Unable to fetch theatre release movies (${response.status}). ${body}`);

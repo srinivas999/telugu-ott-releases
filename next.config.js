@@ -5,6 +5,10 @@ const useGitHubPagesSubdirectory = process.env.USE_GITHUB_PAGES_SUBDIRECTORY ===
 const nextConfig = {
   ...(isGitHubDeploy && { output: 'export' }),
   ...(isGitHubDeploy && useGitHubPagesSubdirectory && { basePath: '/telugu-ott-releases' }),
+  env: {
+    NEXT_PUBLIC_BASE_PATH: useGitHubPagesSubdirectory ? '/telugu-ott-releases' : '',
+  },
+  ...(useGitHubPagesSubdirectory && { assetPrefix: '/telugu-ott-releases' }),
   reactStrictMode: true,
   images: {
     unoptimized: true,
