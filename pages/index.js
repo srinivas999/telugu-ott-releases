@@ -281,23 +281,7 @@ export default function HomePage() {
 
       <section className="page-projects page-ott">
         <div className="projects-page-inner">
-          <div className="ott-home-header">
-            <div className="ott-home-header__inner">
-              <Link href="/" className="ott-home-header__brand">
-                <span className="ott-home-header__text ott-home-header__text--brand">telugu</span>
-                <span className="ott-home-header__text ott-home-header__text--accent">OTT</span>
-                <span className="ott-home-header__text ott-home-header__text--brand">Releases</span>
-              </Link>
-              <nav className="ott-home-header__nav" aria-label="Primary site navigation">
-                <Link href="/" className="ott-home-header__link">Home</Link>
-                <Link href="/theatre-release" className="ott-home-header__link">Theatre Release</Link>
-                <Link href="/web-series" className="ott-home-header__link">Web Series</Link>
-                <Link href="/blog" className="ott-home-header__link">Blog</Link>
-                <Link href="/contact" className="ott-home-header__link">Contact Us</Link>
-              </nav>
-            </div>
-          </div>
-
+        
           <section className="movie-carousel" aria-label="Theatre release movies">
             {theatreLoading ? (
               <p className="admin-status">Loading theatre release data...</p>

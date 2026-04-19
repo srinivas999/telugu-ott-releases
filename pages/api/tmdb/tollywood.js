@@ -7,7 +7,7 @@ export default async function handler(req, res) {
   const readToken = process.env.TMDB_API_READ_ACCESS_TOKEN;
 
   if (!apiKey && !readToken) {
-    return res.status(500).json({ error: 'TMDb API key is not configured.' });
+    return res.status(500).json({ error: 'API key is not configured.' });
   }
 
   const url = `https://api.themoviedb.org/3/discover/movie?language=te-IN&region=IN&sort_by=primary_release_date.desc&with_original_language=te&page=1`;

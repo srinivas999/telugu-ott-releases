@@ -154,7 +154,7 @@ export default function TheatreReleasePage() {
             </div>
           </section>
 
-          {!loading && !error && movies.length > 0 && (
+          {/* {!loading && !error && movies.length > 0 && (
             <section className="movie-carousel">
               <div className="movie-carousel__inner">
                 {movies.map((carouselMovie) => (
@@ -189,7 +189,7 @@ export default function TheatreReleasePage() {
               </div>
             </section>
           )}
-
+ */}
           <section className="tmdb-release-section">
             {loading ? (
               <p className="admin-status">Loading theatre release movies...</p>
