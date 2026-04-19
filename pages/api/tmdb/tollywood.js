@@ -3,7 +3,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const apiKey = process.env.TMDB_API_KEY || process.env.NEXT_PUBLIC_TMDB_API_KEY;
+  const apiKey =  process.env.NEXT_PUBLIC_TMDB_API_KEY;
   const readToken = process.env.TMDB_API_READ_ACCESS_TOKEN;
 
   if (!apiKey && !readToken) {
