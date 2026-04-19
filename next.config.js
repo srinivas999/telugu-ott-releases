@@ -1,5 +1,5 @@
 /** @type {import('next').NextConfig} */
-const isGitHubDeploy = process.env.IS_GITHUB_DEPLOY === 'true';
+const isGitHubDeploy = process.env.IS_GITHUB_DEPLOY === 'true' && !process.env.VERCEL;
 const useGitHubPagesSubdirectory = process.env.USE_GITHUB_PAGES_SUBDIRECTORY === 'true';
 
 const nextConfig = {
