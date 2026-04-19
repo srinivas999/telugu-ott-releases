@@ -314,17 +314,21 @@ export default function OttMoviesPage({ home = false }) {
                   ) : (
                     filteredMovies.map((movie) => (
                       <tr key={movie.id || `${movie.movie_name}-${movie.digital_release_date}`} itemScope itemType="https://schema.org/Movie">
-                        <td>
+                        <td data-label="Movie">
                           <span itemProp="name">{movie.movie_name || 'Untitled'}</span>
                         </td>
-                        <td>
+                        <td data-label="Release Date">
                           <time itemProp="datePublished" dateTime={movie.digital_release_date || ''}>
                             {formatReleaseDate(movie.digital_release_date)}
                           </time>
                         </td>
-                        <td>{movie.streaming_partner || 'TBA'}</td>
-                        <td>{movie.language || movie.movie_language || 'Telugu'}</td>
-                        <td itemProp="genre">{movie.category || 'Film'}</td>
+                        <td data-label="Platform">
+                          <span>{movie.streaming_partner || 'TBA'}</span>
+                        </td>
+                        <td data-label="Language">{movie.language || movie.movie_language || 'Telugu'}</td>
+                        <td data-label="Category" itemProp="genre">
+                          <span>{movie.category || 'Film'}</span>
+                        </td>
                       </tr>
                     ))
                   )}

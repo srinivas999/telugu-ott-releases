@@ -37,6 +37,14 @@ export default function Nav() {
     setMenuOpen(false);
   }, [router.pathname]);
 
+  useEffect(() => {
+    document.body.classList.toggle('nav-open', menuOpen);
+
+    return () => {
+      document.body.classList.remove('nav-open');
+    };
+  }, [menuOpen]);
+
   return (
     <header className={`site-header ${menuOpen ? 'is-open' : ''}`}>
       <nav className="site-nav" aria-label="Primary">
