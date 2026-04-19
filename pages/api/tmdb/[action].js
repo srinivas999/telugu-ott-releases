@@ -1,6 +1,6 @@
 export default async function handler(req, res) {
   const { action } = req.query;
-  const apiKey = process.env.TMDB_API_KEY || process.env.NEXT_PUBLIC_TMDB_API_KEY;
+  const apiKey =  process.env.NEXT_PUBLIC_TMDB_API_KEY;
 
   if (req.method !== 'GET') {
     res.setHeader('Allow', 'GET');

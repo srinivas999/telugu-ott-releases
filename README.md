@@ -56,7 +56,6 @@ Recommended deployment options:
    - `NEXT_PUBLIC_SUPABASE_URL`
    - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
    - `NEXT_PUBLIC_TMDB_API_KEY`
-   - `TMDB_API_KEY`
    - `TMDB_API_READ_ACCESS_TOKEN`
 3. Deploy the project with the default build command:
    ```bash
