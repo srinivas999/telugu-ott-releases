@@ -8,8 +8,6 @@ out/
 *.pem
 *.p12
 *.secret
-*API*
-*api*
 supabase-config.js
 supabase-config.example.js
 .env.local.example
