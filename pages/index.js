@@ -187,12 +187,13 @@ export default function HomePage() {
       setTheatreError('');
       try {
         // Check deployment mode
-        const isGitHubDeploy = process.env.NEXT_PUBLIC_IS_GITHUB_DEPLOY === 'true';
+        const isGitHubDeploy =
+          process.env.NEXT_PUBLIC_IS_GITHUB_DEPLOY === 'true' ||
+          (typeof window !== 'undefined' && window.location.hostname.includes('github.io'));
+        const tmdbApiKey = process.env.NEXT_PUBLIC_TMDB_API_KEY;
         let response;
 
         if (isGitHubDeploy) {
-          // GitHub Pages: Direct TMDB API call
-          const tmdbApiKey = process.env.NEXT_PUBLIC_TMDB_API_KEY;
           if (!tmdbApiKey) {
             console.error('TMDB API key is not configured');
             setTheatreMovies([]);
@@ -205,7 +206,6 @@ export default function HomePage() {
             `https://api.themoviedb.org/3/movie/now_playing?api_key=${tmdbApiKey}&language=te-IN&page=1`
           );
         } else {
-          // Next.js Dynamic: Use API route
           response = await fetch('/api/tmdb/latest');
         }
 
@@ -245,6 +245,7 @@ export default function HomePage() {
     return sortMovies(filtered, sortOrder);
   }, [ottMovies, selectedPlatform, sortOrder]);
 
+  const assetBasePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
   const shareUrl = `https://svteluguott.in${router.asPath}`;
   const shareText = encodeURIComponent('Check the latest Telugu OTT movie releases this week.');
   const whatsappShareUrl = `https://api.whatsapp.com/send?text=${shareText}%20${encodeURIComponent(shareUrl)}`;
@@ -342,7 +343,7 @@ export default function HomePage() {
           <section className="ott-hero">
             <div className="ott-hero__visual">
               <img
-                src="/images/ott-hero-banner.png"
+                src={`${assetBasePath}/images/ott-hero-banner.png`}
                 alt="Telugu OTT hero banner"
                 className="hero-image"
                 loading="lazy"

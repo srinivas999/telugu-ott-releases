@@ -56,6 +56,7 @@ function sortMovies(movies, sortOrder) {
 
 export default function OttMoviesPage({ home = false }) {
   const router = useRouter();
+  const assetBasePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
   const [ottMovies, setOttMovies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -173,7 +174,7 @@ export default function OttMoviesPage({ home = false }) {
           <section className="ott-hero">
             <div className="ott-hero__visual">
               <img
-                src="/images/ott-hero-banner.png"
+                src={`${assetBasePath}/images/ott-hero-banner.png`}
                 alt="Telugu OTT hero banner"
                 className="hero-image"
                 loading="lazy"

@@ -4,13 +4,16 @@ export default function Seo({
   title,
   description,
   url,
-  image = '/images/ott-hero-banner.png',
+  image,
   keywords,
   jsonLd,
   robots = 'index,follow',
 }) {
   const pageTitle = title ? `${title} | Srinivas OTT Movies` : 'Srinivas OTT Movies';
+  const assetBasePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+  const defaultImage = `https://svteluguott.in${assetBasePath}/images/ott-hero-banner.png`;
   const pageUrl = url ? `https://svteluguott.in${url}` : 'https://svteluguott.in';
+  const ogImage = image || defaultImage;
 
   return (
     <Head>
@@ -20,14 +23,14 @@ export default function Seo({
       <link rel="canonical" href={pageUrl} />
       <meta property="og:title" content={pageTitle} />
       <meta property="og:description" content={description} />
-      <meta property="og:image" content={image} />
+      <meta property="og:image" content={ogImage} />
       <meta property="og:url" content={pageUrl} />
       <meta property="og:type" content="website" />
       <meta property="og:site_name" content="Srinivas OTT Movies" />
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content={pageTitle} />
       <meta name="twitter:description" content={description} />
-      <meta name="twitter:image" content={image} />
+      <meta name="twitter:image" content={ogImage} />
       <meta name="twitter:site" content="@Srinivas" />
       <meta name="twitter:creator" content="@Srinivas" />
       <meta name="robots" content={robots} />

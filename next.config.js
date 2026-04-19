@@ -1,10 +1,14 @@
 /** @type {import('next').NextConfig} */
-const isGitHubDeploy = process.env.IS_GITHUB_DEPLOY === 'true';
+const isGitHubDeploy = process.env.IS_GITHUB_DEPLOY === 'true' && !process.env.VERCEL;
 const useGitHubPagesSubdirectory = process.env.USE_GITHUB_PAGES_SUBDIRECTORY === 'true';
 
 const nextConfig = {
   ...(isGitHubDeploy && { output: 'export' }),
   ...(isGitHubDeploy && useGitHubPagesSubdirectory && { basePath: '/telugu-ott-releases' }),
+  env: {
+    NEXT_PUBLIC_BASE_PATH: useGitHubPagesSubdirectory ? '/telugu-ott-releases' : '',
+  },
+  ...(useGitHubPagesSubdirectory && { assetPrefix: '/telugu-ott-releases' }),
   reactStrictMode: true,
   images: {
     unoptimized: true,
