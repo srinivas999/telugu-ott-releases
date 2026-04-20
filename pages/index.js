@@ -346,9 +346,9 @@ export default function HomePage() {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Share on WhatsApp"
+                  title="Share on WhatsApp"
                 >
                   <span className="share-button__icon" aria-hidden="true">📱</span>
-                  WhatsApp
                 </a>
                 <a
                   className="share-button share-button--facebook"
@@ -356,9 +356,9 @@ export default function HomePage() {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Share on Facebook"
+                  title="Share on Facebook"
                 >
                   <span className="share-button__icon" aria-hidden="true">✈️</span>
-                  Facebook
                 </a>
                 <a
                   className="share-button share-button--telegram"
@@ -366,9 +366,9 @@ export default function HomePage() {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Share on Telegram"
+                  title="Share on Telegram"
                 >
                   <span className="share-button__icon" aria-hidden="true">Telegram</span>
-                  Telegram
                 </a>
                 <a
                   className="share-button share-button--twitter"
@@ -376,9 +376,9 @@ export default function HomePage() {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Share on Twitter"
+                  title="Share on Twitter"
                 >
                   <span className="share-button__icon" aria-hidden="true">🐦</span>
-                  Twitter
                 </a>
               </div>
             </div>
