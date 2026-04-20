@@ -9,26 +9,7 @@ const navLinks = [
   { href: '/blog', label: 'Blog' },
   { href: '/contact', label: 'Contact Us' }
 ];
-/* 
-                <div className="projects-page-inner">
-          <div className="ott-home-header">
-            <div className="ott-home-header__inner">
-              <a href="/" className="ott-home-header__brand">
-                <span className="ott-home-header__text ott-home-header__text--brand">telugu</span>
-                <span className="ott-home-header__text ott-home-header__text--accent">OTT</span>
-                <span className="ott-home-header__text ott-home-header__text--brand">Releases</span>
-              </a>
-              <nav className="ott-home-header__nav" aria-label="Primary site navigation">
-                <a href="/" className="ott-home-header__link">Home</a>
-                <a href="/theatre-release" className="ott-home-header__link">Theatre Release</a>
-                <a href="/web-series" className="ott-home-header__link">Web Series</a>
-                <a href="/blog" className="ott-home-header__link">Blog</a>
-                <a href="/contact" className="ott-home-header__link">Contact Us</a>
-              </nav>
-            </div>
-          </div>
-        
-        </div> */
+
 export default function Nav() {
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -45,6 +26,34 @@ export default function Nav() {
     };
   }, [menuOpen]);
 
+  useEffect(() => {
+    function handleKeyDown(event) {
+      if (event.key === 'Escape') {
+        setMenuOpen(false);
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
+
+  useEffect(() => {
+    function handleResize() {
+      if (window.innerWidth > 767.98) {
+        setMenuOpen(false);
+      }
+    }
+
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
+
   return (
     <header className={`site-header ${menuOpen ? 'is-open' : ''}`}>
       <nav className="site-nav" aria-label="Primary">
@@ -59,6 +68,7 @@ export default function Nav() {
           className="nav-toggle"
           aria-expanded={menuOpen}
           aria-controls="primary-menu"
+          aria-haspopup="true"
           aria-label={menuOpen ? 'Close menu' : 'Open menu'}
           onClick={() => setMenuOpen((value) => !value)}
         >
@@ -69,7 +79,11 @@ export default function Nav() {
           </span>
         </button>
 
-        <div id="primary-menu" className="nav-menu">
+        <div
+          id="primary-menu"
+          className={`nav-menu ${menuOpen ? 'is-open' : ''}`}
+          aria-hidden={!menuOpen}
+        >
           <ul className="nav-links">
             {navLinks.map((link) => {
               const active = router.pathname === link.href;
@@ -89,7 +103,7 @@ export default function Nav() {
         </div>
       </nav>
       <div
-        className="nav-backdrop"
+        className={`nav-backdrop ${menuOpen ? 'is-visible' : ''}`}
         aria-hidden={!menuOpen}
         onClick={() => setMenuOpen(false)}
       />

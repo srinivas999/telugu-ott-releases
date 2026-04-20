@@ -192,8 +192,9 @@ export default function OttMoviesPage({ home = false }) {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Share on WhatsApp"
+                  title="Share on WhatsApp"
                 >
-                  WhatsApp
+                  <span className="share-button__icon" aria-hidden="true" />
                 </a>
                 <a
                   className="share-button share-button--telegram"
@@ -201,8 +202,9 @@ export default function OttMoviesPage({ home = false }) {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Share on Telegram"
+                  title="Share on Telegram"
                 >
-                  Telegram
+                  <span className="share-button__icon" aria-hidden="true" />
                 </a>
                 <a
                   className="share-button share-button--twitter"
@@ -210,8 +212,9 @@ export default function OttMoviesPage({ home = false }) {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Share on Twitter"
+                  title="Share on Twitter"
                 >
-                  Twitter
+                  <span className="share-button__icon" aria-hidden="true" />
                 </a>
               </div>
             </div>
