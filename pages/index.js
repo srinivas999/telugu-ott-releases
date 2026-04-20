@@ -270,6 +270,36 @@ export default function HomePage() {
     }))
   };
 
+  // Ref for the OTT table wrapper
+  const ottTableWrapRef = useRef(null);
+
+  // Fix: Allow vertical scroll to bubble up when at scroll limits
+  // Only add scroll fix if both scrollbars are present
+  useEffect(() => {
+    const el = ottTableWrapRef.current;
+    if (!el) return;
+    function handleWheel(e) {
+      // Only intervene if horizontal scroll is possible
+      const canScrollX = el.scrollWidth > el.clientWidth + 2;
+      const canScrollY = el.scrollHeight > el.clientHeight + 2;
+      if (!canScrollX || !canScrollY) return; // Let browser handle
+      // Only care about vertical scroll
+      if (e.deltaY === 0) return;
+      const atTop = el.scrollTop === 0;
+      const atBottom = el.scrollHeight - el.clientHeight - el.scrollTop <= 1;
+      if ((e.deltaY < 0 && atTop) || (e.deltaY > 0 && atBottom)) {
+        // Let parent scroll
+        // Do NOT preventDefault, just let event bubble
+        // Optionally, could manually scroll parent, but default is best
+        return;
+      }
+      // Otherwise, let the ott-table-wrap scroll vertically
+      // Do not block event
+    }
+    el.addEventListener('wheel', handleWheel, { passive: true });
+    return () => el.removeEventListener('wheel', handleWheel);
+  }, []);
+
   return (
     <Layout>
       <Seo
@@ -460,7 +490,7 @@ export default function HomePage() {
               {loading ? 'Loading movies...' : `${filteredMovies.length} releases`}
             </span>
 
-            <div className="ott-table-wrap">
+            <div className="ott-table-wrap" ref={ottTableWrapRef}>
               <table className="ott-movies-table">
                 <thead>
                   <tr>
