@@ -661,10 +661,10 @@
 
 .ott-table-wrap {
   width: 100%;
-  overflow-x: auto;
+  overflow: auto;
   overscroll-behavior-x: contain;
   -webkit-overflow-scrolling: touch;
-  touch-action: pan-x;
+  touch-action: pan-x pan-y;
   margin-top: 1.5rem;
 }
 
