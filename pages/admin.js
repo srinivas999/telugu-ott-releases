@@ -6,6 +6,8 @@ const EMPTY_MOVIE = {
   movie_name: '',
   streaming_partner: '',
   digital_release_date: '',
+  language: '',
+  category: '',
 };
 
 export default function AdminPage() {
@@ -343,6 +345,8 @@ export default function AdminPage() {
       movie_name: movieForm.movie_name.trim(),
       streaming_partner: movieForm.streaming_partner.trim(),
       digital_release_date: movieForm.digital_release_date.trim(),
+      language: movieForm.language.trim(),
+      category: movieForm.category.trim(),
     };
 
     let error;
@@ -373,6 +377,8 @@ export default function AdminPage() {
       movie_name: movie.movie_name || '',
       streaming_partner: movie.streaming_partner || '',
       digital_release_date: movie.digital_release_date || '',
+      language: movie.language || '',
+      category: movie.category || '',
     });
     setStatus('Editing movie. Update the fields and save.');
   };
@@ -688,6 +694,24 @@ export default function AdminPage() {
                       required
                     />
 
+                    <label htmlFor="movie-language">Language</label>
+                    <input
+                      id="movie-language"
+                      type="text"
+                      value={movieForm.language}
+                      onChange={(event) => handleMovieFormChange('language', event.target.value)}
+                      placeholder="Telugu, Hindi, English, etc."
+                    />
+
+                    <label htmlFor="movie-category">Category</label>
+                    <input
+                      id="movie-category"
+                      type="text"
+                      value={movieForm.category}
+                      onChange={(event) => handleMovieFormChange('category', event.target.value)}
+                      placeholder="Movie, Web Series, etc."
+                    />
+
                     <div className="admin-form-actions">
                       <button type="submit" className="admin-button" disabled={actionLoading}>
                         {actionLoading ? 'Saving…' : editingMovieId ? 'Save changes' : 'Add movie'}
@@ -716,21 +740,26 @@ export default function AdminPage() {
                   ) : movies.length === 0 ? (
                     <p className="admin-status">No movies found. Add your first OTT release.</p>
                   ) : (
-                    <table className="admin-table">
-                      <thead>
-                        <tr>
-                          <th>Movie</th>
-                          <th>Partner</th>
-                          <th>Release date</th>
-                          <th aria-label="Actions" />
-                        </tr>
-                      </thead>
-                      <tbody>
+                    <div className="admin-table-wrapper">
+                      <table className="admin-table">
+                        <thead>
+                          <tr>
+                            <th>Movie</th>
+                            <th>Partner</th>
+                            <th>Release date</th>
+                            <th>Language</th>
+                            <th>Category</th>
+                            <th aria-label="Actions" />
+                          </tr>
+                        </thead>
+                        <tbody>
                         {movies.map((movie) => (
                           <tr key={movie.id || `${movie.movie_name}-${movie.digital_release_date}`}>
                             <td>{movie.movie_name || 'Untitled'}</td>
                             <td>{movie.streaming_partner || 'TBA'}</td>
                             <td>{movie.digital_release_date || 'TBA'}</td>
+                            <td>{movie.language || 'Telugu'}</td>
+                            <td>{movie.category || 'Film'}</td>
                             <td>
                               <button type="button" className="admin-action-button" onClick={() => handleEditMovie(movie)}>
                                 Edit
@@ -741,8 +770,9 @@ export default function AdminPage() {
                             </td>
                           </tr>
                         ))}
-                      </tbody>
-                    </table>
+                        </tbody>
+                      </table>
+                    </div>
                   )}
                 </div>
               </div>

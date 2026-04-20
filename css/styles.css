@@ -1764,34 +1764,63 @@ html[data-homepage-mode="ott_only"] .site-footer__copy {
   height: 1rem;
 }
 
+.admin-table-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: 0 -1.75rem -1.75rem -1.75rem;
+  padding: 1.75rem;
+  border-radius: 0 0 24px 24px;
+}
+
 .admin-table {
   width: 100%;
   border-collapse: collapse;
   margin: 0;
+  min-width: 100%;
 }
 
 .admin-table th,
 .admin-table td {
   text-align: left;
-  padding: 0.85rem 1rem;
+  padding: 0.85rem 0.75rem;
   border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+  white-space: nowrap;
 }
 
 .admin-table th {
   color: #0f172a;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   font-weight: 700;
 }
 
 .admin-table td {
   color: #475569;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
 }
 
 .admin-table td:last-child {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
+  white-space: normal;
+}
+
+@media (max-width: 768px) {
+  .admin-table-wrapper {
+    margin: 0 -1.75rem -1.75rem -1.75rem;
+    padding: 1.75rem;
+  }
+
+  .admin-table th,
+  .admin-table td {
+    padding: 0.75rem 0.6rem;
+    font-size: 0.85rem;
+  }
+
+  .admin-action-button {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.8rem;
+  }
 }
 
 @media (max-width: 48rem) {
