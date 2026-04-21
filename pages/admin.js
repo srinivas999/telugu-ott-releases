@@ -154,7 +154,9 @@ export default function AdminPage() {
 
       for (const movie of moviesToSync) {
         const title = movie.movie_name.trim();
-        const response = await fetch(`/api/tmdb/search?query=${encodeURIComponent(title)}`);
+        const response = await fetch(
+          `/api/tmdb/search?query=${encodeURIComponent(title)}&originalTitle=${encodeURIComponent(title)}&mediaType=movie`
+        );
 
         if (!response.ok) {
           stats.failedRequests += 1;
@@ -162,7 +164,7 @@ export default function AdminPage() {
         }
 
         const metadata = await response.json();
-        const result = metadata.results?.[0];
+        const result = metadata.bestMatch || metadata.results?.[0];
         if (!result) {
           stats.noMatch += 1;
           continue;
@@ -414,6 +416,19 @@ export default function AdminPage() {
       .replace(/\s+/g, ' ')
       .trim();
 
+  const getTmdbMediaType = (category) => {
+    const normalizedCategory = String(category || '').toLowerCase();
+    if (
+      normalizedCategory.includes('series') ||
+      normalizedCategory.includes('web series') ||
+      normalizedCategory.includes('tv')
+    ) {
+      return 'tv';
+    }
+
+    return 'movie';
+  };
+
   const findBestSearchMatch = (results, title) => {
     if (!Array.isArray(results) || results.length === 0) {
       return null;
@@ -473,20 +488,30 @@ export default function AdminPage() {
     setLiveSyncError(false);
 
     try {
-      const searchResponse = await fetch(`/api/tmdb/search?query=${encodeURIComponent(movieTitle)}`);
+      const mediaType = getTmdbMediaType(movie.category);
+      const syncYear = String(
+        movie.release_date ||
+        movie.digital_release_date ||
+        ''
+      ).slice(0, 4);
+      const searchResponse = await fetch(
+        `/api/tmdb/search?query=${encodeURIComponent(movieTitle)}&originalTitle=${encodeURIComponent(movie.original_title || movieTitle)}&year=${encodeURIComponent(syncYear)}&mediaType=${encodeURIComponent(mediaType)}`
+      );
       if (!searchResponse.ok) {
         const errorBody = await searchResponse.text();
         throw new Error(`TMDB search failed (${searchResponse.status}): ${errorBody}`);
       }
 
       const searchPayload = await searchResponse.json();
-      const bestMatch = findBestSearchMatch(searchPayload.results, movieTitle);
+      const bestMatch = searchPayload.bestMatch || findBestSearchMatch(searchPayload.results, movieTitle);
 
       if (!bestMatch?.id) {
         throw new Error(`No TMDB match found for "${movieTitle}".`);
       }
 
-      const detailsResponse = await fetch(`/api/tmdb/details?id=${encodeURIComponent(bestMatch.id)}`);
+      const detailsResponse = await fetch(
+        `/api/tmdb/details?id=${encodeURIComponent(bestMatch.id)}&mediaType=${encodeURIComponent(mediaType)}`
+      );
       if (!detailsResponse.ok) {
         const errorBody = await detailsResponse.text();
         throw new Error(`TMDB details fetch failed (${detailsResponse.status}): ${errorBody}`);
@@ -495,7 +520,12 @@ export default function AdminPage() {
       const details = await detailsResponse.json();
       const payload = {
         tmdb_id: details.id || bestMatch.id,
-        original_title: details.original_title || bestMatch.original_title || '',
+        original_title:
+          details.original_title ||
+          details.original_name ||
+          bestMatch.original_title ||
+          bestMatch.original_name ||
+          '',
         poster_path: details.poster_path || bestMatch.poster_path || '',
         backdrop_path: details.backdrop_path || bestMatch.backdrop_path || '',
         overview: details.overview || '',
@@ -507,7 +537,7 @@ export default function AdminPage() {
         cast_data: Array.isArray(details.credits?.cast) ? details.credits.cast.slice(0, 15) : [],
         crew: Array.isArray(details.credits?.crew) ? details.credits.crew : [],
         rating: typeof details.vote_average === 'number' ? Number(details.vote_average.toFixed(1)) : null,
-        release_date: details.release_date || null,
+        release_date: details.release_date || details.first_air_date || null,
       };
 
       const { error } = await supabase

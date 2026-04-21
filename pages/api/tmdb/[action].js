@@ -15,11 +15,15 @@ export default async function handler(req, res) {
   let url;
   if (action === 'search') {
     const query = String(req.query.query || '').trim();
+    const mediaType = String(req.query.mediaType || 'movie').trim().toLowerCase();
     if (!query) {
       return res.status(400).json({ error: 'Missing query parameter.' });
     }
+    if (!['movie', 'tv'].includes(mediaType)) {
+      return res.status(400).json({ error: 'Invalid mediaType. Use "movie" or "tv".' });
+    }
 
-    url = `https://api.themoviedb.org/3/search/movie?query=${encodeURIComponent(query)}&language=en-US&region=IN&page=1&include_adult=false`;
+    url = `https://api.themoviedb.org/3/search/${mediaType}?query=${encodeURIComponent(query)}&language=en-US&region=IN&page=1&include_adult=false`;
   } else if (action === 'latest') {
     const page = String(req.query.page || '1');
     url = `https://api.themoviedb.org/3/discover/movie?language=te-IN&region=IN&sort_by=primary_release_date.desc&with_original_language=te&page=${encodeURIComponent(page)}`;
@@ -28,11 +32,15 @@ export default async function handler(req, res) {
     url = `https://api.themoviedb.org/3/discover/movie?language=te-IN&watch_region=IN&with_watch_monetization_types=flatrate&sort_by=popularity.desc&with_original_language=te&include_adult=false&page=${encodeURIComponent(page)}`;
   } else if (action === 'details') {
     const movieId = String(req.query.id || '').trim();
+    const mediaType = String(req.query.mediaType || 'movie').trim().toLowerCase();
     if (!movieId) {
       return res.status(400).json({ error: 'Missing id parameter.' });
     }
+    if (!['movie', 'tv'].includes(mediaType)) {
+      return res.status(400).json({ error: 'Invalid mediaType. Use "movie" or "tv".' });
+    }
 
-    url = `https://api.themoviedb.org/3/movie/${encodeURIComponent(movieId)}?language=en-US&append_to_response=credits,videos,images`;
+    url = `https://api.themoviedb.org/3/${mediaType}/${encodeURIComponent(movieId)}?language=en-US&append_to_response=credits,videos,images`;
   } else {
     return res.status(404).json({ error: 'Unknown TMDb action.' });
   }
