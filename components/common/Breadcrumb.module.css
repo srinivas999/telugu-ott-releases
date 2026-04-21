@@ -1,0 +1,53 @@
+.breadcrumb {
+  padding: 1rem 0;
+  background-color: transparent;
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.link {
+  color: #0070f3;
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: color 0.2s;
+}
+
+.link:hover {
+  color: #0051cc;
+  text-decoration: underline;
+}
+
+.separator {
+  color: #999;
+  margin: 0 0.25rem;
+}
+
+.current {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+@media (max-width: 640px) {
+  .breadcrumb {
+    padding: 0.5rem 0;
+  }
+
+  .link,
+  .current {
+    font-size: 0.85rem;
+  }
+}

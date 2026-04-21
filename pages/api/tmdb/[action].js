@@ -1,13 +1,14 @@
 export default async function handler(req, res) {
   const { action } = req.query;
-  const apiKey =  process.env.NEXT_PUBLIC_TMDB_API_KEY;
+  const apiKey = process.env.NEXT_PUBLIC_TMDB_API_KEY;
+  const readAccessToken = process.env.TMDB_API_READ_ACCESS_TOKEN;
 
   if (req.method !== 'GET') {
     res.setHeader('Allow', 'GET');
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  if (!apiKey) {
+  if (!apiKey && !readAccessToken) {
     return res.status(500).json({ error: 'TMDb API key is not configured. Set TMDB_API_KEY.' });
   }
 
@@ -18,23 +19,34 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Missing query parameter.' });
     }
 
-    url = `https://api.themoviedb.org/3/search/movie?api_key=${encodeURIComponent(apiKey)}&query=${encodeURIComponent(query)}&language=en-US&region=IN&page=1&include_adult=false`;
+    url = `https://api.themoviedb.org/3/search/movie?query=${encodeURIComponent(query)}&language=en-US&region=IN&page=1&include_adult=false`;
   } else if (action === 'latest') {
     const page = String(req.query.page || '1');
-    url = `https://api.themoviedb.org/3/discover/movie?api_key=${encodeURIComponent(apiKey)}&language=te-IN&region=IN&sort_by=primary_release_date.desc&with_original_language=te&page=${encodeURIComponent(page)}`;
+    url = `https://api.themoviedb.org/3/discover/movie?language=te-IN&region=IN&sort_by=primary_release_date.desc&with_original_language=te&page=${encodeURIComponent(page)}`;
+  } else if (action === 'trending') {
+    const page = String(req.query.page || '1');
+    url = `https://api.themoviedb.org/3/discover/movie?language=te-IN&watch_region=IN&with_watch_monetization_types=flatrate&sort_by=popularity.desc&with_original_language=te&include_adult=false&page=${encodeURIComponent(page)}`;
   } else if (action === 'details') {
     const movieId = String(req.query.id || '').trim();
     if (!movieId) {
       return res.status(400).json({ error: 'Missing id parameter.' });
     }
 
-    url = `https://api.themoviedb.org/3/movie/${encodeURIComponent(movieId)}?api_key=${encodeURIComponent(apiKey)}&language=en-US`;
+    url = `https://api.themoviedb.org/3/movie/${encodeURIComponent(movieId)}?language=en-US&append_to_response=credits,videos,images`;
   } else {
     return res.status(404).json({ error: 'Unknown TMDb action.' });
   }
 
   try {
-    const tmdbResponse = await fetch(url);
+    const tmdbUrl = `${url}${readAccessToken ? '' : `${url.includes('?') ? '&' : '?'}api_key=${encodeURIComponent(apiKey)}`}`;
+    const tmdbResponse = await fetch(tmdbUrl, {
+      headers: readAccessToken
+        ? {
+            Authorization: `Bearer ${readAccessToken}`,
+            'Content-Type': 'application/json;charset=utf-8',
+          }
+        : undefined,
+    });
     const payload = await tmdbResponse.json();
     return res.status(tmdbResponse.ok ? 200 : tmdbResponse.status).json(payload);
   } catch (error) {

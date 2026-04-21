@@ -12,6 +12,12 @@ const nextConfig = {
   reactStrictMode: true,
   images: {
     unoptimized: true,
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'image.tmdb.org',
+      },
+    ],
   },
   ...(isGitHubDeploy && { trailingSlash: true }),
   eslint: {

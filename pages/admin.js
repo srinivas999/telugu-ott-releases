@@ -32,6 +32,9 @@ export default function AdminPage() {
   const [tmdbFetchLoading, setTmdbFetchLoading] = useState(false);
   const [tmdbFetchStatus, setTmdbFetchStatus] = useState('');
   const [tmdbFetchError, setTmdbFetchError] = useState(false);
+  const [liveSyncMovieId, setLiveSyncMovieId] = useState(null);
+  const [liveSyncStatus, setLiveSyncStatus] = useState('');
+  const [liveSyncError, setLiveSyncError] = useState(false);
   const [activeTab, setActiveTab] = useState('add');
   const [csvFile, setCsvFile] = useState(null);
   const [csvStatus, setCsvStatus] = useState('');
@@ -404,6 +407,128 @@ export default function AdminPage() {
     fetchMovies();
   };
 
+  const normalizeMovieTitle = (value) =>
+    String(value || '')
+      .toLowerCase()
+      .replace(/[^\w\s]/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+
+  const findBestSearchMatch = (results, title) => {
+    if (!Array.isArray(results) || results.length === 0) {
+      return null;
+    }
+
+    const normalizedTitle = normalizeMovieTitle(title);
+    const exactMatch = results.find((result) => {
+      const candidate = normalizeMovieTitle(result.title || result.original_title);
+      return candidate === normalizedTitle;
+    });
+
+    if (exactMatch) {
+      return exactMatch;
+    }
+
+    const partialMatch = results.find((result) => {
+      const candidate = normalizeMovieTitle(result.title || result.original_title);
+      return candidate.includes(normalizedTitle) || normalizedTitle.includes(candidate);
+    });
+
+    return partialMatch || results[0];
+  };
+
+  const buildTrailerUrl = (videos) => {
+    if (!Array.isArray(videos?.results) || videos.results.length === 0) {
+      return '';
+    }
+
+    const preferredVideo =
+      videos.results.find((video) => video.site === 'YouTube' && video.type === 'Trailer' && video.official) ||
+      videos.results.find((video) => video.site === 'YouTube' && video.type === 'Trailer') ||
+      videos.results.find((video) => video.site === 'YouTube');
+
+    if (!preferredVideo?.key) {
+      return '';
+    }
+
+    return `https://www.youtube.com/watch?v=${preferredVideo.key}`;
+  };
+
+  const handleSyncLiveData = async (movie) => {
+    if (!supabase) {
+      setLiveSyncError(true);
+      setLiveSyncStatus('Supabase is not configured.');
+      return;
+    }
+
+    const movieTitle = movie?.movie_name?.trim();
+    if (!movieTitle) {
+      setLiveSyncError(true);
+      setLiveSyncStatus('Movie title is missing, so TMDB sync cannot run.');
+      return;
+    }
+
+    setLiveSyncMovieId(movie.id);
+    setLiveSyncStatus('');
+    setLiveSyncError(false);
+
+    try {
+      const searchResponse = await fetch(`/api/tmdb/search?query=${encodeURIComponent(movieTitle)}`);
+      if (!searchResponse.ok) {
+        const errorBody = await searchResponse.text();
+        throw new Error(`TMDB search failed (${searchResponse.status}): ${errorBody}`);
+      }
+
+      const searchPayload = await searchResponse.json();
+      const bestMatch = findBestSearchMatch(searchPayload.results, movieTitle);
+
+      if (!bestMatch?.id) {
+        throw new Error(`No TMDB match found for "${movieTitle}".`);
+      }
+
+      const detailsResponse = await fetch(`/api/tmdb/details?id=${encodeURIComponent(bestMatch.id)}`);
+      if (!detailsResponse.ok) {
+        const errorBody = await detailsResponse.text();
+        throw new Error(`TMDB details fetch failed (${detailsResponse.status}): ${errorBody}`);
+      }
+
+      const details = await detailsResponse.json();
+      const payload = {
+        tmdb_id: details.id || bestMatch.id,
+        original_title: details.original_title || bestMatch.original_title || '',
+        poster_path: details.poster_path || bestMatch.poster_path || '',
+        backdrop_path: details.backdrop_path || bestMatch.backdrop_path || '',
+        overview: details.overview || '',
+        tagline: details.tagline || '',
+        runtime: details.runtime || null,
+        trailer_url: buildTrailerUrl(details.videos),
+        genres: Array.isArray(details.genres) ? details.genres : [],
+        genre_ids: Array.isArray(details.genres) ? details.genres.map((genre) => genre.id) : [],
+        cast_data: Array.isArray(details.credits?.cast) ? details.credits.cast.slice(0, 15) : [],
+        crew: Array.isArray(details.credits?.crew) ? details.credits.crew : [],
+        rating: typeof details.vote_average === 'number' ? Number(details.vote_average.toFixed(1)) : null,
+        release_date: details.release_date || null,
+      };
+
+      const { error } = await supabase
+        .from('ott_movies')
+        .update(payload)
+        .eq('id', movie.id);
+
+      if (error) {
+        throw error;
+      }
+
+      await fetchMovies();
+      setLiveSyncStatus(`Live TMDB data synced for "${movieTitle}".`);
+    } catch (error) {
+      setLiveSyncError(true);
+      setLiveSyncStatus(error?.message || 'Unable to sync live TMDB data.');
+    } finally {
+      setLiveSyncMovieId(null);
+    }
+  };
+
   const escapeCsvValue = (value) => {
     const stringValue = String(value ?? '').trim();
     if (/"|,|\n|\r/.test(stringValue)) {
@@ -740,39 +865,54 @@ export default function AdminPage() {
                   ) : movies.length === 0 ? (
                     <p className="admin-status">No movies found. Add your first OTT release.</p>
                   ) : (
-                    <div className="admin-table-wrapper">
-                      <table className="admin-table">
-                        <thead>
-                          <tr>
-                            <th>Movie</th>
-                            <th>Partner</th>
-                            <th>Release date</th>
-                            <th>Language</th>
-                            <th>Category</th>
-                            <th aria-label="Actions" />
-                          </tr>
-                        </thead>
-                        <tbody>
-                        {movies.map((movie) => (
-                          <tr key={movie.id || `${movie.movie_name}-${movie.digital_release_date}`}>
-                            <td>{movie.movie_name || 'Untitled'}</td>
-                            <td>{movie.streaming_partner || 'TBA'}</td>
-                            <td>{movie.digital_release_date || 'TBA'}</td>
-                            <td>{movie.language || 'Telugu'}</td>
-                            <td>{movie.category || 'Film'}</td>
-                            <td>
-                              <button type="button" className="admin-action-button" onClick={() => handleEditMovie(movie)}>
-                                Edit
-                              </button>
-                              <button type="button" className="admin-action-button admin-action-button--danger" onClick={() => handleDeleteMovie(movie.id)}>
-                                Delete
-                              </button>
-                            </td>
-                          </tr>
-                        ))}
-                        </tbody>
-                      </table>
-                    </div>
+                    <>
+                      <div className="admin-table-wrapper">
+                        <table className="admin-table">
+                          <thead>
+                            <tr>
+                              <th>Movie</th>
+                              <th>Partner</th>
+                              <th>Release date</th>
+                              <th>Language</th>
+                              <th>Category</th>
+                              <th aria-label="Actions" />
+                            </tr>
+                          </thead>
+                          <tbody>
+                          {movies.map((movie) => (
+                            <tr key={movie.id || `${movie.movie_name}-${movie.digital_release_date}`}>
+                              <td>{movie.movie_name || 'Untitled'}</td>
+                              <td>{movie.streaming_partner || 'TBA'}</td>
+                              <td>{movie.digital_release_date || 'TBA'}</td>
+                              <td>{movie.language || 'Telugu'}</td>
+                              <td>{movie.category || 'Film'}</td>
+                              <td>
+                                <button type="button" className="admin-action-button" onClick={() => handleEditMovie(movie)}>
+                                  Edit
+                                </button>
+                                <button
+                                  type="button"
+                                  className="admin-action-button"
+                                  onClick={() => handleSyncLiveData(movie)}
+                                  disabled={liveSyncMovieId === movie.id}
+                                >
+                                  {liveSyncMovieId === movie.id ? 'Syncing…' : 'Sync live data'}
+                                </button>
+                                <button type="button" className="admin-action-button admin-action-button--danger" onClick={() => handleDeleteMovie(movie.id)}>
+                                  Delete
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                          </tbody>
+                        </table>
+                      </div>
+                      {liveSyncStatus ? (
+                        <p className={`admin-status ${liveSyncError ? 'admin-status--error' : ''}`}>
+                          {liveSyncStatus}
+                        </p>
+                      ) : null}
+                    </>
                   )}
                 </div>
               </div>
