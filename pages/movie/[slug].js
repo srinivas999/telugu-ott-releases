@@ -11,7 +11,7 @@ import MovieDetails from '../../components/movie/MovieDetails';
 import Breadcrumb from '../../components/common/Breadcrumb';
 import SchemaMarkup from '../../components/seo/SchemaMarkup';
 import SimilarMovies from '../../components/movie/SimilarMovies';
-import { useMovie, useSimilarMovies } from '../../lib/hooks/useMovies';
+import { useMovie, useSimilarMovies, useTmdbDetails } from '../../lib/hooks/useMovies';
 import {
   generateMovieSchema,
   generateFaqSchema,
@@ -23,12 +23,63 @@ export default function MovieDetailPage({ movie: initialMovie }) {
   const router = useRouter();
   const slug = Array.isArray(router.query.slug) ? router.query.slug[0] : router.query.slug;
 
+  const getTrailerUrl = (details, fallbackUrl) => {
+    const officialTrailer = details?.videos?.results?.find(
+      (video) => video.site === 'YouTube' && video.type === 'Trailer' && video.official
+    );
+    if (officialTrailer?.key) {
+      return `https://www.youtube.com/watch?v=${officialTrailer.key}`;
+    }
+
+    const trailer = details?.videos?.results?.find(
+      (video) => video.site === 'YouTube' && video.type === 'Trailer'
+    );
+    if (trailer?.key) {
+      return `https://www.youtube.com/watch?v=${trailer.key}`;
+    }
+
+    return fallbackUrl;
+  };
+
   // Parse slug to get ID
   const { id } = parseSlug(slug);
 
   // Fetch movie data (use initial data if available, otherwise fetch)
   const { movie, loading, error } = useMovie(initialMovie ? null : (id || slug));
   const actualMovie = movie || initialMovie;
+  const { details: tmdbDetails } = useTmdbDetails(actualMovie?.tmdb_id, actualMovie?.category);
+  const mergedMovie = actualMovie
+    ? {
+        ...tmdbDetails,
+        ...actualMovie,
+        title:
+          tmdbDetails?.title ||
+          tmdbDetails?.name ||
+          actualMovie?.movie_name ||
+          actualMovie?.title,
+        original_title:
+          tmdbDetails?.original_title ||
+          tmdbDetails?.original_name ||
+          actualMovie?.original_title,
+        overview: tmdbDetails?.overview || actualMovie?.overview || actualMovie?.description,
+        poster_path: tmdbDetails?.poster_path || actualMovie?.poster_path,
+        backdrop_path: tmdbDetails?.backdrop_path || actualMovie?.backdrop_path,
+        genres: tmdbDetails?.genres || actualMovie?.genres || [],
+        genre_ids:
+          tmdbDetails?.genres?.map((genre) => genre.id) ||
+          actualMovie?.genre_ids ||
+          [],
+        cast_data: tmdbDetails?.credits?.cast || actualMovie?.cast_data || [],
+        crew: tmdbDetails?.credits?.crew || actualMovie?.crew || [],
+        rating:
+          typeof tmdbDetails?.vote_average === 'number'
+            ? tmdbDetails.vote_average
+            : actualMovie?.rating,
+        runtime: tmdbDetails?.runtime || actualMovie?.runtime,
+        release_date: tmdbDetails?.release_date || tmdbDetails?.first_air_date || actualMovie?.release_date,
+        trailer_url: getTrailerUrl(tmdbDetails, actualMovie?.trailer_url),
+      }
+    : null;
 
   // Fetch similar movies
   const { movies: similarMovies } = useSimilarMovies(actualMovie?.id, 6);
@@ -57,17 +108,17 @@ export default function MovieDetailPage({ movie: initialMovie }) {
   }
 
   // Prepare SEO data
-  const movieTitle = actualMovie?.title || actualMovie?.movie_name || 'Movie';
+  const movieTitle = mergedMovie?.title || mergedMovie?.movie_name || 'Movie';
   const movieDescription =
-    actualMovie?.overview ||
-    actualMovie?.description ||
+    mergedMovie?.overview ||
+    mergedMovie?.description ||
     `Watch ${movieTitle} on OTT platforms in Telugu.`;
-  const posterImage = actualMovie?.poster_path
-    ? `https://image.tmdb.org/t/p/w500${actualMovie.poster_path}`
+  const posterImage = mergedMovie?.poster_path
+    ? `https://image.tmdb.org/t/p/w500${mergedMovie.poster_path}`
     : 'https://svteluguott.in/images/ott-hero-banner.png';
 
   // Generate schemas
-  const movieSchema = generateMovieSchema(actualMovie);
+  const movieSchema = generateMovieSchema(mergedMovie || actualMovie);
   const breadcrumbs = [
     { name: 'Home', url: '/' },
     { name: 'Movies', url: '/ott-movies' },
@@ -90,8 +141,8 @@ export default function MovieDetailPage({ movie: initialMovie }) {
     },
     {
       question: `What is the runtime of ${movieTitle}?`,
-      answer: actualMovie?.runtime
-        ? `${movieTitle} has a runtime of ${actualMovie.runtime} minutes.`
+      answer: mergedMovie?.runtime || actualMovie?.runtime
+        ? `${movieTitle} has a runtime of ${mergedMovie?.runtime || actualMovie?.runtime} minutes.`
         : 'Runtime information is not available.',
     },
   ];
@@ -116,7 +167,11 @@ export default function MovieDetailPage({ movie: initialMovie }) {
       <Breadcrumb items={breadcrumbs} />
 
       {/* Movie Details */}
-      <MovieDetails movie={actualMovie} loading={loading} error={error} />
+      <MovieDetails
+        movie={mergedMovie || actualMovie}
+        loading={loading}
+        error={error}
+      />
 
       {/* Similar Movies */}
       {similarMovies && similarMovies.length > 0 && (

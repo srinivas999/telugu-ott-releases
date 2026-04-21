@@ -452,23 +452,6 @@ export default function AdminPage() {
     return partialMatch || results[0];
   };
 
-  const buildTrailerUrl = (videos) => {
-    if (!Array.isArray(videos?.results) || videos.results.length === 0) {
-      return '';
-    }
-
-    const preferredVideo =
-      videos.results.find((video) => video.site === 'YouTube' && video.type === 'Trailer' && video.official) ||
-      videos.results.find((video) => video.site === 'YouTube' && video.type === 'Trailer') ||
-      videos.results.find((video) => video.site === 'YouTube');
-
-    if (!preferredVideo?.key) {
-      return '';
-    }
-
-    return `https://www.youtube.com/watch?v=${preferredVideo.key}`;
-  };
-
   const handleSyncLiveData = async (movie) => {
     if (!supabase) {
       setLiveSyncError(true);
@@ -509,35 +492,17 @@ export default function AdminPage() {
         throw new Error(`No TMDB match found for "${movieTitle}".`);
       }
 
-      const detailsResponse = await fetch(
-        `/api/tmdb/details?id=${encodeURIComponent(bestMatch.id)}&mediaType=${encodeURIComponent(mediaType)}`
-      );
-      if (!detailsResponse.ok) {
-        const errorBody = await detailsResponse.text();
-        throw new Error(`TMDB details fetch failed (${detailsResponse.status}): ${errorBody}`);
-      }
-
-      const details = await detailsResponse.json();
       const payload = {
-        tmdb_id: details.id || bestMatch.id,
+        tmdb_id: bestMatch.id,
         original_title:
-          details.original_title ||
-          details.original_name ||
           bestMatch.original_title ||
           bestMatch.original_name ||
           '',
-        poster_path: details.poster_path || bestMatch.poster_path || '',
-        backdrop_path: details.backdrop_path || bestMatch.backdrop_path || '',
-        overview: details.overview || '',
-        tagline: details.tagline || '',
-        runtime: details.runtime || null,
-        trailer_url: buildTrailerUrl(details.videos),
-        genres: Array.isArray(details.genres) ? details.genres : [],
-        genre_ids: Array.isArray(details.genres) ? details.genres.map((genre) => genre.id) : [],
-        cast_data: Array.isArray(details.credits?.cast) ? details.credits.cast.slice(0, 15) : [],
-        crew: Array.isArray(details.credits?.crew) ? details.credits.crew : [],
-        rating: typeof details.vote_average === 'number' ? Number(details.vote_average.toFixed(1)) : null,
-        release_date: details.release_date || details.first_air_date || null,
+        poster_path: bestMatch.poster_path || '',
+        backdrop_path: bestMatch.backdrop_path || '',
+        overview: bestMatch.overview || '',
+        rating: typeof bestMatch.vote_average === 'number' ? Number(bestMatch.vote_average.toFixed(1)) : null,
+        release_date: bestMatch.release_date || bestMatch.first_air_date || null,
       };
 
       const { error } = await supabase

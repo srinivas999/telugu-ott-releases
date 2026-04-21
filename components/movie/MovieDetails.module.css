@@ -1,303 +1,318 @@
 .container {
   width: 100%;
-  max-width: 1200px;
+  max-width: 1240px;
   margin: 0 auto;
-  background: #fff;
+  color: #161616;
+}
+
+.hero {
+  position: relative;
+  overflow: hidden;
+  border-radius: 28px;
+  min-height: 540px;
+  background:
+    radial-gradient(circle at top left, rgba(255, 184, 0, 0.35), transparent 28%),
+    linear-gradient(135deg, #111111 0%, #201113 48%, #4d1b17 100%);
 }
 
 .backdrop {
-  position: relative;
-  width: 100%;
-  height: 400px;
-  overflow: hidden;
-  border-radius: 8px;
-}
-
-.backdrop img {
-  object-fit: cover;
-}
-
-.backdropOverlay {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(135deg, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0) 100%);
+  inset: 0;
 }
 
-.content {
-  padding: 2rem;
+.backdropImage {
+  object-fit: cover;
+  opacity: 0.34;
 }
 
-.header {
-  display: grid;
-  grid-template-columns: 280px 1fr;
-  gap: 2rem;
-  margin-bottom: 2rem;
+.heroShade {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgba(10, 10, 10, 0.92) 0%, rgba(10, 10, 10, 0.72) 38%, rgba(10, 10, 10, 0.28) 100%),
+    linear-gradient(180deg, rgba(10, 10, 10, 0.08) 0%, rgba(10, 10, 10, 0.6) 100%);
 }
 
-.posterContainer {
+.heroInner {
   position: relative;
-  width: 280px;
-  height: auto;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 2.5rem;
+  align-items: end;
+  min-height: 540px;
+  padding: 2.5rem;
+}
+
+.posterPanel {
+  display: flex;
+  align-items: end;
 }
 
 .poster {
-  width: 100%;
-  height: auto;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-radius: 24px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+  object-fit: cover;
 }
 
-.info {
-  flex: 1;
+.infoPanel {
+  color: #fff6e8;
+  padding-bottom: 0.5rem;
+}
+
+.kicker {
+  margin: 0 0 0.65rem;
+  color: #ffcd7a;
+  font-size: 0.88rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
 }
 
 .title {
-  font-size: 2.5rem;
-  font-weight: bold;
-  margin: 0 0 0.5rem 0;
-  color: #000;
-  line-height: 1.2;
+  margin: 0;
+  font-size: clamp(2.4rem, 5vw, 4.6rem);
+  line-height: 0.98;
+  color: #fff;
 }
 
 .tagline {
+  max-width: 720px;
+  margin: 1rem 0 0;
+  color: rgba(255, 246, 232, 0.82);
   font-size: 1.1rem;
-  color: #666;
-  font-style: italic;
-  margin: 0 0 1.5rem 0;
+  line-height: 1.6;
 }
 
-.metadata {
+.statRow {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 1rem;
-  margin-bottom: 1.5rem;
+  margin-top: 1.75rem;
 }
 
-.metaItem {
+.statCard {
   display: flex;
   flex-direction: column;
+  gap: 0.35rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(10px);
 }
 
-.metaLabel {
-  font-weight: 600;
-  color: #333;
-  font-size: 0.9rem;
-  margin-bottom: 0.25rem;
+.statLabel {
+  color: rgba(255, 246, 232, 0.72);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
-.metaValue {
-  color: #555;
+.statValue {
+  color: #fff;
   font-size: 1rem;
+  font-weight: 700;
 }
 
-.genres {
+.genreRow {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-bottom: 1.5rem;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
 }
 
-.genre {
-  display: inline-block;
-  background: #f0f0f0;
-  padding: 0.5rem 1rem;
-  border-radius: 20px;
-  font-size: 0.85rem;
-  font-weight: 500;
-  color: #333;
+.genreChip {
+  padding: 0.7rem 1rem;
+  border-radius: 999px;
+  background: rgba(255, 205, 122, 0.16);
+  border: 1px solid rgba(255, 205, 122, 0.34);
+  color: #ffe6bb;
+  font-size: 0.9rem;
+  font-weight: 700;
 }
 
-.ottPlatform {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  padding: 1rem;
-  border-radius: 8px;
+.watchPanel {
   display: flex;
-  align-items: center;
+  justify-content: space-between;
   gap: 1rem;
-}
-
-.platformBadge {
-  background: rgba(255, 255, 255, 0.3);
-  padding: 0.5rem 1rem;
+  align-items: center;
+  margin-top: 2rem;
+  padding: 1.1rem 1.2rem;
   border-radius: 20px;
-  font-weight: bold;
-  font-size: 0.95rem;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.12);
 }
 
-/* Sections */
+.watchLabel {
+  margin: 0;
+  color: rgba(255, 246, 232, 0.68);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.watchValue {
+  margin: 0.3rem 0 0;
+  color: #fff;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.primaryAction {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0.8rem 1.2rem;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #ffb347 0%, #ff6a3d 100%);
+  color: #1b1109;
+  text-decoration: none;
+  font-weight: 800;
+}
+
+.content {
+  padding: 2.25rem 0 1rem;
+}
+
 .section {
-  margin-bottom: 2rem;
-  padding: 1.5rem 0;
-  border-bottom: 1px solid #eee;
+  margin-top: 1.4rem;
+  padding: 1.5rem;
+  border-radius: 26px;
+  background:
+    linear-gradient(180deg, rgba(255, 250, 242, 1) 0%, rgba(255, 245, 232, 1) 100%);
+  border: 1px solid #f2dfc7;
+  box-shadow: 0 12px 34px rgba(94, 59, 22, 0.08);
 }
 
-.section:last-child {
-  border-bottom: none;
+.sectionHeader {
+  margin-bottom: 1rem;
+}
+
+.sectionEyebrow {
+  margin: 0 0 0.35rem;
+  color: #9b5f24;
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
 }
 
 .sectionTitle {
-  font-size: 1.5rem;
-  font-weight: bold;
-  margin: 0 0 1rem 0;
-  color: #000;
+  margin: 0;
+  color: #1d130f;
+  font-size: 1.7rem;
 }
 
 .overview {
-  font-size: 1rem;
-  line-height: 1.6;
-  color: #555;
   margin: 0;
-}
-
-/* Cast Section */
-.castGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: 1rem;
-}
-
-.castCard {
-  background: #f9f9f9;
-  padding: 1rem;
-  border-radius: 8px;
-  text-align: center;
-}
-
-.castName {
-  font-weight: 600;
-  color: #333;
-  margin-bottom: 0.25rem;
-}
-
-.castCharacter {
-  font-size: 0.85rem;
-  color: #666;
-  font-style: italic;
-}
-
-/* Crew Section */
-.crewList {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 1rem;
-}
-
-.crewItem {
-  background: #f9f9f9;
-  padding: 1rem;
-  border-radius: 8px;
-  display: flex;
-  flex-direction: column;
-}
-
-.crewJob {
-  font-size: 0.85rem;
-  color: #666;
-  margin-top: 0.25rem;
-}
-
-/* Watch Info */
-.watchInfo {
-  background: #f0f8ff;
-  padding: 1.5rem;
-  border-radius: 8px;
-  border-left: 4px solid #0070f3;
-}
-
-.watchInfo p {
-  margin: 0.5rem 0;
+  color: #4e3b31;
   font-size: 1rem;
-  line-height: 1.6;
+  line-height: 1.85;
+}
+
+.castGrid,
+.crewGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+}
+
+.personCard {
+  padding: 1rem;
+  border-radius: 18px;
+  background: #fff;
+  border: 1px solid #f2e7d8;
+}
+
+.personName {
+  margin: 0;
+  color: #251510;
+  font-size: 1rem;
+}
+
+.personMeta {
+  margin: 0.45rem 0 0;
+  color: #875b43;
+  font-size: 0.92rem;
+}
+
+.watchDetails {
+  padding: 1.2rem;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #fff8eb 0%, #fff 100%);
+  border-left: 4px solid #ff9a3c;
+}
+
+.watchDetails p {
+  margin: 0.45rem 0;
+  color: #4a3427;
+  line-height: 1.7;
 }
 
 .releaseInfo {
-  color: #0070f3;
-  font-weight: 500;
+  color: #b24f1d;
+  font-weight: 700;
 }
 
-/* FAQ Section */
-.faqContainer {
-  display: grid;
-  gap: 1rem;
-}
-
-.faqItem {
-  background: #f9f9f9;
-  padding: 1.5rem;
-  border-radius: 8px;
-}
-
-.faqQuestion {
-  font-size: 1.05rem;
-  font-weight: 600;
-  margin: 0 0 0.75rem 0;
-  color: #333;
-}
-
-.faqAnswer {
-  margin: 0;
-  font-size: 0.95rem;
-  color: #555;
-  line-height: 1.6;
-}
-
-/* Mobile Responsiveness */
-@media (max-width: 768px) {
-  .content {
-    padding: 1rem;
+@media (max-width: 960px) {
+  .heroInner {
+    grid-template-columns: 1fr;
+    align-items: start;
   }
 
-  .header {
+  .posterPanel {
+    justify-content: center;
+  }
+
+  .infoPanel {
+    text-align: center;
+  }
+
+  .statRow {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .genreRow,
+  .watchPanel {
+    justify-content: center;
+  }
+
+  .watchPanel {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 640px) {
+  .hero {
+    border-radius: 20px;
+    min-height: auto;
+  }
+
+  .heroInner {
+    min-height: auto;
+    padding: 1.2rem;
+    gap: 1.4rem;
+  }
+
+  .poster {
+    width: 220px;
+    height: auto;
+  }
+
+  .statRow {
     grid-template-columns: 1fr;
   }
 
-  .posterContainer {
-    width: 100%;
-    max-width: 280px;
-  }
-
-  .title {
-    font-size: 1.8rem;
-  }
-
-  .metadata {
-    grid-template-columns: 1fr;
-    gap: 0.75rem;
-  }
-
-  .backdrop {
-    height: 250px;
-  }
-
-  .castGrid {
-    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-  }
-}
-
-@media (max-width: 480px) {
-  .content {
-    padding: 0.75rem;
-  }
-
-  .title {
-    font-size: 1.5rem;
+  .section {
+    padding: 1.1rem;
+    border-radius: 20px;
   }
 
   .sectionTitle {
-    font-size: 1.2rem;
-  }
-
-  .genres,
-  .metadata {
-    gap: 0.5rem;
-  }
-
-  .genre {
-    font-size: 0.75rem;
-    padding: 0.4rem 0.8rem;
+    font-size: 1.35rem;
   }
 }
