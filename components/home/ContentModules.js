@@ -93,7 +93,7 @@ function MovieCard({ movie, index, showDate = false }) {
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
         />
         <div className={styles.overlay}>
-          {typeof movie.rating === 'number' ? (
+          {typeof movie.rating === 'number' && movie.rating > 0 ? (
             <div className={styles.rating}>★ {movie.rating.toFixed(1)}</div>
           ) : null}
           {index === 0 ? <div className={styles.badge}>TRENDING</div> : null}
