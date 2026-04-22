@@ -1060,4 +1060,254 @@
   .ott-trending-card__body {
     gap: 0.65rem;
   }
+
+  .ott-trending-carousel {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-ott .ott-table-section {
+    padding: 0.8rem 0.5rem;
+    border-radius: 16px;
+    margin-bottom: 0.85rem;
+  }
+
+  .ott-hero {
+    padding: 0.7rem 0.5rem;
+    border-radius: 16px;
+    margin-bottom: 0.85rem;
+  }
+
+  .ott-hero__visual {
+    min-height: 140px;
+    border-radius: 16px;
+  }
+
+  .ott-hero h1 {
+    font-size: clamp(1.5rem, 6vw, 2rem);
+  }
+
+  .ott-hero__tagline {
+    font-size: 0.9rem;
+  }
+
+  .ott-section {
+    padding: 1rem 0.5rem;
+  }
+
+  .section-heading h2 {
+    font-size: clamp(1.6rem, 5vw, 2rem);
+  }
+
+  .ott-seo-copy {
+    padding: 0.9rem 0.6rem;
+  }
+
+  .ott-seo-copy p {
+    font-size: 0.9rem;
+  }
+
+  .share-buttons {
+    gap: 0.5rem;
+  }
+
+  .share-button {
+    width: 2.8rem;
+    height: 2.8rem;
+  }
+
+  .share-button__icon {
+    width: 1.2rem;
+    height: 1.2rem;
+  }
+
+  .ott-filter-button {
+    padding: 0.8rem 1rem;
+    font-size: 0.85rem;
+  }
+
+  .ott-select {
+    min-width: 100%;
+    font-size: 0.9rem;
+    padding: 0.8rem 0.85rem;
+  }
+
+  .ott-movies-table {
+    min-width: 38rem;
+    border-spacing: 0 0.5rem;
+  }
+
+  .ott-movies-table th,
+  .ott-movies-table td {
+    padding: 0.7rem 0.7rem;
+    font-size: clamp(0.75rem, 2.5vw, 0.9rem);
+  }
+
+  .ott-movies-table th {
+    font-size: clamp(0.65rem, 2vw, 0.75rem);
+  }
+
+  .ott-movies-table td:first-child {
+    min-width: 10rem;
+    font-size: clamp(0.8rem, 2.8vw, 0.9rem);
+  }
+
+  .ott-movie-count {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .ott-hero {
+    padding: 0.6rem 0.4rem;
+    gap: 0.8rem;
+    border-radius: 14px;
+    margin-bottom: 0.7rem;
+  }
+
+  .ott-hero__visual {
+    min-height: 120px;
+    border-radius: 14px;
+  }
+
+  .ott-hero h1 {
+    font-size: clamp(1.3rem, 5vw, 1.8rem);
+  }
+
+  .ott-hero__tagline {
+    font-size: 0.85rem;
+    line-height: 1.4;
+  }
+
+  .section-heading h2 {
+    font-size: clamp(1.4rem, 4.5vw, 1.7rem);
+  }
+
+  .page-ott .ott-table-section {
+    padding: 0.7rem 0.4rem;
+    border-radius: 14px;
+    margin-bottom: 0.7rem;
+  }
+
+  .ott-seo-copy {
+    padding: 0.85rem 0.55rem;
+    border-radius: 14px;
+  }
+
+  .ott-seo-copy p {
+    font-size: 0.85rem;
+    margin: 0 0 0.8rem;
+  }
+
+  .share-button {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+
+  .share-button__icon {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  .ott-filter-mobile {
+    gap: 0.8rem;
+  }
+
+  .ott-filter-button {
+    padding: 0.7rem 0.9rem;
+    font-size: 0.8rem;
+  }
+
+  .ott-select {
+    font-size: 0.85rem;
+    padding: 0.7rem 0.8rem;
+  }
+
+  .ott-filter-label {
+    font-size: 0.8rem;
+  }
+
+  .ott-movies-table {
+    min-width: 34rem;
+    border-spacing: 0 0.4rem;
+  }
+
+  .ott-movies-table th,
+  .ott-movies-table td {
+    padding: 0.6rem 0.6rem;
+    font-size: clamp(0.7rem, 2.3vw, 0.8rem);
+  }
+
+  .ott-movies-table th {
+    font-size: clamp(0.6rem, 1.8vw, 0.7rem);
+  }
+
+  .ott-movies-table td:first-child {
+    min-width: 9rem;
+    font-size: clamp(0.75rem, 2.6vw, 0.85rem);
+  }
+
+  .ott-movies-table td:nth-child(2) {
+    min-width: 6.5rem;
+  }
+
+  .ott-movies-table td:nth-child(3) {
+    min-width: 5.5rem;
+  }
+
+  .ott-movies-table td:nth-child(4),
+  .ott-movies-table td:nth-child(5) {
+    min-width: 5rem;
+  }
+
+  .ott-empty {
+    padding: 1rem 0.8rem;
+    font-size: 0.85rem;
+  }
+
+  .ott-movie-count {
+    font-size: 0.85rem;
+  }
+
+  .eyebrow {
+    font-size: 0.75rem;
+  }
+
+  .page-ott .ott-table-filters {
+    gap: 1rem;
+  }
+
+  .ott-filter-actions {
+    gap: 0.8rem;
+  }
+
+  .ott-trending-card {
+    padding: 1rem;
+  }
+
+  .ott-trending-card h3 {
+    font-size: 1.05rem;
+  }
+
+  .ott-trending-card__partner {
+    font-size: 0.65rem;
+    padding: 0.35rem 0.7rem;
+  }
+
+  .ott-carousel-card {
+    flex: 0 0 240px;
+    min-width: 240px;
+    padding: 0.95rem;
+    gap: 0.65rem;
+    border-radius: 18px;
+  }
+
+  .ott-carousel-card h3 {
+    font-size: 1rem;
+  }
+
+  .ott-carousel-card p {
+    font-size: 0.85rem;
+  }
 }

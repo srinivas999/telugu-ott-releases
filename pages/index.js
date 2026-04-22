@@ -4,6 +4,22 @@ import { useRouter } from 'next/router';
 import Layout from '../components/Layout';
 import Seo from '../components/Seo';
 import { supabase } from '../lib/supabaseClient';
+import Breadcrumb from '../components/common/Breadcrumb';
+
+// NEW: Import content modules
+import {
+  TrendingNow,
+  ReleasingThisWeekend,
+  RecentlyAdded,
+} from '../components/home/ContentModules';
+
+// NEW: Import custom hooks
+import {
+  useTrendingMovies,
+  useReleasingThisWeek,
+  useRecentlyAdded,
+} from '../lib/hooks/useMovies';
+import { generateUniqueSlug } from '../lib/utils/slug';
 
 
 const TMDB_POSTER_BASE = 'https://image.tmdb.org/t/p/w500';
@@ -102,6 +118,11 @@ export default function HomePage() {
   const [theatreError, setTheatreError] = useState('');
   const [selectedPlatform, setSelectedPlatform] = useState('all');
   const [sortOrder, setSortOrder] = useState('desc');
+
+  // NEW: Fetch content for modules
+  const { movies: moduleTrendingMovies } = useTrendingMovies(10);
+  const { movies: weekendReleases } = useReleasingThisWeek();
+  const { movies: recentlyAddedMovies } = useRecentlyAdded(10);
 
   const carouselRef = useRef(null);
   const trendingMovies = useMemo(() => sortMovies(ottMovies, 'desc').slice(0, 8), [ottMovies]);
@@ -265,7 +286,7 @@ export default function HomePage() {
         name: movie.movie_name || 'Untitled',
         datePublished: movie.digital_release_date || '',
         description: movie.streaming_partner ? `Streaming on ${movie.streaming_partner}` : 'Telugu OTT movie release',
-        url: shareUrl,
+        url: `https://svteluguott.in/movie/${generateUniqueSlug(movie.movie_name, movie.id)}`,
       },
     }))
   };
@@ -280,9 +301,19 @@ export default function HomePage() {
         jsonLd={jsonLd}
       />
 
+      {/* NEW: Add breadcrumb at top */}
+      <Breadcrumb items={[{ name: 'Home' }]} />
+
       <section className="page-projects page-ott">
         <div className="projects-page-inner">
         
+          {/* NEW: Add content modules */}
+          <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '2rem 1rem' }}>
+            <TrendingNow movies={moduleTrendingMovies} />
+            <ReleasingThisWeekend movies={weekendReleases} />
+            <RecentlyAdded movies={recentlyAddedMovies} />
+          </div>
+
           <section className="movie-carousel" aria-label="Theatre release movies">
             {theatreLoading ? (
               <p className="admin-status">Loading theatre release data...</p>
@@ -394,7 +425,7 @@ export default function HomePage() {
                 This page is your weekly Telugu OTT schedule for new streaming releases, verified digital release dates, and platform rights. Use it to track the latest Telugu OTT premieres on Netflix, Aha, Prime Video, JioHotstar, Zee5, Sun NXT, and ETV Win.
               </p>
               <p>
-                If you're searching for "Telugu OTT releases this week" or "upcoming OTT movies Telugu April 2026," this page helps you find the latest Telugu streaming launch dates and movie details in one place.
+                If you&apos;re searching for &quot;Telugu OTT releases this week&quot; or &quot;upcoming OTT movies Telugu April 2026,&quot; this page helps you find the latest Telugu streaming launch dates and movie details in one place.
               </p>
             </div>
           </section>
@@ -482,7 +513,9 @@ export default function HomePage() {
                     filteredMovies.map((movie) => (
                       <tr key={movie.id || `${movie.movie_name}-${movie.digital_release_date}`} itemScope itemType="https://schema.org/Movie">
                         <td data-label="Movie">
-                          <span itemProp="name">{movie.movie_name || 'Untitled'}</span>
+                          <Link href={`/movie/${generateUniqueSlug(movie.movie_name, movie.id)}`} itemProp="url">
+                            <span itemProp="name">{movie.movie_name || 'Untitled'}</span>
+                          </Link>
                         </td>
                         <td data-label="Release Date">
                           <time itemProp="datePublished" dateTime={movie.digital_release_date || ''}>
@@ -522,7 +555,11 @@ export default function HomePage() {
                   <div className="ott-trending-card__stripe" />
                   <div className="ott-trending-card__body">
                     <span className="ott-trending-card__partner">{movie.streaming_partner || 'Partner'}</span>
-                    <h3>{movie.movie_name || 'Untitled'}</h3>
+                    <h3>
+                      <Link href={`/movie/${generateUniqueSlug(movie.movie_name, movie.id)}`}>
+                        {movie.movie_name || 'Untitled'}
+                      </Link>
+                    </h3>
                     <p>{formatReleaseDate(movie.digital_release_date)}</p>
                   </div>
                 </article>
