@@ -294,17 +294,85 @@
 
   .heroInner {
     min-height: auto;
-    padding: 1.2rem;
-    gap: 1.4rem;
+    padding: 1.2rem 1rem;
+    gap: 1.2rem;
   }
 
   .poster {
-    width: 220px;
+    width: 100%;
+    max-width: 240px;
     height: auto;
   }
 
+  .posterPanel {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .infoPanel {
+    text-align: left;
+  }
+
+  .title {
+    font-size: clamp(1.8rem, 6vw, 2.4rem);
+  }
+
+  .tagline {
+    font-size: clamp(0.9rem, 2.2vw, 1rem);
+  }
+
   .statRow {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+  }
+
+  .statCard {
+    padding: 0.85rem 1rem;
+    gap: 0.3rem;
+  }
+
+  .statLabel {
+    font-size: 0.7rem;
+    letter-spacing: 0.06em;
+  }
+
+  .statValue {
+    font-size: 0.95rem;
+  }
+
+  .genreRow {
+    justify-content: flex-start;
+    gap: 0.6rem;
+  }
+
+  .genreChip {
+    padding: 0.5rem 0.9rem;
+    font-size: 0.8rem;
+  }
+
+  .watchPanel {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.8rem;
+    padding: 1rem;
+  }
+
+  .castGrid,
+  .crewGrid {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 0.8rem;
+  }
+
+  .personCard {
+    padding: 0.9rem;
+  }
+
+  .personName {
+    font-size: 0.95rem;
+  }
+
+  .personMeta {
+    font-size: 0.85rem;
   }
 
   .section {
@@ -314,5 +382,153 @@
 
   .sectionTitle {
     font-size: 1.35rem;
+  }
+
+  .overview {
+    font-size: 0.95rem;
+  }
+
+  .watchDetails {
+    padding: 1rem;
+  }
+
+  .watchDetails p {
+    font-size: 0.95rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .heroInner {
+    padding: 1rem 0.8rem;
+    gap: 1rem;
+  }
+
+  .poster {
+    max-width: 200px;
+  }
+
+  .title {
+    font-size: clamp(1.5rem, 5vw, 2rem);
+  }
+
+  .tagline {
+    font-size: 0.85rem;
+  }
+
+  .statRow {
+    grid-template-columns: 1fr;
+    gap: 0.6rem;
+  }
+
+  .statCard {
+    padding: 0.75rem 0.85rem;
+    gap: 0.25rem;
+  }
+
+  .statLabel {
+    font-size: 0.65rem;
+  }
+
+  .statValue {
+    font-size: 0.9rem;
+  }
+
+  .genreChip {
+    padding: 0.4rem 0.7rem;
+    font-size: 0.7rem;
+  }
+
+  .watchPanel {
+    padding: 0.85rem;
+    gap: 0.6rem;
+  }
+
+  .castGrid,
+  .crewGrid {
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 0.6rem;
+  }
+
+  .personCard {
+    padding: 0.8rem;
+  }
+
+  .personName {
+    font-size: 0.9rem;
+  }
+
+  .personMeta {
+    font-size: 0.8rem;
+  }
+
+  .section {
+    padding: 1rem;
+  }
+
+  .sectionTitle {
+    font-size: 1.2rem;
+  }
+
+  .overview {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .heroInner {
+    padding: 0.85rem 0.7rem;
+    gap: 0.8rem;
+  }
+
+  .poster {
+    max-width: 160px;
+  }
+
+  .title {
+    font-size: clamp(1.3rem, 4.5vw, 1.8rem);
+  }
+
+  .tagline {
+    font-size: 0.8rem;
+    line-height: 1.4;
+  }
+
+  .statCard {
+    padding: 0.6rem 0.7rem;
+  }
+
+  .statLabel {
+    font-size: 0.6rem;
+  }
+
+  .statValue {
+    font-size: 0.85rem;
+  }
+
+  .section {
+    padding: 0.9rem;
+    margin-top: 1rem;
+  }
+
+  .sectionTitle {
+    font-size: 1.1rem;
+  }
+
+  .castGrid,
+  .crewGrid {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+
+  .personCard {
+    padding: 0.7rem;
+  }
+
+  .personName {
+    font-size: 0.85rem;
+  }
+
+  .personMeta {
+    font-size: 0.75rem;
   }
 }

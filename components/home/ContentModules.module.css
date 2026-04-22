@@ -176,8 +176,8 @@
   }
 
   .grid {
-    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-    gap: 1rem;
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+    gap: 0.9rem;
   }
 
   .posterContainer {
@@ -187,6 +187,64 @@
   .cardTitle {
     font-size: 0.85rem;
   }
+
+  .viewAll {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .module {
+    padding: 1.2rem 0;
+  }
+
+  .moduleHeader {
+    margin-bottom: 0.9rem;
+    gap: 0.5rem;
+  }
+
+  .moduleTitle {
+    font-size: 1.15rem;
+  }
+
+  .viewAll {
+    font-size: 0.85rem;
+    padding: 0.4rem 0.8rem;
+  }
+
+  .grid {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 0.8rem;
+  }
+
+  .posterContainer {
+    margin-bottom: 0.4rem;
+    border-radius: 6px;
+  }
+
+  .cardTitle {
+    font-size: 0.8rem;
+  }
+
+  .platform {
+    font-size: 0.75rem;
+  }
+
+  .date {
+    font-size: 0.7rem;
+  }
+
+  .badge {
+    top: 0.3rem;
+    right: 0.3rem;
+    padding: 0.3rem 0.6rem;
+    font-size: 0.6rem;
+  }
+
+  .rating {
+    padding: 0.3rem 0.6rem;
+    font-size: 0.75rem;
+  }
 }
 
 @media (max-width: 480px) {
@@ -194,13 +252,23 @@
     padding: 1rem 0;
   }
 
+  .moduleHeader {
+    margin-bottom: 0.8rem;
+    gap: 0.4rem;
+  }
+
   .moduleTitle {
-    font-size: 1.1rem;
+    font-size: 1rem;
+  }
+
+  .viewAll {
+    font-size: 0.8rem;
+    padding: 0.3rem 0.6rem;
   }
 
   .grid {
-    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-    gap: 0.75rem;
+    grid-template-columns: repeat(auto-fill, minmax(85px, 1fr));
+    gap: 0.7rem;
   }
 
   .cardTitle {
@@ -209,6 +277,51 @@
 
   .platform,
   .date {
+    font-size: 0.65rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .module {
+    padding: 0.85rem 0;
+  }
+
+  .moduleTitle {
+    font-size: 0.95rem;
+  }
+
+  .viewAll {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+  }
+
+  .grid {
+    grid-template-columns: repeat(auto-fill, minmax(75px, 1fr));
+    gap: 0.6rem;
+  }
+
+  .posterContainer {
+    margin-bottom: 0.3rem;
+  }
+
+  .cardTitle {
     font-size: 0.7rem;
+    margin: 0 0 0.15rem 0;
+  }
+
+  .platform,
+  .date {
+    font-size: 0.6rem;
+  }
+
+  .card {
+    border-radius: 6px;
+  }
+
+  .badge {
+    top: 0.2rem;
+    right: 0.2rem;
+    padding: 0.2rem 0.4rem;
+    font-size: 0.5rem;
   }
 }

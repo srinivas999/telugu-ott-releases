@@ -17,6 +17,7 @@
   display: flex;
   align-items: center;
   gap: 0.25rem;
+  flex-wrap: nowrap;
 }
 
 .link {
@@ -24,6 +25,9 @@
   text-decoration: none;
   font-size: 0.9rem;
   transition: color 0.2s;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .link:hover {
@@ -34,20 +38,71 @@
 .separator {
   color: #999;
   margin: 0 0.25rem;
+  flex-shrink: 0;
 }
 
 .current {
   color: #666;
   font-size: 0.9rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 
 @media (max-width: 640px) {
+  .breadcrumb {
+    padding: 0.75rem 0;
+  }
+
+  .list {
+    gap: 0.15rem;
+  }
+
+  .link,
+  .current {
+    font-size: 0.85rem;
+  }
+
+  .separator {
+    margin: 0 0.15rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .breadcrumb {
+    padding: 0.6rem 0;
+  }
+
+  .link,
+  .current {
+    font-size: 0.8rem;
+  }
+
+  .list {
+    gap: 0.1rem;
+  }
+
+  .separator {
+    margin: 0 0.1rem;
+  }
+}
+
+@media (max-width: 360px) {
   .breadcrumb {
     padding: 0.5rem 0;
   }
 
   .link,
   .current {
-    font-size: 0.85rem;
+    font-size: 0.75rem;
+  }
+
+  .list {
+    gap: 0.08rem;
+  }
+
+  .separator {
+    margin: 0 0.08rem;
+    font-size: 0.8rem;
   }
 }
