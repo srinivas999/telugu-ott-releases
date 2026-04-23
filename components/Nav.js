@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
+import SearchBar from './SearchBar';
 
 const navLinks = [
   { href: '/', label: 'Home' },
@@ -26,6 +27,11 @@ export default function Nav() {
 
   useEffect(() => {
     document.body.classList.toggle('nav-open', menuOpen);
+
+    // Scroll to top when menu opens on mobile
+    if (menuOpen && window.innerWidth <= 767.98) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
 
     return () => {
       document.body.classList.remove('nav-open');
@@ -96,6 +102,9 @@ export default function Nav() {
           className={`nav-menu ${menuOpen ? 'is-open' : ''}`}
           aria-hidden={!menuOpen}
         >
+          <div className="nav-search-container">
+            <SearchBar />
+          </div>
           <ul className="nav-links">
             {navLinks.map((link) => {
               const active = router.pathname === link.href;
