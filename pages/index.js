@@ -207,28 +207,7 @@ export default function HomePage() {
       setTheatreLoading(true);
       setTheatreError('');
       try {
-        // Check deployment mode
-        const isGitHubDeploy =
-          process.env.NEXT_PUBLIC_IS_GITHUB_DEPLOY === 'true' ||
-          (typeof window !== 'undefined' && window.location.hostname.includes('github.io'));
-        const tmdbApiKey = process.env.NEXT_PUBLIC_TMDB_API_KEY;
-        let response;
-
-        if (isGitHubDeploy) {
-          if (!tmdbApiKey) {
-            console.error('TMDB API key is not configured');
-            setTheatreMovies([]);
-            setTheatreError('Configuration issue: TMDB API key not found.');
-            setTheatreLoading(false);
-            return;
-          }
-
-          response = await fetch(
-            `https://api.themoviedb.org/3/movie/now_playing?api_key=${tmdbApiKey}&language=te-IN&page=1`
-          );
-        } else {
-          response = await fetch('/api/tmdb/latest');
-        }
+        const response = await fetch('/api/tmdb/latest');
 
         if (!response.ok) {
           const body = await response.text();

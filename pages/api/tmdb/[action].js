@@ -46,6 +46,15 @@ export default async function handler(req, res) {
   }
 
   try {
+    // Build cache key from URL for ETag
+    const cacheKey = `tmdb_cache_${action}_${JSON.stringify(req.query)}`;
+    
+    // Check if client has valid ETag
+    const clientETag = req.headers['if-none-match'];
+    if (clientETag) {
+      res.setHeader('ETag', clientETag);
+    }
+
     const tmdbUrl = `${url}${readAccessToken ? '' : `${url.includes('?') ? '&' : '?'}api_key=${encodeURIComponent(apiKey)}`}`;
     const tmdbResponse = await fetch(tmdbUrl, {
       headers: readAccessToken
@@ -55,8 +64,27 @@ export default async function handler(req, res) {
           }
         : undefined,
     });
+
+    // TMDB returns 304 when data unchanged
+    if (tmdbResponse.status === 304) {
+      return res.status(304).end();
+    }
+
+    // Forward error status from TMDB
+    if (!tmdbResponse.ok) {
+      const errorPayload = await tmdbResponse.json();
+      return res.status(tmdbResponse.status).json(errorPayload);
+    }
+
     const payload = await tmdbResponse.json();
-    return res.status(tmdbResponse.ok ? 200 : tmdbResponse.status).json(payload);
+    
+    // Get ETag from TMDB response and forward it
+    const tmdbETag = tmdbResponse.headers.get('etag');
+    if (tmdbETag) {
+      res.setHeader('ETag', tmdbETag);
+    }
+
+    return res.status(200).json(payload);
   } catch (error) {
     return res.status(500).json({ error: 'Unable to fetch TMDb data.' });
   }
