@@ -1,12 +1,10 @@
 import { useState } from 'react';
-import { useRouter } from 'next/router';
 import Layout from '../components/Layout';
+import Seo from '../components/Seo';
 import Breadcrumb from '../components/common/Breadcrumb';
 import { supabase } from '../lib/supabaseClient';
 
 export default function ContactPage() {
-  const router = useRouter();
-
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [error, setError] = useState('');
@@ -69,6 +67,12 @@ export default function ContactPage() {
 
 return (
     <Layout>
+      <Seo
+        title="Contact Telugu OTT Releases"
+        description="Contact Telugu OTT Releases for feedback, corrections, partnership requests, and Telugu OTT movie update suggestions."
+        url="/contact"
+        keywords="contact Telugu OTT Releases, Telugu OTT feedback, OTT release corrections"
+      />
       <Breadcrumb items={[{ name: 'Home', url: '/' }, { name: 'Contact Us' }]} />
       <div className="page-contact">
         {/* Decorative background elements */}

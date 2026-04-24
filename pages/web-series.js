@@ -1,5 +1,5 @@
-
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import Layout from '../components/Layout';
 import Seo from '../components/Seo';
 import Breadcrumb from '../components/common/Breadcrumb';
@@ -39,29 +39,39 @@ export default function WebSeriesPage() {
         if (!res.ok) throw new Error('Failed to fetch web series');
         const data = await res.json();
         setSeries(data.results || []);
-        setError(''); // Clear error if fetch succeeds
+        setError('');
       } catch (err) {
         setError(err.message);
-        setSeries([]); // Clear data if fetch fails
+        setSeries([]);
       }
       setLoading(false);
     }
+
     fetchSeries();
   }, []);
 
   return (
-<Layout>
-      <Seo title="Latest Telugu Web Series" description="Latest Telugu web series streaming on OTT platforms. Find new Telugu web series releases with posters, ratings, and more." />
+    <Layout>
+      <Seo
+        title="Latest Telugu Web Series"
+        description="Latest Telugu web series streaming on OTT platforms. Find new Telugu web series releases with posters, ratings, and more."
+        url="/web-series"
+        keywords="latest Telugu web series, Telugu OTT web series, Telugu streaming series"
+      />
+
       <Breadcrumb items={[{ name: 'Home', url: '/' }, { name: 'Web Series' }]} />
+
       <section className="ott-hero">
         <div className="ott-hero__panel">
           <h1>Latest Telugu Web Series</h1>
           <p className="ott-hero__tagline">Discover the newest Telugu web series streaming now!</p>
         </div>
       </section>
+
       <section className="webseries-list-section">
+        <h2 className="visually-hidden">Latest Telugu web series list</h2>
         {loading ? (
-          <div className="webseries-list__loading">Loading…</div>
+          <div className="webseries-list__loading">Loading...</div>
         ) : error ? (
           <div className="webseries-list__error">{error}</div>
         ) : series.length === 0 ? (
@@ -74,7 +84,24 @@ export default function WebSeriesPage() {
           </div>
         )}
       </section>
+
+      <section className="webseries-list-section">
+        <h2 className="webseries-list__loading">Explore More</h2>
+        <div className="webseries-list-grid">
+          <Link href="/ott-movies" className="webseries-card">
+            <div className="webseries-card__body">
+              <h3 className="webseries-card__title">OTT Movies</h3>
+              <p className="webseries-card__desc">Browse upcoming and latest Telugu OTT movie releases.</p>
+            </div>
+          </Link>
+          <Link href="/theatre-release" className="webseries-card">
+            <div className="webseries-card__body">
+              <h3 className="webseries-card__title">Theatre Releases</h3>
+              <p className="webseries-card__desc">Track Tollywood theatrical releases with ratings and details.</p>
+            </div>
+          </Link>
+        </div>
+      </section>
     </Layout>
   );
 }
-

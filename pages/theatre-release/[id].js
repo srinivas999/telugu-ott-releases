@@ -152,33 +152,6 @@ export default function MovieDetailsPage() {
     loadMovies();
   }, []);
 
-  useEffect(() => {
-    if (!id) return;
-
-    async function loadMovie() {
-      setLoading(true);
-      setError('');
-
-      try {
-        const response = await fetch(`/api/tmdb/details?id=${encodeURIComponent(id)}`);
-        if (!response.ok) {
-          const text = await response.text();
-          throw new Error(`Unable to load movie details (${response.status}). ${text}`);
-        }
-
-        const data = await response.json();
-        setMovie(data);
-      } catch (fetchError) {
-        console.error('Movie details fetch error:', fetchError);
-        setError(fetchError.message || 'Unable to load movie details.');
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    loadMovie();
-  }, [id]);
-
   return (
     <Layout>
       <Seo
@@ -186,6 +159,7 @@ export default function MovieDetailsPage() {
         description={movie?.overview || 'Movie details and trailer links.'}
         url={id ? `/theatre-release/${id}` : '/theatre-release'}
         keywords="Telugu theatre movie details, movie details"
+        image={movie?.poster_path ? `${TMDB_POSTER_BASE}${movie.poster_path}` : undefined}
       />
 
       <Breadcrumb
@@ -200,7 +174,7 @@ export default function MovieDetailsPage() {
         <div className="projects-page-inner">
           <div className="projects-page-header">
             <p className="eyebrow">Theatre Release</p>
-            <h1 className="projects-page-title">Movie details</h1>
+            <p className="projects-page-title">Movie details</p>
           </div>
 
           {loading ? (

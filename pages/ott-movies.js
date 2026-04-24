@@ -481,7 +481,11 @@ export default function OttMoviesPage({ home = false }) {
                     ) : (
                       filteredMovies.map((movie) => (
                         <tr key={movie.id || `${movie.movie_name}-${movie.digital_release_date}`}>
-                          <td className="ott-movies-table-v2__name">{movie.movie_name || 'Untitled'}</td>
+                          <td className="ott-movies-table-v2__name">
+                            <Link href={`/movie/${generateUniqueSlug(movie.movie_name, movie.id)}`}>
+                              {movie.movie_name || 'Untitled'}
+                            </Link>
+                          </td>
                           <td>{formatReleaseDate(movie.digital_release_date)}</td>
                           <td>
                             <span
@@ -523,7 +527,11 @@ export default function OttMoviesPage({ home = false }) {
                       >
                         {movie.streaming_partner || 'Partner'}
                       </span>
-                      <h3>{movie.movie_name || 'Untitled'}</h3>
+                      <h3>
+                        <Link href={`/movie/${generateUniqueSlug(movie.movie_name, movie.id)}`}>
+                          {movie.movie_name || 'Untitled'}
+                        </Link>
+                      </h3>
                       <p>{formatReleaseDate(movie.digital_release_date)}</p>
                     </div>
                   </article>

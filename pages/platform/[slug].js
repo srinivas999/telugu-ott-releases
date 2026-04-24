@@ -3,7 +3,9 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import Layout from '../../components/Layout';
 import Seo from '../../components/Seo';
+import Breadcrumb from '../../components/common/Breadcrumb';
 import { supabase } from '../../lib/supabaseClient';
+import { generateUniqueSlug } from '../../lib/utils/slug';
 
 const PLATFORM_MAP = {
   'netflix': 'Netflix',
@@ -16,8 +18,10 @@ const PLATFORM_MAP = {
 };
 
 function PlatformMovieCard({ movie }) {
+  const movieSlug = generateUniqueSlug(movie.movie_name, movie.id);
+
   return (
-    <div className="webseries-card">
+    <Link href={`/movie/${movieSlug}`} className="webseries-card">
       <div className="webseries-card__img-wrap">
         <img
           src={movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : '/images/default_poster.png'}
@@ -33,7 +37,7 @@ function PlatformMovieCard({ movie }) {
         </div>
         <p className="webseries-card__desc">{movie.overview || 'No description available.'}</p>
       </div>
-    </div>
+    </Link>
   );
 }
 
@@ -45,6 +49,7 @@ export default function PlatformPage() {
   const [error, setError] = useState('');
 
   const platformName = slug ? PLATFORM_MAP[slug] : '';
+  const safePlatformName = platformName || 'Platform';
 
   useEffect(() => {
     if (!slug) return;
@@ -80,32 +85,42 @@ export default function PlatformPage() {
     }
 
     loadMovies();
-  }, [slug]);
+  }, [slug, platformName]);
 
   return (
     <Layout>
       <Seo
-        title={`${platformName} Movies - Telugu OTT Releases`}
-        description={`Browse all ${platformName} Telugu movies on TeluguOTTReleases. Find release dates, streaming information, and more.`}
-        url={`/platform/${slug}`}
+        title={`${safePlatformName} Telugu Movies`}
+        description={`Browse Telugu movies available on ${safePlatformName}. Find OTT release dates, ratings, and streaming information.`}
+        url={slug ? `/platform/${slug}` : '/ott-movies'}
+        keywords={`${safePlatformName} Telugu movies, ${safePlatformName} OTT, Telugu streaming movies`}
+      />
+
+      <Breadcrumb
+        items={[
+          { name: 'Home', url: '/' },
+          { name: 'OTT Movies', url: '/ott-movies' },
+          { name: safePlatformName },
+        ]}
       />
 
       <section className="ott-hero">
         <div className="ott-hero__panel">
-          <h1>{platformName} Telugu Movies</h1>
-          <p className="ott-hero__tagline">Discover all Telugu movies available on {platformName}</p>
+          <h1>{safePlatformName} Telugu Movies</h1>
+          <p className="ott-hero__tagline">Discover all Telugu movies available on {safePlatformName}</p>
         </div>
       </section>
 
       <section className="webseries-list-section">
+        <h2 className="visually-hidden">{safePlatformName} movie list</h2>
         {error && (
           <div className="webseries-list__error">{error}</div>
         )}
 
         {loading ? (
-          <div className="webseries-list__loading">Loading {platformName} movies...</div>
+          <div className="webseries-list__loading">Loading {safePlatformName} movies...</div>
         ) : movies.length === 0 ? (
-          <div className="webseries-list__empty">No movies found on {platformName}.</div>
+          <div className="webseries-list__empty">No movies found on {safePlatformName}.</div>
         ) : (
           <div className="webseries-list-grid">
             {movies.map((movie) => (

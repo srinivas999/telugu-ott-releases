@@ -137,7 +137,13 @@ export default function SearchBar() {
 
   return (
     <div className="search-bar" ref={searchRef}>
-      <div className="search-bar__input-group">
+      <div
+        className="search-bar__input-group"
+        role="combobox"
+        aria-controls="search-results"
+        aria-expanded={isOpen}
+        aria-haspopup="listbox"
+      >
         <input
           ref={inputRef}
           type="text"
@@ -149,7 +155,6 @@ export default function SearchBar() {
           aria-label="Search movies or platforms"
           aria-autocomplete="list"
           aria-controls="search-results"
-          aria-expanded={isOpen}
         />
         <svg
           className="search-bar__icon"
@@ -169,7 +174,7 @@ export default function SearchBar() {
 
       {/* Search Results Dropdown */}
       {isOpen && (
-        <div className="search-bar__dropdown" id="search-results">
+        <div className="search-bar__dropdown" id="search-results" role="listbox">
           {isLoading && (
             <div className="search-bar__item search-bar__item--loading">
               <span>Searching...</span>
