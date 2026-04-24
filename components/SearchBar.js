@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import Image from 'next/image';
 import { useRouter } from 'next/router';
 import { supabase } from '../lib/supabaseClient';
 import { generateUniqueSlug } from '../lib/utils/slug';
@@ -215,10 +216,12 @@ export default function SearchBar() {
                     ) : (
                       <>
                         {result.poster_path && (
-                          <img
+                          <Image
                             src={`https://image.tmdb.org/t/p/w92${result.poster_path}`}
                             alt={result.movie_name}
                             className="search-bar__result-poster"
+                            width={40}
+                            height={60}
                           />
                         )}
                         <div className="search-bar__result-content">

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import Layout from '../../components/Layout';
@@ -23,14 +24,16 @@ function PlatformMovieCard({ movie }) {
   return (
     <Link href={`/movie/${movieSlug}`} className="webseries-card">
       <div className="webseries-card__img-wrap">
-        <img
+        <Image
           src={movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : '/images/default_poster.png'}
           alt={movie.movie_name}
           className="webseries-card__img"
+          fill
+          sizes="(max-width: 480px) 100vw, (max-width: 768px) 50vw, 33vw"
         />
       </div>
       <div className="webseries-card__body">
-        <h2 className="webseries-card__title">{movie.movie_name}</h2>
+        <h3 className="webseries-card__title">{movie.movie_name}</h3>
         <div className="webseries-card__meta">
           <span>{movie.digital_release_date ? new Date(`${movie.digital_release_date}T00:00:00`).toLocaleDateString() : 'TBA'}</span>
           {movie.rating > 0 && <span className="webseries-card__rating">★ {movie.rating.toFixed(1)}</span>}

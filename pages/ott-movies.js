@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import Layout from '../components/Layout';
@@ -382,11 +383,12 @@ export default function OttMoviesPage({ home = false }) {
                       <article className="ott-movie-card-v2">
                         {/* Poster */}
                         <div className="ott-movie-card-v2__poster-wrap">
-                          <img
+                          <Image
                             src={posterUrl}
                             alt={`${movie.movie_name || 'Movie'} poster`}
                             className="ott-movie-card-v2__poster"
-                            loading="lazy"
+                            fill
+                            sizes="(max-width: 400px) 100vw, (max-width: 640px) 50vw, (max-width: 1200px) 25vw, 200px"
                           />
                           {/* Platform badge on poster */}
                           <span

@@ -42,6 +42,7 @@
   box-shadow: 0 16px 40px rgba(67, 56, 202, 0.16);
 }
 .webseries-card__img-wrap {
+  position: relative;
   width: 100%;
   aspect-ratio: 2/3;
   background: #eef2ff;

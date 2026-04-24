@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import Layout from '../components/Layout';
@@ -324,11 +325,12 @@ export default function HomePage() {
                   <article key={`${carouselMovie.id}-${index}`} className="tmdb-release-card movie-carousel__card">
                     <div className="tmdb-release-card__poster">
                       {carouselMovie.poster_path ? (
-                        <img
+                        <Image
                           src={`${TMDB_POSTER_BASE}${carouselMovie.poster_path}`}
                           alt={carouselMovie.title || carouselMovie.original_title}
                           className="tmdb-release-card__image"
-                          loading="lazy"
+                          fill
+                          sizes="200px"
                         />
                       ) : (
                         <div className="tmdb-release-card__image tmdb-release-card__placeholder">
@@ -357,11 +359,12 @@ export default function HomePage() {
 
           <section className="ott-hero">
             <div className="ott-hero__visual">
-              <img
+              <Image
                 src={`${assetBasePath}/images/ott-hero-banner.png`}
                 alt="Telugu OTT hero banner"
                 className="hero-image"
-                loading="lazy"
+                fill
+                sizes="(max-width: 980px) 100vw, 35vw"
               />
             </div>
             <div className="ott-hero__panel">
@@ -425,6 +428,10 @@ export default function HomePage() {
               </p>
               <p>
                 If you&apos;re searching for &quot;Telugu OTT releases this week&quot; or &quot;upcoming OTT movies Telugu April 2026,&quot; this page helps you find the latest Telugu streaming launch dates and movie details in one place.
+              </p>
+              <p>
+                Quick links: <Link href="/telugu-ott-releases-this-week">Telugu OTT releases this week</Link> and{' '}
+                <Link href="/top-rated-telugu-ott-movies">top rated Telugu OTT movies</Link>.
               </p>
             </div>
           </section>

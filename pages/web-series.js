@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import Layout from '../components/Layout';
 import Seo from '../components/Seo';
@@ -8,14 +9,16 @@ function WebSeriesCard({ series }) {
   return (
     <div className="webseries-card">
       <div className="webseries-card__img-wrap">
-        <img
+        <Image
           src={series.poster_path ? `https://image.tmdb.org/t/p/w500${series.poster_path}` : '/images/default_poster.png'}
           alt={series.name}
           className="webseries-card__img"
+          fill
+          sizes="(max-width: 480px) 100vw, (max-width: 768px) 50vw, 33vw"
         />
       </div>
       <div className="webseries-card__body">
-        <h2 className="webseries-card__title">{series.name}</h2>
+        <h3 className="webseries-card__title">{series.name}</h3>
         <div className="webseries-card__meta">
           <span>{series.first_air_date ? new Date(series.first_air_date).toLocaleDateString() : 'TBA'}</span>
           {series.vote_average > 0 && <span className="webseries-card__rating">★ {series.vote_average.toFixed(1)}</span>}

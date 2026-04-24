@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import Image from 'next/image';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import Layout from '../../components/Layout';
@@ -190,11 +191,12 @@ export default function MovieDetailsPage() {
                       <article key={carouselMovie.id} className="tmdb-release-card">
                         <div className="tmdb-release-card__poster">
                           {carouselMovie.poster_path ? (
-                            <img
+                            <Image
                               src={`${TMDB_POSTER_BASE}${carouselMovie.poster_path}`}
                               alt={carouselMovie.title || carouselMovie.original_title}
                               className="tmdb-release-card__image"
-                              loading="lazy"
+                              fill
+                              sizes="220px"
                             />
                           ) : (
                             <div className="tmdb-release-card__image tmdb-release-card__placeholder">
@@ -237,19 +239,24 @@ export default function MovieDetailsPage() {
 
               <section className="movie-detail-hero">
               {movie.backdrop_path ? (
-                <img
+                <Image
                   src={`${TMDB_BACKDROP_BASE}${movie.backdrop_path}`}
                   alt={movie.title || movie.original_title}
                   className="movie-detail-hero__backdrop"
+                  fill
+                  priority
+                  sizes="100vw"
                 />
               ) : null}
 
               <div className="movie-detail-hero__inner">
                 <div className="movie-detail-poster">
                   {movie.poster_path ? (
-                    <img
+                    <Image
                       src={`${TMDB_POSTER_BASE}${movie.poster_path}`}
                       alt={`${movie.title || movie.original_title} poster`}
+                      fill
+                      sizes="(max-width: 980px) 320px, 280px"
                     />
                   ) : (
                     <div className="movie-detail-poster__placeholder">
