@@ -24,7 +24,12 @@ export function TrendingNow({ movies = [] }) {
       </div>
       <div className={styles.grid}>
         {movies.slice(0, 6).map((movie, index) => (
-          <MovieCard key={movie.id} movie={movie} index={index} />
+          <MovieCard
+            key={movie.id}
+            movie={movie}
+            index={index}
+            fallbackPoster="/images/default_poster.png"
+          />
         ))}
       </div>
     </section>
@@ -75,12 +80,12 @@ export function RecentlyAdded({ movies = [] }) {
   );
 }
 
-function MovieCard({ movie, index, showDate = false }) {
+function MovieCard({ movie, index, showDate = false, fallbackPoster = '/images/default_poster.png' }) {
   const slug = generateUniqueSlug(movie.movie_name || movie.title, movie.id);
   const href = movie.disableLink ? null : movie.href || `/movie/${slug}`;
   const posterUrl = movie.poster_path
     ? `${TMDB_POSTER_BASE}${movie.poster_path}`
-    : '/images/ott-hero-banner.png';
+    : fallbackPoster;
 
   const content = (
     <>

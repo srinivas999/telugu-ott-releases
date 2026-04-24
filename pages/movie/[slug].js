@@ -115,7 +115,7 @@ export default function MovieDetailPage({ movie: initialMovie }) {
     `Watch ${movieTitle} on OTT platforms in Telugu.`;
   const posterImage = mergedMovie?.poster_path
     ? `https://image.tmdb.org/t/p/w500${mergedMovie.poster_path}`
-    : 'https://svteluguott.in/images/ott-hero-banner.png';
+    : 'https://svteluguott.in/images/default_poster.png';
 
   // Generate schemas
   const movieSchema = generateMovieSchema(mergedMovie || actualMovie);

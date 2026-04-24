@@ -20,7 +20,7 @@ function PlatformMovieCard({ movie }) {
     <div className="webseries-card">
       <div className="webseries-card__img-wrap">
         <img
-          src={movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : '/images/ott-hero-banner.png'}
+          src={movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : '/images/default_poster.png'}
           alt={movie.movie_name}
           className="webseries-card__img"
         />

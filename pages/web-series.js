@@ -9,7 +9,7 @@ function WebSeriesCard({ series }) {
     <div className="webseries-card">
       <div className="webseries-card__img-wrap">
         <img
-          src={series.poster_path ? `https://image.tmdb.org/t/p/w500${series.poster_path}` : '/images/ott-hero-banner.png'}
+          src={series.poster_path ? `https://image.tmdb.org/t/p/w500${series.poster_path}` : '/images/default_poster.png'}
           alt={series.name}
           className="webseries-card__img"
         />
