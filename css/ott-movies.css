@@ -11,6 +11,20 @@
   gap: 2rem;
 }
 
+@media (max-width: 768px) {
+  .webseries-list-grid {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.25rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .webseries-list-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+}
+
 .webseries-card {
   background: #fff;
   border-radius: 18px;
@@ -20,12 +34,15 @@
   flex-direction: column;
   transition: transform 0.18s cubic-bezier(.4,0,.2,1), box-shadow 0.18s;
   border: 1px solid rgba(67, 56, 202, 0.08);
+  color: inherit;
+  text-decoration: none;
 }
 .webseries-card:hover {
   transform: translateY(-4px) scale(1.025);
   box-shadow: 0 16px 40px rgba(67, 56, 202, 0.16);
 }
 .webseries-card__img-wrap {
+  position: relative;
   width: 100%;
   aspect-ratio: 2/3;
   background: #eef2ff;
@@ -61,6 +78,7 @@
   color: #6366f1;
   margin-bottom: 0.5rem;
   align-items: center;
+  flex-wrap: wrap;
 }
 .webseries-card__rating {
   background: #e0e7ff;
@@ -1384,6 +1402,12 @@
   padding: 0 1.25rem;
 }
 
+@media (max-width: 640px) {
+  .page-ott-movies__inner {
+    padding: 0 0.75rem;
+  }
+}
+
 /* Hero */
 .ott-movies-hero {
   padding: clamp(3rem, 8vw, 5rem) 0 clamp(1.5rem, 4vw, 2.5rem);
@@ -1644,6 +1668,15 @@
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
+}
+
+@media (max-width: 640px) {
+  .ott-movies-filters__platforms {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding-bottom: 0.35rem;
+    -webkit-overflow-scrolling: touch;
+  }
 }
 
 .ott-platform-pill {

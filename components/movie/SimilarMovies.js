@@ -23,7 +23,7 @@ export default function SimilarMovies({ movies = [] }) {
           const slug = generateUniqueSlug(movie.movie_name || movie.title, movie.id);
           const posterUrl = movie.poster_path
             ? `${TMDB_POSTER_BASE}${movie.poster_path}`
-            : '/images/ott-hero-banner.png';
+            : '/images/default_poster.png';
 
           return (
             <Link key={movie.id} href={`/movie/${slug}`} className={styles.movieCard}>

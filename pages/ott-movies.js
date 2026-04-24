@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import Layout from '../components/Layout';
@@ -382,11 +383,12 @@ export default function OttMoviesPage({ home = false }) {
                       <article className="ott-movie-card-v2">
                         {/* Poster */}
                         <div className="ott-movie-card-v2__poster-wrap">
-                          <img
+                          <Image
                             src={posterUrl}
                             alt={`${movie.movie_name || 'Movie'} poster`}
                             className="ott-movie-card-v2__poster"
-                            loading="lazy"
+                            fill
+                            sizes="(max-width: 400px) 100vw, (max-width: 640px) 50vw, (max-width: 1200px) 25vw, 200px"
                           />
                           {/* Platform badge on poster */}
                           <span
@@ -481,7 +483,11 @@ export default function OttMoviesPage({ home = false }) {
                     ) : (
                       filteredMovies.map((movie) => (
                         <tr key={movie.id || `${movie.movie_name}-${movie.digital_release_date}`}>
-                          <td className="ott-movies-table-v2__name">{movie.movie_name || 'Untitled'}</td>
+                          <td className="ott-movies-table-v2__name">
+                            <Link href={`/movie/${generateUniqueSlug(movie.movie_name, movie.id)}`}>
+                              {movie.movie_name || 'Untitled'}
+                            </Link>
+                          </td>
                           <td>{formatReleaseDate(movie.digital_release_date)}</td>
                           <td>
                             <span
@@ -523,7 +529,11 @@ export default function OttMoviesPage({ home = false }) {
                       >
                         {movie.streaming_partner || 'Partner'}
                       </span>
-                      <h3>{movie.movie_name || 'Untitled'}</h3>
+                      <h3>
+                        <Link href={`/movie/${generateUniqueSlug(movie.movie_name, movie.id)}`}>
+                          {movie.movie_name || 'Untitled'}
+                        </Link>
+                      </h3>
                       <p>{formatReleaseDate(movie.digital_release_date)}</p>
                     </div>
                   </article>

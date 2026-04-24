@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import Layout from '../components/Layout';
 import Seo from '../components/Seo';
@@ -209,10 +210,12 @@ export default function TheatreReleasePage() {
               <div className="theatre-featured__card">
                 <div className="theatre-featured__poster">
                   {featuredMovie.poster_path ? (
-                    <img
+                    <Image
                       src={`${TMDB_POSTER_BASE}${featuredMovie.poster_path}`}
                       alt={featuredMovie.title || featuredMovie.original_title}
-                      loading="eager"
+                      fill
+                      priority
+                      sizes="(max-width: 768px) 220px, 280px"
                     />
                   ) : (
                     <div className="theatre-featured__placeholder">
@@ -315,11 +318,12 @@ export default function TheatreReleasePage() {
                   <article key={movie.id} className="theatre-card">
                     <div className="theatre-card__poster">
                       {movie.poster_path ? (
-                        <img
+                        <Image
                           src={`${TMDB_POSTER_BASE}${movie.poster_path}`}
                           alt={movie.title || movie.original_title}
                           className="theatre-card__image"
-                          loading="lazy"
+                          fill
+                          sizes={compactMode ? "(max-width: 640px) 33vw, 160px" : "(max-width: 640px) 50vw, 220px"}
                         />
                       ) : (
                         <div className="theatre-card__placeholder">

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import Image from 'next/image';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import Layout from '../../components/Layout';
@@ -152,33 +153,6 @@ export default function MovieDetailsPage() {
     loadMovies();
   }, []);
 
-  useEffect(() => {
-    if (!id) return;
-
-    async function loadMovie() {
-      setLoading(true);
-      setError('');
-
-      try {
-        const response = await fetch(`/api/tmdb/details?id=${encodeURIComponent(id)}`);
-        if (!response.ok) {
-          const text = await response.text();
-          throw new Error(`Unable to load movie details (${response.status}). ${text}`);
-        }
-
-        const data = await response.json();
-        setMovie(data);
-      } catch (fetchError) {
-        console.error('Movie details fetch error:', fetchError);
-        setError(fetchError.message || 'Unable to load movie details.');
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    loadMovie();
-  }, [id]);
-
   return (
     <Layout>
       <Seo
@@ -186,6 +160,7 @@ export default function MovieDetailsPage() {
         description={movie?.overview || 'Movie details and trailer links.'}
         url={id ? `/theatre-release/${id}` : '/theatre-release'}
         keywords="Telugu theatre movie details, movie details"
+        image={movie?.poster_path ? `${TMDB_POSTER_BASE}${movie.poster_path}` : undefined}
       />
 
       <Breadcrumb
@@ -200,7 +175,7 @@ export default function MovieDetailsPage() {
         <div className="projects-page-inner">
           <div className="projects-page-header">
             <p className="eyebrow">Theatre Release</p>
-            <h1 className="projects-page-title">Movie details</h1>
+            <p className="projects-page-title">Movie details</p>
           </div>
 
           {loading ? (
@@ -216,11 +191,12 @@ export default function MovieDetailsPage() {
                       <article key={carouselMovie.id} className="tmdb-release-card">
                         <div className="tmdb-release-card__poster">
                           {carouselMovie.poster_path ? (
-                            <img
+                            <Image
                               src={`${TMDB_POSTER_BASE}${carouselMovie.poster_path}`}
                               alt={carouselMovie.title || carouselMovie.original_title}
                               className="tmdb-release-card__image"
-                              loading="lazy"
+                              fill
+                              sizes="220px"
                             />
                           ) : (
                             <div className="tmdb-release-card__image tmdb-release-card__placeholder">
@@ -263,19 +239,24 @@ export default function MovieDetailsPage() {
 
               <section className="movie-detail-hero">
               {movie.backdrop_path ? (
-                <img
+                <Image
                   src={`${TMDB_BACKDROP_BASE}${movie.backdrop_path}`}
                   alt={movie.title || movie.original_title}
                   className="movie-detail-hero__backdrop"
+                  fill
+                  priority
+                  sizes="100vw"
                 />
               ) : null}
 
               <div className="movie-detail-hero__inner">
                 <div className="movie-detail-poster">
                   {movie.poster_path ? (
-                    <img
+                    <Image
                       src={`${TMDB_POSTER_BASE}${movie.poster_path}`}
                       alt={`${movie.title || movie.original_title} poster`}
+                      fill
+                      sizes="(max-width: 980px) 320px, 280px"
                     />
                   ) : (
                     <div className="movie-detail-poster__placeholder">

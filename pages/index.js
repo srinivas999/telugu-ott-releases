@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import Layout from '../components/Layout';
@@ -108,6 +109,23 @@ function sortMovies(movies, sortOrder) {
   });
 }
 
+function sortMoviesByRating(movies) {
+  return [...movies].sort((a, b) => {
+    const firstRating = typeof a.rating === 'number' ? a.rating : Number(a.rating) || 0;
+    const secondRating = typeof b.rating === 'number' ? b.rating : Number(b.rating) || 0;
+
+    if (secondRating !== firstRating) {
+      return secondRating - firstRating;
+    }
+
+    const firstTime = new Date(`${a.digital_release_date}T00:00:00`).getTime();
+    const secondTime = new Date(`${b.digital_release_date}T00:00:00`).getTime();
+
+    if (Number.isNaN(firstTime) || Number.isNaN(secondTime)) return 0;
+    return secondTime - firstTime;
+  });
+}
+
 export default function HomePage() {
   const router = useRouter();
   const [ottMovies, setOttMovies] = useState([]);
@@ -125,7 +143,10 @@ export default function HomePage() {
   const { movies: recentlyAddedMovies } = useRecentlyAdded(10);
 
   const carouselRef = useRef(null);
-  const trendingMovies = useMemo(() => sortMovies(ottMovies, 'desc').slice(0, 8), [ottMovies]);
+  const trendingMovies = useMemo(
+    () => sortMoviesByRating(ottMovies).filter((movie) => Number(movie.rating) > 0).slice(0, 8),
+    [ottMovies]
+  );
 
   // Create duplicated movies for infinite marquee effect
   const marqueeMovies = useMemo(() => {
@@ -287,7 +308,7 @@ export default function HomePage() {
         <div className="projects-page-inner">
         
           {/* NEW: Add content modules */}
-          <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '2rem 1rem' }}>
+          <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0.5rem 1rem 2rem' }}>
             <TrendingNow movies={moduleTrendingMovies} />
             <ReleasingThisWeekend movies={weekendReleases} />
             <RecentlyAdded movies={recentlyAddedMovies} />
@@ -304,11 +325,12 @@ export default function HomePage() {
                   <article key={`${carouselMovie.id}-${index}`} className="tmdb-release-card movie-carousel__card">
                     <div className="tmdb-release-card__poster">
                       {carouselMovie.poster_path ? (
-                        <img
+                        <Image
                           src={`${TMDB_POSTER_BASE}${carouselMovie.poster_path}`}
                           alt={carouselMovie.title || carouselMovie.original_title}
                           className="tmdb-release-card__image"
-                          loading="lazy"
+                          fill
+                          sizes="200px"
                         />
                       ) : (
                         <div className="tmdb-release-card__image tmdb-release-card__placeholder">
@@ -337,11 +359,12 @@ export default function HomePage() {
 
           <section className="ott-hero">
             <div className="ott-hero__visual">
-              <img
+              <Image
                 src={`${assetBasePath}/images/ott-hero-banner.png`}
                 alt="Telugu OTT hero banner"
                 className="hero-image"
-                loading="lazy"
+                fill
+                sizes="(max-width: 980px) 100vw, 35vw"
               />
             </div>
             <div className="ott-hero__panel">
@@ -405,6 +428,10 @@ export default function HomePage() {
               </p>
               <p>
                 If you&apos;re searching for &quot;Telugu OTT releases this week&quot; or &quot;upcoming OTT movies Telugu April 2026,&quot; this page helps you find the latest Telugu streaming launch dates and movie details in one place.
+              </p>
+              <p>
+                Quick links: <Link href="/telugu-ott-releases-this-week">Telugu OTT releases this week</Link> and{' '}
+                <Link href="/top-rated-telugu-ott-movies">top rated Telugu OTT movies</Link>.
               </p>
             </div>
           </section>
@@ -526,7 +553,7 @@ export default function HomePage() {
           <section className="ott-section ott-trending" aria-labelledby="trending-heading">
             <div className="section-heading">
               <p className="eyebrow">Trending</p>
-              <h2 id="trending-heading">Buzzing Telugu OTT premieres</h2>
+              <h2 id="trending-heading">Top rated Telugu OTT movies</h2>
             </div>
             <div className="ott-trending-carousel" aria-label="Trending OTT releases">
               {trendingMovies.map((movie) => (
@@ -539,7 +566,9 @@ export default function HomePage() {
                         {movie.movie_name || 'Untitled'}
                       </Link>
                     </h3>
-                    <p>{formatReleaseDate(movie.digital_release_date)}</p>
+                    <p>
+                      {Number(movie.rating) > 0 ? `Rating ${Number(movie.rating).toFixed(1)}/10` : formatReleaseDate(movie.digital_release_date)}
+                    </p>
                   </div>
                 </article>
               ))}

@@ -88,6 +88,18 @@ h3 {
   word-wrap: break-word;
 }
 
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 .site-header {
   position: sticky;
   top: 0;
@@ -2066,6 +2078,13 @@ html[data-homepage-mode="ott_only"] .site-footer__copy {
   }
 }
 
+@media (max-width: 640px) {
+  .admin-table-wrapper {
+    margin: 0 -1rem -1rem -1rem;
+    padding: 1rem;
+  }
+}
+
 @media (max-width: 48rem) {
   .admin-dashboard-grid {
     grid-template-columns: 1fr;
@@ -3009,6 +3028,12 @@ html[data-hide-contact="true"] #contact {
   }
 }
 
+@media (max-width: 640px) {
+  .search-bar {
+    min-width: 0;
+  }
+}
+
 /* ============================================================
    CONTACT PAGE — Enhanced Design (Overrides previous styles)
    ============================================================ */
@@ -3676,6 +3701,27 @@ html[data-hide-contact="true"] #contact {
   border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 16px;
   backdrop-filter: blur(16px);
+}
+
+@media (max-width: 640px) {
+  .theatre-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .theatre-controls__group {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .theatre-controls__select {
+    width: 100%;
+  }
+
+  .theatre-view-toggle {
+    width: 100%;
+    justify-content: center;
+  }
 }
 
 .theatre-controls__group {

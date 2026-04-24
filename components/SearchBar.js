@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import Image from 'next/image';
 import { useRouter } from 'next/router';
 import { supabase } from '../lib/supabaseClient';
 import { generateUniqueSlug } from '../lib/utils/slug';
@@ -137,7 +138,13 @@ export default function SearchBar() {
 
   return (
     <div className="search-bar" ref={searchRef}>
-      <div className="search-bar__input-group">
+      <div
+        className="search-bar__input-group"
+        role="combobox"
+        aria-controls="search-results"
+        aria-expanded={isOpen}
+        aria-haspopup="listbox"
+      >
         <input
           ref={inputRef}
           type="text"
@@ -149,7 +156,6 @@ export default function SearchBar() {
           aria-label="Search movies or platforms"
           aria-autocomplete="list"
           aria-controls="search-results"
-          aria-expanded={isOpen}
         />
         <svg
           className="search-bar__icon"
@@ -169,7 +175,7 @@ export default function SearchBar() {
 
       {/* Search Results Dropdown */}
       {isOpen && (
-        <div className="search-bar__dropdown" id="search-results">
+        <div className="search-bar__dropdown" id="search-results" role="listbox">
           {isLoading && (
             <div className="search-bar__item search-bar__item--loading">
               <span>Searching...</span>
@@ -210,10 +216,12 @@ export default function SearchBar() {
                     ) : (
                       <>
                         {result.poster_path && (
-                          <img
+                          <Image
                             src={`https://image.tmdb.org/t/p/w92${result.poster_path}`}
                             alt={result.movie_name}
                             className="search-bar__result-poster"
+                            width={40}
+                            height={60}
                           />
                         )}
                         <div className="search-bar__result-content">

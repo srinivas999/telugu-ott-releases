@@ -7,7 +7,7 @@ import Image from 'next/image';
 import styles from './MovieDetails.module.css';
 
 const TMDB_IMAGE_BASE = 'https://image.tmdb.org/t/p/w780';
-const FALLBACK_IMAGE = '/images/ott-hero-banner.png';
+const FALLBACK_IMAGE = '/images/default_poster.png';
 
 function formatDate(dateString) {
   if (!dateString) return 'TBA';
