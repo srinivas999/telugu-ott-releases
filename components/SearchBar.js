@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
-import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { supabase } from '../lib/supabaseClient';
+import { generateUniqueSlug } from '../lib/utils/slug';
 
 const PLATFORMS = ['Netflix', 'Aha', 'Prime Video', 'JioHotstar', 'Zee5', 'Sun NXT', 'ETV Win'];
 
@@ -127,10 +127,11 @@ export default function SearchBar() {
       router.push(`/platform/${platformSlug}`);
     } else {
       // Navigate to movie page
+      const movieSlug = generateUniqueSlug(result.movie_name, result.id);
       setSearchTerm('');
       setResults([]);
       setIsOpen(false);
-      router.push(`/movie/${result.id}`);
+      router.push(`/movie/${movieSlug}`);
     }
   };
 

@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import Link from 'next/link';
 import Layout from '../../components/Layout';
 import Seo from '../../components/Seo';
+import Breadcrumb from '../../components/common/Breadcrumb';
 
 const TMDB_POSTER_BASE = 'https://image.tmdb.org/t/p/w500';
 const TMDB_BACKDROP_BASE = 'https://image.tmdb.org/t/p/original';
@@ -185,6 +186,14 @@ export default function MovieDetailsPage() {
         description={movie?.overview || 'Movie details and trailer links.'}
         url={id ? `/theatre-release/${id}` : '/theatre-release'}
         keywords="Telugu theatre movie details, movie details"
+      />
+
+      <Breadcrumb
+        items={[
+          { name: 'Home', url: '/' },
+          { name: 'Theatre Releases', url: '/theatre-release' },
+          { name: movie?.title || movie?.original_title || 'Movie Details' },
+        ]}
       />
 
       <main className="page-projects page-ott movie-detail-page">

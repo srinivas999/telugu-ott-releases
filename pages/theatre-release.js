@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import Layout from '../components/Layout';
 import Seo from '../components/Seo';
+import Breadcrumb from '../components/common/Breadcrumb';
 
 const TMDB_POSTER_BASE = 'https://image.tmdb.org/t/p/w500';
 const CACHE_KEY = 'theatreReleaseMoviesCache';
@@ -122,6 +123,8 @@ export default function TheatreReleasePage() {
         url="/theatre-release"
         keywords="Telugu theatre releases, Tollywood theatre movies, latest Telugu movies"
       />
+
+      <Breadcrumb items={[{ name: 'Home', url: '/' }, { name: 'Theatre Releases' }]} />
 
       <main className="theatre-page">
         {/* Decorative background */}
