@@ -1,12 +1,14 @@
 import { useRouter } from 'next/router';
 import Layout from '../components/Layout';
+import Breadcrumb from '../components/common/Breadcrumb';
 
 export default function BlogPage() {
   const router = useRouter();
   const assetBasePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
 
-  return (
+return (
     <Layout>
+      <Breadcrumb items={[{ name: 'Home', url: '/' }, { name: 'Blog' }]} />
       <section className="page-projects page-ott">
         <div className="projects-page-inner">
 

@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import Layout from '../components/Layout';
 import Seo from '../components/Seo';
+import Breadcrumb from '../components/common/Breadcrumb';
 import { supabase } from '../lib/supabaseClient';
 import { generateUniqueSlug } from '../lib/utils/slug';
 
@@ -187,6 +188,8 @@ export default function OttMoviesPage({ home = false }) {
         keywords="Telugu OTT releases this week, upcoming OTT movies Telugu, Netflix Telugu, Aha Telugu, Prime Video Telugu"
         jsonLd={jsonLd}
       />
+
+<Breadcrumb items={[{ name: 'Home', url: '/' }, { name: 'OTT Movies' }]} />
 
       <main className="page-ott-movies">
         {/* Animated background */}

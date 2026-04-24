@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import Layout from '../components/Layout';
 import Seo from '../components/Seo';
+import Breadcrumb from '../components/common/Breadcrumb';
 
 function WebSeriesCard({ series }) {
   return (
@@ -49,8 +50,9 @@ export default function WebSeriesPage() {
   }, []);
 
   return (
-    <Layout>
+<Layout>
       <Seo title="Latest Telugu Web Series" description="Latest Telugu web series streaming on OTT platforms. Find new Telugu web series releases with posters, ratings, and more." />
+      <Breadcrumb items={[{ name: 'Home', url: '/' }, { name: 'Web Series' }]} />
       <section className="ott-hero">
         <div className="ott-hero__panel">
           <h1>Latest Telugu Web Series</h1>

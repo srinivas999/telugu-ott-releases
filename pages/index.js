@@ -280,8 +280,8 @@ export default function HomePage() {
         jsonLd={jsonLd}
       />
 
-      {/* NEW: Add breadcrumb at top */}
-      <Breadcrumb items={[{ name: 'Home' }]} />
+      {/* Breadcrumb: shows current page context */}
+      <Breadcrumb items={[{ name: 'Home', url: '/' }, { name: 'Latest OTT Releases' }]} />
 
       <section className="page-projects page-ott">
         <div className="projects-page-inner">

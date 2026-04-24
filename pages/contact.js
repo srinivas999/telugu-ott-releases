@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/router';
 import Layout from '../components/Layout';
+import Breadcrumb from '../components/common/Breadcrumb';
 import { supabase } from '../lib/supabaseClient';
 
 export default function ContactPage() {
@@ -66,8 +67,9 @@ export default function ContactPage() {
     }
   }
 
-  return (
+return (
     <Layout>
+      <Breadcrumb items={[{ name: 'Home', url: '/' }, { name: 'Contact Us' }]} />
       <div className="page-contact">
         {/* Decorative background elements */}
         <div className="contact-bg-blob contact-bg-blob--1" aria-hidden="true" />
