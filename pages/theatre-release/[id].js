@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
+import Image from 'next/image';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import Layout from '../../components/Layout';
 import Seo from '../../components/Seo';
+import Breadcrumb from '../../components/common/Breadcrumb';
 
 const TMDB_POSTER_BASE = 'https://image.tmdb.org/t/p/w500';
 const TMDB_BACKDROP_BASE = 'https://image.tmdb.org/t/p/original';
@@ -72,10 +74,6 @@ export default function MovieDetailsPage() {
   const [movies, setMovies] = useState([]);
   const [moviesLoading, setMoviesLoading] = useState(true);
   const hasFetchedMoviesRef = useRef(false);
-  const isGitHubDeploy =
-    process.env.NEXT_PUBLIC_IS_GITHUB_DEPLOY === 'true' ||
-    (typeof window !== 'undefined' && window.location.hostname.includes('github.io'));
-  const tmdbApiKey = process.env.NEXT_PUBLIC_TMDB_API_KEY;
 
   useEffect(() => {
     if (!id) return;
@@ -126,15 +124,7 @@ export default function MovieDetailsPage() {
           }
         }
 
-        const listUrl = isGitHubDeploy
-          ? `https://api.themoviedb.org/3/movie/now_playing?api_key=${tmdbApiKey}&language=te-IN&page=1`
-          : '/api/tmdb/latest';
-
-        if (isGitHubDeploy && !tmdbApiKey) {
-          throw new Error('TMDB API key is not configured for GitHub Pages deployment.');
-        }
-
-        const response = await fetch(listUrl);
+        const response = await fetch('/api/tmdb/latest');
         if (!response.ok) {
           const body = await response.text();
           throw new Error(`Unable to fetch theatre release movies (${response.status}). ${body}`);
@@ -163,33 +153,6 @@ export default function MovieDetailsPage() {
     loadMovies();
   }, []);
 
-  useEffect(() => {
-    if (!id) return;
-
-    async function loadMovie() {
-      setLoading(true);
-      setError('');
-
-      try {
-        const response = await fetch(`/api/tmdb/details?id=${encodeURIComponent(id)}`);
-        if (!response.ok) {
-          const text = await response.text();
-          throw new Error(`Unable to load movie details (${response.status}). ${text}`);
-        }
-
-        const data = await response.json();
-        setMovie(data);
-      } catch (fetchError) {
-        console.error('Movie details fetch error:', fetchError);
-        setError(fetchError.message || 'Unable to load movie details.');
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    loadMovie();
-  }, [id]);
-
   return (
     <Layout>
       <Seo
@@ -197,13 +160,22 @@ export default function MovieDetailsPage() {
         description={movie?.overview || 'Movie details and trailer links.'}
         url={id ? `/theatre-release/${id}` : '/theatre-release'}
         keywords="Telugu theatre movie details, movie details"
+        image={movie?.poster_path ? `${TMDB_POSTER_BASE}${movie.poster_path}` : undefined}
+      />
+
+      <Breadcrumb
+        items={[
+          { name: 'Home', url: '/' },
+          { name: 'Theatre Releases', url: '/theatre-release' },
+          { name: movie?.title || movie?.original_title || 'Movie Details' },
+        ]}
       />
 
       <main className="page-projects page-ott movie-detail-page">
         <div className="projects-page-inner">
           <div className="projects-page-header">
             <p className="eyebrow">Theatre Release</p>
-            <h1 className="projects-page-title">Movie details</h1>
+            <p className="projects-page-title">Movie details</p>
           </div>
 
           {loading ? (
@@ -219,11 +191,12 @@ export default function MovieDetailsPage() {
                       <article key={carouselMovie.id} className="tmdb-release-card">
                         <div className="tmdb-release-card__poster">
                           {carouselMovie.poster_path ? (
-                            <img
+                            <Image
                               src={`${TMDB_POSTER_BASE}${carouselMovie.poster_path}`}
                               alt={carouselMovie.title || carouselMovie.original_title}
                               className="tmdb-release-card__image"
-                              loading="lazy"
+                              fill
+                              sizes="220px"
                             />
                           ) : (
                             <div className="tmdb-release-card__image tmdb-release-card__placeholder">
@@ -266,19 +239,24 @@ export default function MovieDetailsPage() {
 
               <section className="movie-detail-hero">
               {movie.backdrop_path ? (
-                <img
+                <Image
                   src={`${TMDB_BACKDROP_BASE}${movie.backdrop_path}`}
                   alt={movie.title || movie.original_title}
                   className="movie-detail-hero__backdrop"
+                  fill
+                  priority
+                  sizes="100vw"
                 />
               ) : null}
 
               <div className="movie-detail-hero__inner">
                 <div className="movie-detail-poster">
                   {movie.poster_path ? (
-                    <img
+                    <Image
                       src={`${TMDB_POSTER_BASE}${movie.poster_path}`}
                       alt={`${movie.title || movie.original_title} poster`}
+                      fill
+                      sizes="(max-width: 980px) 320px, 280px"
                     />
                   ) : (
                     <div className="movie-detail-poster__placeholder">

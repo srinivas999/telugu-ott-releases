@@ -11,7 +11,7 @@ export default function Seo({
 }) {
   const pageTitle = title ? `${title} | Srinivas OTT Movies` : 'Srinivas OTT Movies';
   const assetBasePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
-  const defaultImage = `https://svteluguott.in${assetBasePath}/images/ott-hero-banner.png`;
+  const defaultImage = `https://svteluguott.in${assetBasePath}/images/default_poster.png`;
   const pageUrl = url ? `https://svteluguott.in${url}` : 'https://svteluguott.in';
   const ogImage = image || defaultImage;
 

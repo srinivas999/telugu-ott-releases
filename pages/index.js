@@ -1,9 +1,22 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import Layout from '../components/Layout';
 import Seo from '../components/Seo';
 import { supabase } from '../lib/supabaseClient';
+import Breadcrumb from '../components/common/Breadcrumb';
+
+// NEW: Import content modules
+import { TrendingNow, ReleasingThisWeekend, RecentlyAdded } from '../components/home/ContentModules';
+
+// NEW: Import custom hooks
+import {
+  useTrendingMovies,
+  useReleasingThisWeek,
+  useRecentlyAdded,
+} from '../lib/hooks/useMovies';
+import { generateUniqueSlug } from '../lib/utils/slug';
 
 
 const TMDB_POSTER_BASE = 'https://image.tmdb.org/t/p/w500';
@@ -92,6 +105,23 @@ function sortMovies(movies, sortOrder) {
   });
 }
 
+function sortMoviesByRating(movies) {
+  return [...movies].sort((a, b) => {
+    const firstRating = typeof a.rating === 'number' ? a.rating : Number(a.rating) || 0;
+    const secondRating = typeof b.rating === 'number' ? b.rating : Number(b.rating) || 0;
+
+    if (secondRating !== firstRating) {
+      return secondRating - firstRating;
+    }
+
+    const firstTime = new Date(`${a.digital_release_date}T00:00:00`).getTime();
+    const secondTime = new Date(`${b.digital_release_date}T00:00:00`).getTime();
+
+    if (Number.isNaN(firstTime) || Number.isNaN(secondTime)) return 0;
+    return secondTime - firstTime;
+  });
+}
+
 export default function HomePage() {
   const router = useRouter();
   const [ottMovies, setOttMovies] = useState([]);
@@ -103,8 +133,16 @@ export default function HomePage() {
   const [selectedPlatform, setSelectedPlatform] = useState('all');
   const [sortOrder, setSortOrder] = useState('desc');
 
+  // NEW: Fetch content for modules
+  const { movies: moduleTrendingMovies } = useTrendingMovies(10);
+  const { movies: weekendReleases } = useReleasingThisWeek();
+  const { movies: recentlyAddedMovies } = useRecentlyAdded(10);
+
   const carouselRef = useRef(null);
-  const trendingMovies = useMemo(() => sortMovies(ottMovies, 'desc').slice(0, 8), [ottMovies]);
+  const trendingMovies = useMemo(
+    () => sortMoviesByRating(ottMovies).filter((movie) => Number(movie.rating) > 0).slice(0, 8),
+    [ottMovies]
+  );
 
   // Create duplicated movies for infinite marquee effect
   const marqueeMovies = useMemo(() => {
@@ -186,28 +224,7 @@ export default function HomePage() {
       setTheatreLoading(true);
       setTheatreError('');
       try {
-        // Check deployment mode
-        const isGitHubDeploy =
-          process.env.NEXT_PUBLIC_IS_GITHUB_DEPLOY === 'true' ||
-          (typeof window !== 'undefined' && window.location.hostname.includes('github.io'));
-        const tmdbApiKey = process.env.NEXT_PUBLIC_TMDB_API_KEY;
-        let response;
-
-        if (isGitHubDeploy) {
-          if (!tmdbApiKey) {
-            console.error('TMDB API key is not configured');
-            setTheatreMovies([]);
-            setTheatreError('Configuration issue: TMDB API key not found.');
-            setTheatreLoading(false);
-            return;
-          }
-
-          response = await fetch(
-            `https://api.themoviedb.org/3/movie/now_playing?api_key=${tmdbApiKey}&language=te-IN&page=1`
-          );
-        } else {
-          response = await fetch('/api/tmdb/latest');
-        }
+        const response = await fetch('/api/tmdb/latest');
 
         if (!response.ok) {
           const body = await response.text();
@@ -244,6 +261,7 @@ export default function HomePage() {
     });
     return sortMovies(filtered, sortOrder);
   }, [ottMovies, selectedPlatform, sortOrder]);
+  const featuredUpcoming = filteredMovies[0];
 
   const assetBasePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
   const shareUrl = `https://svteluguott.in${router.asPath}`;
@@ -265,7 +283,7 @@ export default function HomePage() {
         name: movie.movie_name || 'Untitled',
         datePublished: movie.digital_release_date || '',
         description: movie.streaming_partner ? `Streaming on ${movie.streaming_partner}` : 'Telugu OTT movie release',
-        url: shareUrl,
+        url: `https://svteluguott.in/movie/${generateUniqueSlug(movie.movie_name, movie.id)}`,
       },
     }))
   };
@@ -280,58 +298,19 @@ export default function HomePage() {
         jsonLd={jsonLd}
       />
 
+      {/* Breadcrumb: shows current page context */}
+      <Breadcrumb items={[{ name: 'Home', url: '/' }, { name: 'Latest OTT Releases' }]} />
+
       <section className="page-projects page-ott">
         <div className="projects-page-inner">
-        
-          <section className="movie-carousel" aria-label="Theatre release movies">
-            {theatreLoading ? (
-              <p className="admin-status">Loading theatre release data...</p>
-            ) : theatreError ? (
-              <p className="admin-status admin-status--error">{theatreError}</p>
-            ) : marqueeMovies.length > 0 ? (
-              <div className="movie-carousel__inner" ref={carouselRef}>
-                {marqueeMovies.map((carouselMovie, index) => (
-                  <article key={`${carouselMovie.id}-${index}`} className="tmdb-release-card movie-carousel__card">
-                    <div className="tmdb-release-card__poster">
-                      {carouselMovie.poster_path ? (
-                        <img
-                          src={`${TMDB_POSTER_BASE}${carouselMovie.poster_path}`}
-                          alt={carouselMovie.title || carouselMovie.original_title}
-                          className="tmdb-release-card__image"
-                          loading="lazy"
-                        />
-                      ) : (
-                        <div className="tmdb-release-card__image tmdb-release-card__placeholder">
-                          <span>No poster available</span>
-                        </div>
-                      )}
-
-                      <div className="tmdb-release-card__pill">{formatReleaseDate(carouselMovie.release_date)}</div>
-
-                      <div className="tmdb-release-card__overlay movie-carousel__overlay">
-                        <div className="tmdb-release-card__content">
-                          <h2 className="tmdb-release-card__title">{carouselMovie.title || carouselMovie.original_title || 'Untitled'}</h2>
-                          <p className="tmdb-release-card__meta">
-                            {getMovieGenres(carouselMovie.genre_ids)} &middot; {carouselMovie.vote_average ? carouselMovie.vote_average.toFixed(1) : 'NR'}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </article>
-                ))}
-              </div>
-            ) : (
-              <p className="admin-status">No theatre release data available at this time.</p>
-            )}
-          </section>
-
           <section className="ott-hero">
             <div className="ott-hero__visual">
-              <img
+              <Image
                 src={`${assetBasePath}/images/ott-hero-banner.png`}
                 alt="Telugu OTT hero banner"
                 className="hero-image"
-                loading="lazy"
+                fill
+                sizes="(max-width: 980px) 100vw, 35vw"
               />
             </div>
             <div className="ott-hero__panel">
@@ -339,6 +318,15 @@ export default function HomePage() {
               <p className="ott-hero__tagline">
                 Find upcoming Telugu OTT movies on Netflix, Aha, Prime Video, JioHotstar, Zee5, Sun NXT and ETV Win with release dates and platform availability.
               </p>
+              {featuredUpcoming ? (
+                <div className="ott-hero-card ott-hero-card--featured">
+                  <span>Next Up</span>
+                  <h2>{featuredUpcoming.movie_name || 'Upcoming release'}</h2>
+                  <p>
+                    {formatReleaseDate(featuredUpcoming.digital_release_date)} on {featuredUpcoming.streaming_partner || 'OTT'}
+                  </p>
+                </div>
+              ) : null}
               <div className="ott-hero__actions share-buttons">
                 <a
                   className="share-button share-button--whatsapp"
@@ -384,20 +372,40 @@ export default function HomePage() {
             </div>
           </section>
 
-          <section className="ott-section ott-seo-copy" itemScope itemType="https://schema.org/Article">
+          <section className="ott-section ott-home-links">
             <div className="section-heading">
-              <p className="eyebrow">OTT guide</p>
-              <h2 itemProp="headline">Upcoming OTT movies Telugu April 2026</h2>
+              <p className="eyebrow">Start Here</p>
+              <h2>Jump straight to what you want to watch</h2>
             </div>
-            <div itemProp="articleBody">
-              <p>
-                This page is your weekly Telugu OTT schedule for new streaming releases, verified digital release dates, and platform rights. Use it to track the latest Telugu OTT premieres on Netflix, Aha, Prime Video, JioHotstar, Zee5, Sun NXT, and ETV Win.
-              </p>
-              <p>
-                If you're searching for "Telugu OTT releases this week" or "upcoming OTT movies Telugu April 2026," this page helps you find the latest Telugu streaming launch dates and movie details in one place.
-              </p>
+            <div className="ott-home-links__grid">
+              <Link href="/telugu-ott-releases-this-week" className="ott-home-links__card">
+                <span>This Week</span>
+                <h3>New Telugu OTT releases</h3>
+                <p>See only the titles releasing over the next 7 days.</p>
+              </Link>
+              <Link href="/top-rated-telugu-ott-movies" className="ott-home-links__card">
+                <span>Top Rated</span>
+                <h3>Best Telugu OTT movies</h3>
+                <p>Browse the highest rated streaming titles in the database.</p>
+              </Link>
+              <Link href="/theatre-release" className="ott-home-links__card">
+                <span>Theatres</span>
+                <h3>Latest Tollywood theatre releases</h3>
+                <p>Switch from OTT to big-screen releases in one tap.</p>
+              </Link>
+              <Link href="/blog" className="ott-home-links__card">
+                <span>About</span>
+                <h3>Why this website exists</h3>
+                <p>Read the heart, purpose, and editorial promise behind the site.</p>
+              </Link>
             </div>
           </section>
+
+          <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0.25rem 1rem 1.5rem' }}>
+            <ReleasingThisWeekend movies={weekendReleases} />
+            <TrendingNow movies={moduleTrendingMovies} />
+            <RecentlyAdded movies={recentlyAddedMovies} />
+          </div>
 
           <section className="ott-section ott-table-section">
             <div className="section-heading">
@@ -482,7 +490,9 @@ export default function HomePage() {
                     filteredMovies.map((movie) => (
                       <tr key={movie.id || `${movie.movie_name}-${movie.digital_release_date}`} itemScope itemType="https://schema.org/Movie">
                         <td data-label="Movie">
-                          <span itemProp="name">{movie.movie_name || 'Untitled'}</span>
+                          <Link href={`/movie/${generateUniqueSlug(movie.movie_name, movie.id)}`} itemProp="url">
+                            <span itemProp="name">{movie.movie_name || 'Untitled'}</span>
+                          </Link>
                         </td>
                         <td data-label="Release Date">
                           <time itemProp="datePublished" dateTime={movie.digital_release_date || ''}>
@@ -513,8 +523,8 @@ export default function HomePage() {
 
           <section className="ott-section ott-trending" aria-labelledby="trending-heading">
             <div className="section-heading">
-              <p className="eyebrow">Trending</p>
-              <h2 id="trending-heading">Buzzing Telugu OTT premieres</h2>
+              <p className="eyebrow">Editor&apos;s Picks</p>
+              <h2 id="trending-heading">Top rated Telugu OTT movies right now</h2>
             </div>
             <div className="ott-trending-carousel" aria-label="Trending OTT releases">
               {trendingMovies.map((movie) => (
@@ -522,12 +532,75 @@ export default function HomePage() {
                   <div className="ott-trending-card__stripe" />
                   <div className="ott-trending-card__body">
                     <span className="ott-trending-card__partner">{movie.streaming_partner || 'Partner'}</span>
-                    <h3>{movie.movie_name || 'Untitled'}</h3>
-                    <p>{formatReleaseDate(movie.digital_release_date)}</p>
+                    <h3>
+                      <Link href={`/movie/${generateUniqueSlug(movie.movie_name, movie.id)}`}>
+                        {movie.movie_name || 'Untitled'}
+                      </Link>
+                    </h3>
+                    <p>
+                      {Number(movie.rating) > 0 ? `Rating ${Number(movie.rating).toFixed(1)}/10` : formatReleaseDate(movie.digital_release_date)}
+                    </p>
                   </div>
                 </article>
               ))}
             </div>
+          </section>
+
+          <section className="ott-section ott-home-theatre movie-carousel" aria-labelledby="theatre-home-heading">
+            <div className="section-heading">
+              <p className="eyebrow">Beyond OTT</p>
+              <h2 id="theatre-home-heading">Also tracking Telugu theatre releases</h2>
+            </div>
+            <p className="ott-home-theatre__copy">
+              If you want the full Telugu movie picture, we also track new theatre releases with ratings, trailers, and detail pages.
+            </p>
+            {theatreLoading ? (
+              <p className="admin-status">Loading theatre release data...</p>
+            ) : theatreError ? (
+              <p className="admin-status admin-status--error">{theatreError}</p>
+            ) : marqueeMovies.length > 0 ? (
+              <>
+                <div className="movie-carousel__inner" ref={carouselRef}>
+                  {marqueeMovies.map((carouselMovie, index) => (
+                    <article key={`${carouselMovie.id}-${index}`} className="tmdb-release-card movie-carousel__card">
+                      <div className="tmdb-release-card__poster">
+                        {carouselMovie.poster_path ? (
+                          <Image
+                            src={`${TMDB_POSTER_BASE}${carouselMovie.poster_path}`}
+                            alt={carouselMovie.title || carouselMovie.original_title}
+                            className="tmdb-release-card__image"
+                            fill
+                            sizes="200px"
+                          />
+                        ) : (
+                          <div className="tmdb-release-card__image tmdb-release-card__placeholder">
+                            <span>No poster available</span>
+                          </div>
+                        )}
+
+                        <div className="tmdb-release-card__pill">{formatReleaseDate(carouselMovie.release_date)}</div>
+
+                        <div className="tmdb-release-card__overlay movie-carousel__overlay">
+                          <div className="tmdb-release-card__content">
+                            <h3 className="tmdb-release-card__title">{carouselMovie.title || carouselMovie.original_title || 'Untitled'}</h3>
+                            <p className="tmdb-release-card__meta">
+                              {getMovieGenres(carouselMovie.genre_ids)} &middot; {carouselMovie.vote_average ? carouselMovie.vote_average.toFixed(1) : 'NR'}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+                <div className="ott-home-theatre__actions">
+                  <Link href="/theatre-release" className="ott-home-theatre__link">
+                    Explore all theatre releases
+                  </Link>
+                </div>
+              </>
+            ) : (
+              <p className="admin-status">No theatre release data available at this time.</p>
+            )}
           </section>
         </div>
       </section>

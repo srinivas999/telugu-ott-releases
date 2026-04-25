@@ -95,19 +95,22 @@ if (contactForm && contactSuccess) {
     const formData = new FormData(contactForm);
     const full_name = formData.get("name")?.toString().trim() ?? "";
     const email = formData.get("email")?.toString().trim() ?? "";
-    const subject = formData.get("subject")?.toString().trim() ?? "";
-    const message = formData.get("message")?.toString().trim() ?? "";
+    const phone = formData.get("phone")?.toString().trim() ?? "";
+    const country = formData.get("country")?.toString().trim() ?? "";
+    const comments = formData.get("comments")?.toString().trim() ?? "";
 
     try {
       const { error } = await supabaseClient.from(TABLE_NAME).insert([
         {
           full_name,
           email,
-          subject,
-          message,
+          phone,
+          country,
+          comments,
           created_at: new Date().toISOString(),
         },
       ]);
+
 
       if (error) {
         throw error;
