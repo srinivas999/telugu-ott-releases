@@ -498,7 +498,7 @@ export default function AdminPage() {
     const rating = getOmdbRatingValue({ OMTB_Details: payload });
     let result = await supabase
       .from('ott_movies')
-      .update({ OMTB_Details: payload, rating })
+      .update({ OMTB_Details: payload, rating, omdb_last_sync: new Date().toISOString() })
       .eq('id', movieId);
 
     if (!result.error) {
@@ -511,7 +511,7 @@ export default function AdminPage() {
 
     result = await supabase
       .from('ott_movies')
-      .update({ omtb_details: payload, rating })
+      .update({ omtb_details: payload, rating, omdb_last_sync: new Date().toISOString() })
       .eq('id', movieId);
 
     return result.error || null;
@@ -520,7 +520,7 @@ export default function AdminPage() {
   const saveTmdbDetails = async (movieId, payload) => {
     let result = await supabase
       .from('ott_movies')
-      .update({ TMDB_Details: payload })
+      .update({ TMDB_Details: payload, tmdb_last_sync: new Date().toISOString() })
       .eq('id', movieId);
 
     if (!result.error) {
@@ -533,7 +533,7 @@ export default function AdminPage() {
 
     result = await supabase
       .from('ott_movies')
-      .update({ tmdb_details: payload })
+      .update({ tmdb_details: payload, tmdb_last_sync: new Date().toISOString() })
       .eq('id', movieId);
 
     return result.error || null;
@@ -1069,23 +1069,35 @@ export default function AdminPage() {
                                 <span className="admin-badge admin-badge--lang">{movie.language || 'Telugu'}</span>
                                 <span className="admin-badge admin-badge--category">{movie.category || 'Film'}</span>
                               </div>
+                              <div className="admin-movie-card__meta admin-movie-card__meta--sync">
+                                {movie.tmdb_last_sync && (
+                                  <span className="admin-badge admin-badge--sync" title={`TMDB Last Sync: ${new Date(movie.tmdb_last_sync).toLocaleString()}`}>
+                                    TMDB: {new Date(movie.tmdb_last_sync).toLocaleDateString()}
+                                  </span>
+                                )}
+                                {movie.omdb_last_sync && (
+                                  <span className="admin-badge admin-badge--sync" title={`OMDB Last Sync: ${new Date(movie.omdb_last_sync).toLocaleString()}`}>
+                                    OMDB: {new Date(movie.omdb_last_sync).toLocaleDateString()}
+                                  </span>
+                                )}
+                              </div>
                             </div>
                             <div className="admin-movie-card__actions">
-                              <button type="button" className="admin-action-button" onClick={() => handleEditMovie(movie)}>
+                              <button type="button" className="admin-action-button" onClick={(e) => { e.preventDefault(); handleEditMovie(movie); }}>
                                 Edit
                               </button>
                               <button
                                 type="button"
                                 className="admin-action-button"
-                                onClick={() => handleSyncLiveData(movie)}
+                                onClick={(e) => { e.preventDefault(); handleSyncLiveData(movie); }}
                                 disabled={liveSyncMovieId === movie.id}
                               >
-                                {liveSyncMovieId === movie.id ? 'Syncing…' : 'Sync live data'}
+                                {liveSyncMovieId === movie.id ? 'Syncing…' : 'Sync TMDB'}
                               </button>
                               <button
                                 type="button"
                                 className="admin-action-button"
-                                onClick={() => handleSyncOmdbData(movie)}
+                                onClick={(e) => { e.preventDefault(); handleSyncOmdbData(movie); }}
                                 disabled={omdbSyncMovieId === movie.id}
                               >
                                 {omdbSyncMovieId === movie.id
@@ -1094,7 +1106,7 @@ export default function AdminPage() {
                                     ? 'Refresh OMDb'
                                     : 'Sync OMDb'}
                               </button>
-                              <button type="button" className="admin-action-button admin-action-button--danger" onClick={() => handleDeleteMovie(movie.id)}>
+                              <button type="button" className="admin-action-button admin-action-button--danger" onClick={(e) => { e.preventDefault(); handleDeleteMovie(movie.id); }}>
                                 Delete
                               </button>
                             </div>
