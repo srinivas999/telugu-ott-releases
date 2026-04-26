@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import Seo from '../components/Seo';
 import { supabase } from '../lib/supabaseClient';
+import { getOmdbRatingValue } from '../lib/utils/ratings';
 
 const EMPTY_MOVIE = {
   movie_name: '',
@@ -463,9 +464,10 @@ export default function AdminPage() {
     ).slice(0, 4);
 
   const saveOmdbDetails = async (movieId, payload) => {
+    const rating = getOmdbRatingValue({ OMTB_Details: payload });
     let result = await supabase
       .from('ott_movies')
-      .update({ OMTB_Details: payload })
+      .update({ OMTB_Details: payload, rating })
       .eq('id', movieId);
 
     if (!result.error) {
@@ -478,7 +480,7 @@ export default function AdminPage() {
 
     result = await supabase
       .from('ott_movies')
-      .update({ omtb_details: payload })
+      .update({ omtb_details: payload, rating })
       .eq('id', movieId);
 
     return result.error || null;

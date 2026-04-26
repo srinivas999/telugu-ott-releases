@@ -6,6 +6,7 @@ import Layout from '../components/Layout';
 import Seo from '../components/Seo';
 import Breadcrumb from '../components/common/Breadcrumb';
 import { supabase } from '../lib/supabaseClient';
+import { getPreferredMovieRating, withPreferredMovieRating } from '../lib/utils/ratings';
 import { generateUniqueSlug } from '../lib/utils/slug';
 
 const platformOptions = [
@@ -129,7 +130,7 @@ export default function OttMoviesPage({ home = false, initialMovies = [] }) {
 
         setOttMovies(
           (data || []).map((movie) => ({
-            ...movie,
+            ...withPreferredMovieRating(movie),
             streaming_partner: normalizePlatform(movie.streaming_partner),
           }))
         );
@@ -367,7 +368,7 @@ export default function OttMoviesPage({ home = false, initialMovies = [] }) {
                   const posterUrl = movie.poster_path
                     ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
                     : '/images/default_poster.png';
-                  const rating = typeof movie.rating === 'number' ? movie.rating : null;
+                  const rating = getPreferredMovieRating(movie);
                   const genres = movie.genres
                     ? (Array.isArray(movie.genres)
                         ? movie.genres.map((g) => (typeof g === 'string' ? g : g?.name)).filter(Boolean)
@@ -576,7 +577,7 @@ export async function getStaticProps() {
     }
 
     const initialMovies = data.map((movie) => ({
-      ...movie,
+      ...withPreferredMovieRating(movie),
       streaming_partner: normalizePlatform(movie.streaming_partner),
     }));
 

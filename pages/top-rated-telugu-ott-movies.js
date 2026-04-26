@@ -4,6 +4,7 @@ import Layout from '../components/Layout';
 import Seo from '../components/Seo';
 import Breadcrumb from '../components/common/Breadcrumb';
 import { supabase } from '../lib/supabaseClient';
+import { getPreferredMovieRating, withPreferredMovieRating } from '../lib/utils/ratings';
 import { generateUniqueSlug } from '../lib/utils/slug';
 
 function normalizePlatform(value) {
@@ -45,7 +46,7 @@ export async function getStaticProps() {
     .limit(30);
 
   const movies = (data || []).map((movie) => ({
-    ...movie,
+    ...withPreferredMovieRating(movie),
     streaming_partner: normalizePlatform(movie.streaming_partner),
   }));
 
@@ -69,10 +70,10 @@ export default function TopRatedTeluguOttMoviesPage({ movies = [] }) {
         '@type': 'Movie',
         name: movie.movie_name || 'Untitled',
         datePublished: movie.digital_release_date || '',
-        aggregateRating: movie.rating
+        aggregateRating: getPreferredMovieRating(movie)
           ? {
               '@type': 'AggregateRating',
-              ratingValue: movie.rating,
+              ratingValue: getPreferredMovieRating(movie),
               bestRating: 10,
             }
           : undefined,
@@ -146,8 +147,8 @@ export default function TopRatedTeluguOttMoviesPage({ movies = [] }) {
                         <span className="ott-movie-card-v2__platform-badge">
                           {movie.streaming_partner || 'TBA'}
                         </span>
-                        {Number(movie.rating) > 0 ? (
-                          <span className="ott-movie-card-v2__rating-badge">{Number(movie.rating).toFixed(1)}</span>
+                        {(getPreferredMovieRating(movie) || 0) > 0 ? (
+                          <span className="ott-movie-card-v2__rating-badge">{getPreferredMovieRating(movie).toFixed(1)}</span>
                         ) : null}
                       </div>
                       <div className="ott-movie-card-v2__info">

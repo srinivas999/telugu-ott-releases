@@ -5,6 +5,7 @@
 
 import Image from 'next/image';
 import styles from './MovieDetails.module.css';
+import { getPreferredMovieRating } from '../../lib/utils/ratings';
 
 const TMDB_IMAGE_BASE = 'https://image.tmdb.org/t/p/w780';
 const FALLBACK_IMAGE = '/images/default_poster.png';
@@ -85,6 +86,7 @@ export default function MovieDetails({ movie, loading = false, error = null }) {
   const genres = Array.isArray(movie.genres) ? movie.genres : [];
   const cast = getTopCast(movie);
   const crew = getTopCrew(movie);
+  const rating = getPreferredMovieRating(movie);
 
   return (
     <article className={styles.container}>
@@ -135,7 +137,7 @@ export default function MovieDetails({ movie, loading = false, error = null }) {
               <div className={styles.statCard}>
                 <span className={styles.statLabel}>Rating</span>
                 <span className={styles.statValue}>
-                  {movie.rating ? Number(movie.rating).toFixed(1) : 'NR'}/10
+                  {rating ? Number(rating).toFixed(1) : 'NR'}/10
                 </span>
               </div>
             </div>

@@ -6,6 +6,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import styles from './ContentModules.module.css';
 import { generateUniqueSlug } from '../../lib/utils/slug';
+import { getPreferredMovieRating } from '../../lib/utils/ratings';
 
 const TMDB_POSTER_BASE = 'https://image.tmdb.org/t/p/w300';
 
@@ -86,6 +87,7 @@ function MovieCard({ movie, index, showDate = false, fallbackPoster = '/images/d
   const posterUrl = movie.poster_path
     ? `${TMDB_POSTER_BASE}${movie.poster_path}`
     : fallbackPoster;
+  const rating = getPreferredMovieRating(movie);
 
   const content = (
     <>
@@ -98,8 +100,8 @@ function MovieCard({ movie, index, showDate = false, fallbackPoster = '/images/d
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
         />
         <div className={styles.overlay}>
-          {typeof movie.rating === 'number' && movie.rating > 0 ? (
-            <div className={styles.rating}>★ {movie.rating.toFixed(1)}</div>
+          {rating !== null && rating > 0 ? (
+            <div className={styles.rating}>★ {rating.toFixed(1)}</div>
           ) : null}
           {index === 0 ? <div className={styles.badge}>TRENDING</div> : null}
         </div>
