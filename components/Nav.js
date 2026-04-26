@@ -82,6 +82,10 @@ export default function Nav() {
             <span className="ott-home-header__text ott-home-header__text--brand">Releases</span>
           </Link>
           
+          <div className="nav-search-container mobile-only">
+            <SearchBar />
+          </div>
+          
           <button
             type="button"
             className="nav-toggle"
@@ -103,7 +107,7 @@ export default function Nav() {
             className={`nav-menu ${menuOpen ? 'is-open' : ''}`}
             aria-hidden={!menuOpen}
           >
-            <div className="nav-search-container">
+            <div className="nav-search-container desktop-only">
               <SearchBar />
             </div>
             <ul className="nav-links">
