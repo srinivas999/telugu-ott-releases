@@ -93,11 +93,11 @@ function SkeletonCard() {
   );
 }
 
-export default function OttMoviesPage({ home = false }) {
+export default function OttMoviesPage({ home = false, initialMovies = [] }) {
   const router = useRouter();
   const assetBasePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
-  const [ottMovies, setOttMovies] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [ottMovies, setOttMovies] = useState(initialMovies);
+  const [loading, setLoading] = useState(initialMovies.length === 0);
   const [error, setError] = useState('');
   const [selectedPlatform, setSelectedPlatform] = useState('all');
   const [sortOrder, setSortOrder] = useState('desc');
@@ -112,8 +112,10 @@ export default function OttMoviesPage({ home = false }) {
         setLoading(false);
         return;
       }
-
-      setLoading(true);
+      const hasInitialMovies = initialMovies.length > 0;
+      if (!hasInitialMovies) {
+        setLoading(true);
+      }
       setError('');
 
       try {
@@ -140,7 +142,7 @@ export default function OttMoviesPage({ home = false }) {
     }
 
     loadMovies();
-  }, []);
+  }, [initialMovies]);
 
   const filteredMovies = useMemo(() => {
     const filtered = ottMovies.filter((movie) => {
@@ -545,5 +547,53 @@ export default function OttMoviesPage({ home = false }) {
       </main>
     </Layout>
   );
+}
+
+export async function getStaticProps() {
+  try {
+    if (!supabase) {
+      return {
+        props: {
+          initialMovies: [],
+        },
+        revalidate: 86400,
+      };
+    }
+
+    const { data, error } = await supabase
+      .from('ott_movies')
+      .select('*')
+      .order('digital_release_date', { ascending: false })
+      .order('created_at', { ascending: false });
+
+    if (error || !data) {
+      return {
+        props: {
+          initialMovies: [],
+        },
+        revalidate: 3600,
+      };
+    }
+
+    const initialMovies = data.map((movie) => ({
+      ...movie,
+      streaming_partner: normalizePlatform(movie.streaming_partner),
+    }));
+
+    return {
+      props: {
+        initialMovies,
+      },
+      revalidate: 86400,
+    };
+  } catch (err) {
+    console.error('getStaticProps error:', err);
+    return {
+      props: {
+        initialMovies: [],
+      },
+      revalidate: 3600,
+    };
+  }
 }
 
