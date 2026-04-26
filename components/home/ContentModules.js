@@ -18,7 +18,7 @@ export function TrendingNow({ movies = [] }) {
     <section className={styles.module}>
       <div className={styles.moduleHeader}>
         <h2 className={styles.moduleTitle}>Trending Now</h2>
-        <Link href="/ott-movies" className={styles.viewAll}>
+        <Link href="/ott-movies" prefetch={true} className={styles.viewAll}>
           View All →
         </Link>
       </div>
@@ -45,7 +45,7 @@ export function ReleasingThisWeekend({ movies = [] }) {
     <section className={styles.module}>
       <div className={styles.moduleHeader}>
         <h2 className={styles.moduleTitle}>Coming This Weekend</h2>
-        <Link href="/ott-movies" className={styles.viewAll}>
+        <Link href="/ott-movies" prefetch={true} className={styles.viewAll}>
           Calendar →
         </Link>
       </div>
@@ -67,7 +67,7 @@ export function RecentlyAdded({ movies = [] }) {
     <section className={styles.module}>
       <div className={styles.moduleHeader}>
         <h2 className={styles.moduleTitle}>Recently Added to OTT</h2>
-        <Link href="/ott-movies" className={styles.viewAll}>
+        <Link href="/ott-movies" prefetch={true} className={styles.viewAll}>
           All Releases →
         </Link>
       </div>
