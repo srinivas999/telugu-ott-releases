@@ -11,12 +11,13 @@ import MovieDetails from '../../components/movie/MovieDetails';
 import Breadcrumb from '../../components/common/Breadcrumb';
 import SchemaMarkup from '../../components/seo/SchemaMarkup';
 import SimilarMovies from '../../components/movie/SimilarMovies';
-import { useMovie, useSimilarMovies, useTmdbDetails } from '../../lib/hooks/useMovies';
+import { useMovie, useSimilarMovies } from '../../lib/hooks/useMovies';
 import {
   generateMovieSchema,
   generateFaqSchema,
 } from '../../lib/utils/schema';
 import { getPreferredMovieRating } from '../../lib/utils/ratings';
+import { withStoredTmdbDetails } from '../../lib/utils/tmdb';
 import { generateUniqueSlug, parseSlug } from '../../lib/utils/slug';
 import { supabase } from '../../lib/supabaseClient';
 
@@ -24,58 +25,33 @@ export default function MovieDetailPage({ movie: initialMovie }) {
   const router = useRouter();
   const slug = Array.isArray(router.query.slug) ? router.query.slug[0] : router.query.slug;
 
-  const getTrailerUrl = (details, fallbackUrl) => {
-    const officialTrailer = details?.videos?.results?.find(
-      (video) => video.site === 'YouTube' && video.type === 'Trailer' && video.official
-    );
-    if (officialTrailer?.key) {
-      return `https://www.youtube.com/watch?v=${officialTrailer.key}`;
-    }
-
-    const trailer = details?.videos?.results?.find(
-      (video) => video.site === 'YouTube' && video.type === 'Trailer'
-    );
-    if (trailer?.key) {
-      return `https://www.youtube.com/watch?v=${trailer.key}`;
-    }
-
-    return fallbackUrl;
-  };
-
   // Parse slug to get ID
   const { id } = parseSlug(slug);
 
   // Fetch movie data (use initial data if available, otherwise fetch)
   const { movie, loading, error } = useMovie(initialMovie ? null : (id || slug));
-  const actualMovie = movie || initialMovie;
-  const { details: tmdbDetails } = useTmdbDetails(actualMovie?.tmdb_id, actualMovie?.category);
+  const actualMovie = withStoredTmdbDetails(movie || initialMovie);
   const mergedMovie = actualMovie
     ? {
-        ...tmdbDetails,
         ...actualMovie,
         title:
-          tmdbDetails?.title ||
-          tmdbDetails?.name ||
           actualMovie?.movie_name ||
           actualMovie?.title,
         original_title:
-          tmdbDetails?.original_title ||
-          tmdbDetails?.original_name ||
           actualMovie?.original_title,
-        overview: tmdbDetails?.overview || actualMovie?.overview || actualMovie?.description,
-        poster_path: tmdbDetails?.poster_path || actualMovie?.poster_path,
-        backdrop_path: tmdbDetails?.backdrop_path || actualMovie?.backdrop_path,
-        genres: tmdbDetails?.genres || actualMovie?.genres || [],
+        overview: actualMovie?.overview || actualMovie?.description,
+        poster_path: actualMovie?.poster_path,
+        backdrop_path: actualMovie?.backdrop_path,
+        genres: actualMovie?.genres || [],
         genre_ids:
-          tmdbDetails?.genres?.map((genre) => genre.id) ||
           actualMovie?.genre_ids ||
           [],
-        cast_data: tmdbDetails?.credits?.cast || actualMovie?.cast_data || [],
-        crew: tmdbDetails?.credits?.crew || actualMovie?.crew || [],
+        cast_data: actualMovie?.cast_data || [],
+        crew: actualMovie?.crew || [],
         rating: getPreferredMovieRating(actualMovie),
-        runtime: tmdbDetails?.runtime || actualMovie?.runtime,
-        release_date: tmdbDetails?.release_date || tmdbDetails?.first_air_date || actualMovie?.release_date,
-        trailer_url: getTrailerUrl(tmdbDetails, actualMovie?.trailer_url),
+        runtime: actualMovie?.runtime,
+        release_date: actualMovie?.release_date,
+        trailer_url: actualMovie?.trailer_url,
       }
     : null;
 
