@@ -6,6 +6,7 @@ import Layout from '../../components/Layout';
 import Seo from '../../components/Seo';
 import Breadcrumb from '../../components/common/Breadcrumb';
 import { supabase } from '../../lib/supabaseClient';
+import { getPreferredMovieRating, withPreferredMovieRating } from '../../lib/utils/ratings';
 import { generateUniqueSlug } from '../../lib/utils/slug';
 
 const PLATFORM_MAP = {
@@ -20,6 +21,7 @@ const PLATFORM_MAP = {
 
 function PlatformMovieCard({ movie }) {
   const movieSlug = generateUniqueSlug(movie.movie_name, movie.id);
+  const rating = getPreferredMovieRating(movie);
 
   return (
     <Link href={`/movie/${movieSlug}`} className="webseries-card">
@@ -36,7 +38,7 @@ function PlatformMovieCard({ movie }) {
         <h3 className="webseries-card__title">{movie.movie_name}</h3>
         <div className="webseries-card__meta">
           <span>{movie.digital_release_date ? new Date(`${movie.digital_release_date}T00:00:00`).toLocaleDateString() : 'TBA'}</span>
-          {movie.rating > 0 && <span className="webseries-card__rating">★ {movie.rating.toFixed(1)}</span>}
+          {rating !== null && rating > 0 && <span className="webseries-card__rating">★ {rating.toFixed(1)}</span>}
         </div>
         <p className="webseries-card__desc">{movie.overview || 'No description available.'}</p>
       </div>
@@ -78,7 +80,7 @@ export default function PlatformPage() {
           throw fetchError;
         }
 
-        setMovies(data || []);
+        setMovies((data || []).map(withPreferredMovieRating));
       } catch (fetchError) {
         console.error('Fetch movies error:', fetchError);
         setError('Unable to load movies right now. Please refresh and try again.');

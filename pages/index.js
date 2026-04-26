@@ -16,6 +16,7 @@ import {
   useReleasingThisWeek,
   useRecentlyAdded,
 } from '../lib/hooks/useMovies';
+import { getPreferredMovieRating, withPreferredMovieRating } from '../lib/utils/ratings';
 import { generateUniqueSlug } from '../lib/utils/slug';
 
 
@@ -107,8 +108,8 @@ function sortMovies(movies, sortOrder) {
 
 function sortMoviesByRating(movies) {
   return [...movies].sort((a, b) => {
-    const firstRating = typeof a.rating === 'number' ? a.rating : Number(a.rating) || 0;
-    const secondRating = typeof b.rating === 'number' ? b.rating : Number(b.rating) || 0;
+    const firstRating = getPreferredMovieRating(a) || 0;
+    const secondRating = getPreferredMovieRating(b) || 0;
 
     if (secondRating !== firstRating) {
       return secondRating - firstRating;
@@ -140,7 +141,7 @@ export default function HomePage() {
 
   const carouselRef = useRef(null);
   const trendingMovies = useMemo(
-    () => sortMoviesByRating(ottMovies).filter((movie) => Number(movie.rating) > 0).slice(0, 8),
+    () => sortMoviesByRating(ottMovies).filter((movie) => (getPreferredMovieRating(movie) || 0) > 0).slice(0, 8),
     [ottMovies]
   );
 
@@ -204,7 +205,7 @@ export default function HomePage() {
 
         setOttMovies(
           (data || []).map((movie) => ({
-            ...movie,
+            ...withPreferredMovieRating(movie),
             streaming_partner: normalizePlatform(movie.streaming_partner),
           }))
         );
@@ -615,7 +616,7 @@ export default function HomePage() {
                       </Link>
                     </h3>
                     <p className="ott-trending-card-v2__rating">
-                      {Number(movie.rating) > 0 ? `Rating ${Number(movie.rating).toFixed(1)}/10` : formatReleaseDate(movie.digital_release_date)}
+                      {(getPreferredMovieRating(movie) || 0) > 0 ? `Rating ${getPreferredMovieRating(movie).toFixed(1)}/10` : formatReleaseDate(movie.digital_release_date)}
                     </p>
                   </div>
                 </article>

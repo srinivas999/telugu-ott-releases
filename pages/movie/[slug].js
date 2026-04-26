@@ -16,6 +16,7 @@ import {
   generateMovieSchema,
   generateFaqSchema,
 } from '../../lib/utils/schema';
+import { getPreferredMovieRating } from '../../lib/utils/ratings';
 import { generateUniqueSlug, parseSlug } from '../../lib/utils/slug';
 import { supabase } from '../../lib/supabaseClient';
 
@@ -71,10 +72,7 @@ export default function MovieDetailPage({ movie: initialMovie }) {
           [],
         cast_data: tmdbDetails?.credits?.cast || actualMovie?.cast_data || [],
         crew: tmdbDetails?.credits?.crew || actualMovie?.crew || [],
-        rating:
-          typeof tmdbDetails?.vote_average === 'number'
-            ? tmdbDetails.vote_average
-            : actualMovie?.rating,
+        rating: getPreferredMovieRating(actualMovie),
         runtime: tmdbDetails?.runtime || actualMovie?.runtime,
         release_date: tmdbDetails?.release_date || tmdbDetails?.first_air_date || actualMovie?.release_date,
         trailer_url: getTrailerUrl(tmdbDetails, actualMovie?.trailer_url),
