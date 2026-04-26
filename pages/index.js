@@ -318,15 +318,6 @@ export default function HomePage() {
               <p className="ott-hero__tagline">
                 Find upcoming Telugu OTT movies on Netflix, Aha, Prime Video, JioHotstar, Zee5, Sun NXT and ETV Win with release dates and platform availability.
               </p>
-              {featuredUpcoming ? (
-                <div className="ott-hero-card ott-hero-card--featured">
-                  <span>Next Up</span>
-                  <h2>{featuredUpcoming.movie_name || 'Upcoming release'}</h2>
-                  <p>
-                    {formatReleaseDate(featuredUpcoming.digital_release_date)} on {featuredUpcoming.streaming_partner || 'OTT'}
-                  </p>
-                </div>
-              ) : null}
               <div className="ott-hero__actions share-buttons">
                 <a
                   className="share-button share-button--whatsapp"
