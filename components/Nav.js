@@ -73,63 +73,64 @@ export default function Nav() {
   }, []);
 
   return (
-    <header className={`site-header ${menuOpen ? 'is-open' : ''}`}>
-      <nav className="site-nav" aria-label="Primary">
-        <Link className="logo" href="/">
-          <span className="ott-home-header__text ott-home-header__text--brand">Telugu</span>
-          <span className="ott-home-header__text ott-home-header__text--accent">OTT</span>
-          <span className="ott-home-header__text ott-home-header__text--brand">Releases</span>
-        </Link>
-        
-        <button
-          type="button"
-          className="nav-toggle"
-          aria-expanded={menuOpen}
-          aria-controls="primary-menu"
-          aria-haspopup="true"
-          aria-label={menuOpen ? 'Close menu' : 'Open menu'}
-          onClick={() => setMenuOpen((value) => !value)}
-        >
-          <span className="nav-toggle__lines" aria-hidden="true">
-            <span className="nav-toggle__bar" />
-            <span className="nav-toggle__bar" />
-            <span className="nav-toggle__bar" />
-          </span>
-        </button>
+    <>
+      <header className={`site-header ${menuOpen ? 'is-open' : ''}`}>
+        <nav className="site-nav" aria-label="Primary">
+          <Link className="logo" href="/">
+            <span className="ott-home-header__text ott-home-header__text--brand">Telugu</span>
+            <span className="ott-home-header__text ott-home-header__text--accent">OTT</span>
+            <span className="ott-home-header__text ott-home-header__text--brand">Releases</span>
+          </Link>
+          
+          <button
+            type="button"
+            className="nav-toggle"
+            aria-expanded={menuOpen}
+            aria-controls="primary-menu"
+            aria-haspopup="true"
+            aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+            onClick={() => setMenuOpen((value) => !value)}
+          >
+            <span className="nav-toggle__lines" aria-hidden="true">
+              <span className="nav-toggle__bar" />
+              <span className="nav-toggle__bar" />
+              <span className="nav-toggle__bar" />
+            </span>
+          </button>
 
-        <div
-          id="primary-menu"
-          className={`nav-menu ${menuOpen ? 'is-open' : ''}`}
-          aria-hidden={!menuOpen}
-        >
-          <div className="nav-search-container">
-            <SearchBar />
+          <div
+            id="primary-menu"
+            className={`nav-menu ${menuOpen ? 'is-open' : ''}`}
+            aria-hidden={!menuOpen}
+          >
+            <div className="nav-search-container">
+              <SearchBar />
+            </div>
+            <ul className="nav-links">
+              {navLinks.map((link) => {
+                const active = router.pathname === link.href;
+                return (
+                  <li key={link.href}>
+                    <Link
+                      href={link.href}
+                      className={active ? 'is-active' : ''}
+                      aria-current={active ? 'page' : undefined}
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
           </div>
-          <ul className="nav-links">
-            {navLinks.map((link) => {
-              const active = router.pathname === link.href;
-              return (
-                <li key={link.href}>
-                  <Link
-                    href={link.href}
-                    className={active ? 'is-active' : ''}
-                    aria-current={active ? 'page' : undefined}
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
-        </div>
-      </nav>
-      <div
-        className={`nav-backdrop ${menuOpen ? 'is-visible' : ''}`}
-        aria-hidden={!menuOpen}
-        onClick={() => setMenuOpen(false)}
-      />
-      
-      {/* Mobile Scroll to Top Button */}
+        </nav>
+        <div
+          className={`nav-backdrop ${menuOpen ? 'is-visible' : ''}`}
+          aria-hidden={!menuOpen}
+          onClick={() => setMenuOpen(false)}
+        />
+      </header>
+
       <button
         type="button"
         className={`scroll-to-top ${showScrollTop ? 'is-visible' : ''}`}
@@ -141,6 +142,6 @@ export default function Nav() {
           <polyline points="18 15 12 9 6 15" />
         </svg>
       </button>
-    </header>
+    </>
   );
 }

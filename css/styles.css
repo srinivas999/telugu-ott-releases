@@ -2375,6 +2375,8 @@ html[data-hide-contact="true"] #contact {
 /* Scroll to Top Button */
 .scroll-to-top {
   position: fixed;
+  top: auto;
+  left: auto;
   bottom: 1.5rem;
   right: 1.5rem;
   z-index: 600;
