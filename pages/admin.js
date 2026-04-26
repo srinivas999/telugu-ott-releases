@@ -35,6 +35,9 @@ export default function AdminPage() {
   const [liveSyncMovieId, setLiveSyncMovieId] = useState(null);
   const [liveSyncStatus, setLiveSyncStatus] = useState('');
   const [liveSyncError, setLiveSyncError] = useState(false);
+  const [omdbSyncMovieId, setOmdbSyncMovieId] = useState(null);
+  const [omdbSyncStatus, setOmdbSyncStatus] = useState('');
+  const [omdbSyncError, setOmdbSyncError] = useState(false);
   const [activeTab, setActiveTab] = useState('add');
   const [csvFile, setCsvFile] = useState(null);
   const [csvStatus, setCsvStatus] = useState('');
@@ -452,6 +455,35 @@ export default function AdminPage() {
     return partialMatch || results[0];
   };
 
+  const getOmdbSyncYear = (movie) =>
+    String(
+      movie?.release_date ||
+      movie?.digital_release_date ||
+      '',
+    ).slice(0, 4);
+
+  const saveOmdbDetails = async (movieId, payload) => {
+    let result = await supabase
+      .from('ott_movies')
+      .update({ OMTB_Details: payload })
+      .eq('id', movieId);
+
+    if (!result.error) {
+      return null;
+    }
+
+    if (!/omtb_details/i.test(result.error.message || '')) {
+      return result.error;
+    }
+
+    result = await supabase
+      .from('ott_movies')
+      .update({ omtb_details: payload })
+      .eq('id', movieId);
+
+    return result.error || null;
+  };
+
   const handleSyncLiveData = async (movie) => {
     if (!supabase) {
       setLiveSyncError(true);
@@ -521,6 +553,61 @@ export default function AdminPage() {
       setLiveSyncStatus(error?.message || 'Unable to sync live TMDB data.');
     } finally {
       setLiveSyncMovieId(null);
+    }
+  };
+
+  const handleSyncOmdbData = async (movie) => {
+    if (!supabase) {
+      setOmdbSyncError(true);
+      setOmdbSyncStatus('Supabase is not configured.');
+      return;
+    }
+
+    const movieTitle = movie?.movie_name?.trim();
+    if (!movieTitle) {
+      setOmdbSyncError(true);
+      setOmdbSyncStatus('Movie title is missing, so OMDb sync cannot run.');
+      return;
+    }
+
+    setOmdbSyncMovieId(movie.id);
+    setOmdbSyncStatus('');
+    setOmdbSyncError(false);
+
+    try {
+      const syncYear = getOmdbSyncYear(movie);
+      const query = new URLSearchParams({
+        movieId: String(movie.id),
+        title: movieTitle,
+        force: 'true',
+      });
+
+      if (syncYear) {
+        query.set('year', syncYear);
+      }
+
+      const response = await fetch(`/api/omdb?${query.toString()}`);
+      if (!response.ok) {
+        const errorBody = await response.text();
+        throw new Error(`OMDb sync failed (${response.status}): ${errorBody}`);
+      }
+
+      const payload = await response.json();
+      const updateError = await saveOmdbDetails(movie.id, payload);
+
+      if (updateError) {
+        throw new Error(
+          updateError.message || 'Unable to save OMDb details. Add an OMTB_Details JSONB column to ott_movies.',
+        );
+      }
+
+      await fetchMovies();
+      setOmdbSyncStatus(`OMDb details synced for "${movieTitle}".`);
+    } catch (error) {
+      setOmdbSyncError(true);
+      setOmdbSyncStatus(error?.message || 'Unable to sync OMDb details.');
+    } finally {
+      setOmdbSyncMovieId(null);
     }
   };
 
@@ -893,6 +980,18 @@ export default function AdminPage() {
                                 >
                                   {liveSyncMovieId === movie.id ? 'Syncing…' : 'Sync live data'}
                                 </button>
+                                <button
+                                  type="button"
+                                  className="admin-action-button"
+                                  onClick={() => handleSyncOmdbData(movie)}
+                                  disabled={omdbSyncMovieId === movie.id}
+                                >
+                                  {omdbSyncMovieId === movie.id
+                                    ? 'Syncing OMDb...'
+                                    : movie.OMTB_Details || movie.omtb_details
+                                      ? 'Refresh OMDb'
+                                      : 'Sync OMDb'}
+                                </button>
                                 <button type="button" className="admin-action-button admin-action-button--danger" onClick={() => handleDeleteMovie(movie.id)}>
                                   Delete
                                 </button>
@@ -905,6 +1004,11 @@ export default function AdminPage() {
                       {liveSyncStatus ? (
                         <p className={`admin-status ${liveSyncError ? 'admin-status--error' : ''}`}>
                           {liveSyncStatus}
+                        </p>
+                      ) : null}
+                      {omdbSyncStatus ? (
+                        <p className={`admin-status ${omdbSyncError ? 'admin-status--error' : ''}`}>
+                          {omdbSyncStatus}
                         </p>
                       ) : null}
                     </>
@@ -1014,3 +1118,4 @@ export default function AdminPage() {
     </main>
   );
 }
+
