@@ -604,18 +604,17 @@ export default function HomePage() {
               <p className="eyebrow">Editor&apos;s Picks</p>
               <h2 id="trending-heading">Top rated Telugu OTT movies right now</h2>
             </div>
-            <div className="ott-trending-carousel" aria-label="Trending OTT releases">
+            <div className="ott-trending-carousel-v2" aria-label="Trending OTT releases">
               {trendingMovies.map((movie) => (
-                <article key={`${movie.movie_name}-${movie.digital_release_date}`} className="ott-trending-card">
-                  <div className="ott-trending-card__stripe" />
-                  <div className="ott-trending-card__body">
-                    <span className="ott-trending-card__partner">{movie.streaming_partner || 'Partner'}</span>
+                <article key={`${movie.movie_name}-${movie.digital_release_date}`} className="ott-trending-card-v2">
+                  <div className="ott-trending-card-v2__body">
+                    <span className="ott-trending-card-v2__partner">{movie.streaming_partner || 'Partner'}</span>
                     <h3>
                       <Link href={`/movie/${generateUniqueSlug(movie.movie_name, movie.id)}`}>
                         {movie.movie_name || 'Untitled'}
                       </Link>
                     </h3>
-                    <p>
+                    <p className="ott-trending-card-v2__rating">
                       {Number(movie.rating) > 0 ? `Rating ${Number(movie.rating).toFixed(1)}/10` : formatReleaseDate(movie.digital_release_date)}
                     </p>
                   </div>

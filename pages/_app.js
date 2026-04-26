@@ -2,6 +2,7 @@ import '../css/styles.css';
 import '../css/ott-movies.css';
 import '../css/hero-v2.css';
 import '../css/ott-table-v3.css';
+import '../css/trending-v2.css';
 import Head from 'next/head';
 import { Analytics } from '@vercel/analytics/next';
 
