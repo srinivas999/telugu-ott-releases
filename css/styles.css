@@ -1479,7 +1479,7 @@ main {
   margin: 0 0 1rem;
   max-width: 64ch;
   color: var(--color-muted);
-  font-size: clamp(1rem, 1.3vw, 1.12rem);
+  font-size: 16px;
   line-height: var(--leading-relaxed);
 }
 
