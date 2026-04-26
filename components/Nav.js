@@ -16,6 +16,11 @@ export default function Nav() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [showScrollTop, setShowScrollTop] = useState(false);
 
+  const isLinkActive = useCallback(
+    (href) => (href === '/' ? router.pathname === href : router.pathname.startsWith(href)),
+    [router.pathname]
+  );
+
   const handleScrollToTop = useCallback(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
     setMenuOpen(false);
@@ -75,17 +80,63 @@ export default function Nav() {
   return (
     <>
       <header className={`site-header ${menuOpen ? 'is-open' : ''}`}>
+        <div className="header-glow" aria-hidden="true" />
         <nav className="site-nav" aria-label="Primary">
-          <Link className="logo" href="/">
-            <span className="ott-home-header__text ott-home-header__text--brand">Telugu</span>
-            <span className="ott-home-header__text ott-home-header__text--accent">OTT</span>
-            <span className="ott-home-header__text ott-home-header__text--brand">Releases</span>
-          </Link>
-          
-          <div className="nav-search-container mobile-only">
-            <SearchBar />
+          <div className="site-nav__brand">
+            <Link className="logo" href="/">
+              <span className="logo-icon">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+                  <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="url(#logoGrad1)" />
+                  <path d="M2 17L12 22L22 17" stroke="url(#logoGrad2)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  <path d="M2 12L12 17L22 12" stroke="url(#logoGrad2)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  <defs>
+                    <linearGradient id="logoGrad1" x1="2" y1="2" x2="22" y2="12" gradientUnits="userSpaceOnUse">
+                      <stop stopColor="#f97316" />
+                      <stop offset="1" stopColor="#ef4444" />
+                    </linearGradient>
+                    <linearGradient id="logoGrad2" x1="2" y1="12" x2="22" y2="22" gradientUnits="userSpaceOnUse">
+                      <stop stopColor="#f59e0b" />
+                      <stop offset="1" stopColor="#dc2626" />
+                    </linearGradient>
+                  </defs>
+                </svg>
+              </span>
+              <span className="logo-text">
+                <span className="logo-text__eyebrow">Daily tracker</span>
+                <span className="logo-text__title">
+                  <span className="logo-text__primary">Telugu</span>
+                  <span className="logo-text__accent">OTT</span>
+                  <span className="logo-text__secondary">Releases</span>
+                </span>
+              </span>
+            </Link>
+         {/*    <div className="nav-status desktop-only" aria-label="Site focus">
+              <span className="nav-status__dot" aria-hidden="true" />
+              New drops, theatre dates, and streaming updates
+            </div> */}
           </div>
-          
+
+          <div className="nav-menu" id="primary-menu">
+            <ul className="nav-links">
+              {navLinks.map((link) => (
+                <li key={link.href}>
+                  <Link
+                    href={link.href}
+                    className={isLinkActive(link.href) ? 'is-active' : undefined}
+                    aria-current={isLinkActive(link.href) ? 'page' : undefined}
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+
+            <div className="nav-search-container desktop-only">
+              <SearchBar />
+            </div>
+          </div>
+
           <button
             type="button"
             className="nav-toggle"
@@ -102,30 +153,8 @@ export default function Nav() {
             </span>
           </button>
 
-          <div
-            id="primary-menu"
-            className={`nav-menu ${menuOpen ? 'is-open' : ''}`}
-            aria-hidden={!menuOpen}
-          >
-            <div className="nav-search-container desktop-only">
-              <SearchBar />
-            </div>
-            <ul className="nav-links">
-              {navLinks.map((link) => {
-                const active = router.pathname === link.href;
-                return (
-                  <li key={link.href}>
-                    <Link
-                      href={link.href}
-                      className={active ? 'is-active' : ''}
-                      aria-current={active ? 'page' : undefined}
-                    >
-                      {link.label}
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
+          <div className="nav-search-container mobile-only">
+            <SearchBar />
           </div>
         </nav>
         <div

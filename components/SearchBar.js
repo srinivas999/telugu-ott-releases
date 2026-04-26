@@ -152,7 +152,11 @@ export default function SearchBar() {
           placeholder="Search movies or platforms..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          onFocus={() => setIsOpen(true)}
+          onFocus={() => {
+            if (searchTerm.trim()) {
+              setIsOpen(true);
+            }
+          }}
           aria-label="Search movies or platforms"
           aria-autocomplete="list"
           aria-controls="search-results"
