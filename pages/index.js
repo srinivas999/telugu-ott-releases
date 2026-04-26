@@ -529,8 +529,8 @@ export default function HomePage() {
               {loading ? 'Loading movies...' : `${filteredMovies.length} releases`}
             </span>
 
-            <div className="ott-table-wrap">
-              <table className="ott-movies-table">
+            <div className="ott-table-wrap-v3">
+              <table className="ott-movies-table-v3">
                 <thead>
                   <tr>
                     <th scope="col">Movie</th>
@@ -543,29 +543,46 @@ export default function HomePage() {
                 <tbody>
                   {filteredMovies.length === 0 ? (
                     <tr>
-                      <td className="ott-empty" colSpan="5">
+                      <td colSpan="5">
+                        <div className="ott-empty-v3">
                         {loading ? 'Loading OTT releases...' : 'No releases match your filter.'}
+                        </div>
                       </td>
                     </tr>
                   ) : (
                     filteredMovies.map((movie) => (
                       <tr key={movie.id || `${movie.movie_name}-${movie.digital_release_date}`} itemScope itemType="https://schema.org/Movie">
                         <td data-label="Movie">
-                          <Link href={`/movie/${generateUniqueSlug(movie.movie_name, movie.id)}`} itemProp="url">
+                          <Link href={`/movie/${generateUniqueSlug(movie.movie_name, movie.id)}`} className="ott-table-movie-title" itemProp="url">
+                            <div className="ott-table-movie-icon">
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                            </div>
                             <span itemProp="name">{movie.movie_name || 'Untitled'}</span>
                           </Link>
                         </td>
                         <td data-label="Release Date">
-                          <time itemProp="datePublished" dateTime={movie.digital_release_date || ''}>
+                          <time className="ott-table-date" itemProp="datePublished" dateTime={movie.digital_release_date || ''}>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
                             {formatReleaseDate(movie.digital_release_date)}
                           </time>
                         </td>
                         <td data-label="Platform">
-                          <span>{movie.streaming_partner || 'TBA'}</span>
+                          <span className={`ott-badge ${
+                            (movie.streaming_partner || '').toLowerCase().includes('netflix') ? 'ott-badge--netflix' :
+                            (movie.streaming_partner || '').toLowerCase().includes('aha') ? 'ott-badge--aha' :
+                            (movie.streaming_partner || '').toLowerCase().includes('prime') ? 'ott-badge--prime' :
+                            (movie.streaming_partner || '').toLowerCase().includes('hotstar') ? 'ott-badge--hotstar' :
+                            (movie.streaming_partner || '').toLowerCase().includes('zee5') ? 'ott-badge--zee5' :
+                            'ott-badge--default'
+                          }`}>
+                            {movie.streaming_partner || 'TBA'}
+                          </span>
                         </td>
-                        <td data-label="Language">{movie.language || movie.movie_language || 'Telugu'}</td>
+                        <td data-label="Language">
+                          <span className="ott-badge ott-badge--lang">{movie.language || movie.movie_language || 'Telugu'}</span>
+                        </td>
                         <td data-label="Category" itemProp="genre">
-                          <span>{movie.category || 'Film'}</span>
+                          <span className="ott-badge ott-badge--category">{movie.category || 'Film'}</span>
                         </td>
                       </tr>
                     ))
