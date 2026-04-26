@@ -1057,60 +1057,49 @@ export default function AdminPage() {
                     <p className="admin-status">No movies found. Add your first OTT release.</p>
                   ) : (
                     <>
-                      <div className="admin-table-wrapper">
-                        <table className="admin-table">
-                          <thead>
-                            <tr>
-                              <th>Movie</th>
-                              <th>Year</th>
-                              <th>Partner</th>
-                              <th>Release date</th>
-                              <th>Language</th>
-                              <th>Category</th>
-                              <th aria-label="Actions" />
-                            </tr>
-                          </thead>
-                          <tbody>
-                          {movies.map((movie) => (
-                            <tr key={movie.id || `${movie.movie_name}-${movie.digital_release_date}`}>
-                              <td>{movie.movie_name || 'Untitled'}</td>
-                              <td>{movie.year || 'TBA'}</td>
-                              <td>{movie.streaming_partner || 'TBA'}</td>
-                              <td>{movie.digital_release_date || 'TBA'}</td>
-                              <td>{movie.language || 'Telugu'}</td>
-                              <td>{movie.category || 'Film'}</td>
-                              <td>
-                                <button type="button" className="admin-action-button" onClick={() => handleEditMovie(movie)}>
-                                  Edit
-                                </button>
-                                <button
-                                  type="button"
-                                  className="admin-action-button"
-                                  onClick={() => handleSyncLiveData(movie)}
-                                  disabled={liveSyncMovieId === movie.id}
-                                >
-                                  {liveSyncMovieId === movie.id ? 'Syncing…' : 'Sync live data'}
-                                </button>
-                                <button
-                                  type="button"
-                                  className="admin-action-button"
-                                  onClick={() => handleSyncOmdbData(movie)}
-                                  disabled={omdbSyncMovieId === movie.id}
-                                >
-                                  {omdbSyncMovieId === movie.id
-                                    ? 'Syncing OMDb...'
-                                    : movie.OMTB_Details || movie.omtb_details
-                                      ? 'Refresh OMDb'
-                                      : 'Sync OMDb'}
-                                </button>
-                                <button type="button" className="admin-action-button admin-action-button--danger" onClick={() => handleDeleteMovie(movie.id)}>
-                                  Delete
-                                </button>
-                              </td>
-                            </tr>
-                          ))}
-                          </tbody>
-                        </table>
+                      <div className="admin-movie-grid">
+                        {movies.map((movie) => (
+                          <div className="admin-movie-card" key={movie.id || `${movie.movie_name}-${movie.digital_release_date}`}>
+                            <div className="admin-movie-card__content">
+                              <h3 className="admin-movie-card__title">{movie.movie_name || 'Untitled'}</h3>
+                              <div className="admin-movie-card__meta">
+                                <span className="admin-badge admin-badge--year">{movie.year || 'TBA'}</span>
+                                <span className="admin-badge admin-badge--partner">{movie.streaming_partner || 'TBA'}</span>
+                                <span className="admin-badge admin-badge--date">{movie.digital_release_date || 'TBA'}</span>
+                                <span className="admin-badge admin-badge--lang">{movie.language || 'Telugu'}</span>
+                                <span className="admin-badge admin-badge--category">{movie.category || 'Film'}</span>
+                              </div>
+                            </div>
+                            <div className="admin-movie-card__actions">
+                              <button type="button" className="admin-action-button" onClick={() => handleEditMovie(movie)}>
+                                Edit
+                              </button>
+                              <button
+                                type="button"
+                                className="admin-action-button"
+                                onClick={() => handleSyncLiveData(movie)}
+                                disabled={liveSyncMovieId === movie.id}
+                              >
+                                {liveSyncMovieId === movie.id ? 'Syncing…' : 'Sync live data'}
+                              </button>
+                              <button
+                                type="button"
+                                className="admin-action-button"
+                                onClick={() => handleSyncOmdbData(movie)}
+                                disabled={omdbSyncMovieId === movie.id}
+                              >
+                                {omdbSyncMovieId === movie.id
+                                  ? 'Syncing OMDb...'
+                                  : movie.OMTB_Details || movie.omtb_details
+                                    ? 'Refresh OMDb'
+                                    : 'Sync OMDb'}
+                              </button>
+                              <button type="button" className="admin-action-button admin-action-button--danger" onClick={() => handleDeleteMovie(movie.id)}>
+                                Delete
+                              </button>
+                            </div>
+                          </div>
+                        ))}
                       </div>
                       {liveSyncStatus ? (
                         <p className={`admin-status ${liveSyncError ? 'admin-status--error' : ''}`}>
