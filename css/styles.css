@@ -461,14 +461,13 @@ main {
 .page-projects {
   max-width: 72rem;
   margin: 0 auto;
-  padding: var(--space-section-y-tight) 1.5rem;
+  padding: 0.2rem 1rem;
   width: 100%;
   min-width: 0;
   overflow-x: clip;
 }
 
 .page-ott .projects-page-inner {
-  padding-top: 1.75rem;
   padding-bottom: var(--space-section-y-tight);
 }
 
@@ -479,7 +478,7 @@ main {
 
   .projects-page-inner,
   .page-projects {
-    padding: 0.8rem 0.55rem;
+    padding: 0.5rem 0.55rem;
   }
 
   .page-ott .projects-page-inner {
@@ -642,12 +641,15 @@ main {
 .movie-carousel {
   margin-bottom: 2rem;
   overflow-x: auto;
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none;
+  /* Firefox */
+  -ms-overflow-style: none;
+  /* IE and Edge */
 }
 
 .movie-carousel::-webkit-scrollbar {
-  display: none; /* Chrome, Safari, and Opera */
+  display: none;
+  /* Chrome, Safari, and Opera */
 }
 
 .movie-carousel__inner {
@@ -1038,6 +1040,7 @@ main {
 }
 
 @media (max-width: 680px) {
+
   .tmdb-release-card,
   .tmdb-release-card--compact {
     height: 210px;
@@ -1385,14 +1388,12 @@ main {
   background:
     radial-gradient(ellipse 120% 80% at 20% 20%, rgba(96, 165, 250, 0.35), transparent 55%),
     radial-gradient(ellipse 100% 70% at 85% 75%, rgba(167, 139, 250, 0.4), transparent 50%),
-    linear-gradient(
-      155deg,
+    linear-gradient(155deg,
       #0c1929 0%,
       #1e3a5f 22%,
       #2d3a8c 48%,
       #4c1d95 78%,
-      #5b21b6 100%
-    );
+      #5b21b6 100%);
 }
 
 .hero__inner {
@@ -1565,7 +1566,7 @@ main {
 }
 
 .site-footer__inner {
- max-width: var(--page-max-width);
+  max-width: var(--page-max-width);
   margin: 0 auto;
 }
 
@@ -1734,11 +1735,9 @@ html[data-homepage-mode="ott_only"] .site-footer::before {
   inset: 0;
   background:
     linear-gradient(90deg, transparent 0, rgba(255, 255, 255, 0.05) 50%, transparent 100%),
-    repeating-linear-gradient(
-      90deg,
+    repeating-linear-gradient(90deg,
       rgba(255, 255, 255, 0.04) 0 2px,
-      transparent 2px 18px
-    );
+      transparent 2px 18px);
   opacity: 0.22;
   pointer-events: none;
 }
@@ -1870,6 +1869,7 @@ html[data-homepage-mode="ott_only"] .site-footer__note {
 
 
 @media (prefers-reduced-motion: reduce) {
+
   .nav-menu,
   .nav-toggle__bar,
   .nav-backdrop {
@@ -2440,7 +2440,7 @@ html[data-hide-contact="true"] #contact {
     height: 2.5rem;
     box-shadow: 0 4px 16px rgba(79, 70, 229, 0.35);
   }
-  
+
   .scroll-to-top svg {
     width: 18px;
     height: 18px;
@@ -2454,7 +2454,7 @@ html[data-hide-contact="true"] #contact {
     width: 2.25rem;
     height: 2.25rem;
   }
-  
+
   .scroll-to-top svg {
     width: 16px;
     height: 16px;
@@ -2763,7 +2763,9 @@ html[data-hide-contact="true"] #contact {
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 #contact-status {
@@ -2959,6 +2961,7 @@ html[data-hide-contact="true"] #contact {
     opacity: 0;
     transform: translateY(-8px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -3172,9 +3175,19 @@ html[data-hide-contact="true"] #contact {
 }
 
 @keyframes blobFloat {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  33% { transform: translate(30px, -30px) scale(1.05); }
-  66% { transform: translate(-20px, 20px) scale(0.95); }
+
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+
+  33% {
+    transform: translate(30px, -30px) scale(1.05);
+  }
+
+  66% {
+    transform: translate(-20px, 20px) scale(0.95);
+  }
 }
 
 .contact-page-inner {
@@ -3257,7 +3270,7 @@ html[data-hide-contact="true"] #contact {
   padding: clamp(1.75rem, 4vw, 2.5rem);
   border-radius: 28px;
   border: 1px solid rgba(255, 255, 255, 0.6);
-  box-shadow: 
+  box-shadow:
     0 4px 6px -1px rgba(0, 0, 0, 0.05),
     0 20px 50px -10px rgba(79, 70, 229, 0.12),
     0 0 0 1px rgba(255, 255, 255, 0.5) inset;
@@ -3388,7 +3401,7 @@ html[data-hide-contact="true"] #contact {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 50%);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, transparent 50%);
   pointer-events: none;
 }
 
@@ -3430,7 +3443,9 @@ html[data-hide-contact="true"] #contact {
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* Status messages */
@@ -3448,8 +3463,15 @@ html[data-hide-contact="true"] #contact {
 }
 
 @keyframes slideUp {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 #contact-status.contact-status--error {
@@ -3475,7 +3497,7 @@ html[data-hide-contact="true"] #contact {
   padding: clamp(2.5rem, 6vw, 4rem);
   border-radius: 28px;
   border: 1px solid rgba(255, 255, 255, 0.6);
-  box-shadow: 
+  box-shadow:
     0 4px 6px -1px rgba(0, 0, 0, 0.05),
     0 20px 50px -10px rgba(16, 185, 129, 0.15),
     0 0 0 1px rgba(255, 255, 255, 0.5) inset;
@@ -3483,8 +3505,15 @@ html[data-hide-contact="true"] #contact {
 }
 
 @keyframes scaleIn {
-  from { opacity: 0; transform: scale(0.9) translateY(20px); }
-  to { opacity: 1; transform: scale(1) translateY(0); }
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
 
 .contact-success__animation {
@@ -3505,9 +3534,19 @@ html[data-hide-contact="true"] #contact {
 }
 
 @keyframes checkPop {
-  0% { transform: scale(0); opacity: 0; }
-  50% { transform: scale(1.15); }
-  100% { transform: scale(1); opacity: 1; }
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+
+  50% {
+    transform: scale(1.15);
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 .contact-success__circle svg {
@@ -3621,13 +3660,14 @@ html[data-hide-contact="true"] #contact {
 
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
+
   .contact-bg-blob,
   .contact-success__circle,
   .contact-success-card,
   #contact-status {
     animation: none !important;
   }
-  
+
   .contact-info-card:hover,
   #contact-submit-button:hover:not(:disabled),
   .contact-form input:focus,
@@ -3695,9 +3735,19 @@ html[data-hide-contact="true"] #contact {
 }
 
 @keyframes theatreBlobFloat {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  33% { transform: translate(40px, -30px) scale(1.08); }
-  66% { transform: translate(-30px, 20px) scale(0.95); }
+
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+
+  33% {
+    transform: translate(40px, -30px) scale(1.08);
+  }
+
+  66% {
+    transform: translate(-30px, 20px) scale(0.95);
+  }
 }
 
 .theatre-page__inner {
@@ -4022,16 +4072,20 @@ html[data-hide-contact="true"] #contact {
     grid-template-columns: 1fr;
     text-align: center;
   }
+
   .theatre-featured__poster {
     max-width: 220px;
     margin: 0 auto;
   }
+
   .theatre-featured__label {
     align-self: center;
   }
+
   .theatre-featured__meta {
     justify-content: center;
   }
+
   .theatre-featured__actions {
     justify-content: center;
   }
@@ -4106,6 +4160,7 @@ html[data-hide-contact="true"] #contact {
     grid-template-columns: repeat(2, 1fr);
     gap: 1rem;
   }
+
   .theatre-grid--compact {
     grid-template-columns: repeat(3, 1fr);
     gap: 0.75rem;
@@ -4297,7 +4352,7 @@ html[data-hide-contact="true"] #contact {
 
 /* Skeleton */
 .theatre-card--skeleton .skeleton {
-  background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.04) 75%);
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.04) 25%, rgba(255, 255, 255, 0.08) 50%, rgba(255, 255, 255, 0.04) 75%);
   background-size: 200% 100%;
   animation: skeletonShimmer 1.5s infinite;
 }
@@ -4322,8 +4377,13 @@ html[data-hide-contact="true"] #contact {
 }
 
 @keyframes skeletonShimmer {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+  0% {
+    background-position: 200% 0;
+  }
+
+  100% {
+    background-position: -200% 0;
+  }
 }
 
 /* Error state */
@@ -4355,14 +4415,15 @@ html[data-hide-contact="true"] #contact {
 
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
+
   .theatre-page__bg-blob,
   .theatre-card--skeleton .skeleton {
     animation: none !important;
   }
+
   .theatre-card:hover,
   .theatre-btn--primary:hover,
   .theatre-card__overlay-btn {
     transform: none !important;
   }
 }
-

@@ -1,0 +1,451 @@
+/* Hero v2 Container */
+.ott-hero-v2 {
+  position: relative;
+  background: radial-gradient(circle at 100% 0%, #1e1b4b 0%, #020617 60%, #000000 100%);
+  border-radius: 24px;
+  overflow: hidden;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 2rem;
+  box-shadow: 0 32px 64px rgba(0, 0, 0, 0.4);
+}
+
+/* Header inside Hero */
+.ott-hero-v2__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.5rem 2.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  position: relative;
+  z-index: 10;
+}
+
+.ott-hero-v2__logo {
+  display: flex;
+  align-items: baseline;
+  gap: 0.3rem;
+  font-family: var(--font-heading, sans-serif);
+  font-weight: 900;
+  line-height: 1;
+}
+
+.logo-sv {
+  color: #e50914;
+  font-size: 2.2rem;
+  letter-spacing: -1px;
+}
+
+.logo-telugu {
+  color: #ffffff;
+  font-size: 1rem;
+  letter-spacing: 0.5px;
+}
+
+.logo-ott {
+  color: #e50914;
+  font-size: 1rem;
+  letter-spacing: 0.5px;
+}
+
+.ott-hero-v2__nav {
+  display: none; /* Hidden per user request to avoid double-header look */
+  gap: 1.5rem;
+  align-items: center;
+}
+
+.ott-hero-v2__nav a {
+  color: rgba(255, 255, 255, 0.85);
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  transition: color 0.2s;
+}
+
+.ott-hero-v2__nav a:hover {
+  color: #fff;
+}
+
+.ott-hero-v2__search-btn {
+  display: none; /* Hidden along with nav */
+  background: transparent;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  transition: transform 0.2s;
+}
+
+.ott-hero-v2__search-btn:hover {
+  transform: scale(1.1);
+}
+
+/* Hero Body Layout */
+.ott-hero-v2__body {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  gap: 2rem;
+  padding: 4rem 2.5rem;
+  position: relative;
+}
+
+.ott-hero-v2__content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  z-index: 2;
+}
+
+.ott-hero-v2__eyebrow {
+  font-size: 0.9rem;
+  letter-spacing: 3px;
+  color: #cbd5e1;
+  font-weight: 600;
+  margin: 0;
+}
+
+.ott-hero-v2__title {
+  margin: 0;
+  font-family: var(--font-heading, sans-serif);
+  font-size: clamp(3rem, 5vw, 5.5rem);
+  font-weight: 900;
+  line-height: 0.95;
+  text-transform: uppercase;
+  letter-spacing: -1px;
+}
+
+.title-white {
+  color: #ffffff;
+  text-shadow: 2px 4px 12px rgba(0,0,0,0.5);
+}
+
+.title-red {
+  color: #e50914;
+  text-shadow: 2px 4px 12px rgba(229,9,20,0.3);
+}
+
+.ott-hero-v2__desc {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  color: #94a3b8;
+  max-width: 90%;
+  margin: 0;
+}
+
+/* Platforms Row */
+.ott-hero-v2__platforms {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  margin-top: 0.5rem;
+}
+
+.platform-logo {
+  font-family: var(--font-heading, sans-serif);
+  font-weight: 800;
+  font-size: 1.2rem;
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
+}
+
+.p-netflix { color: #E50914; font-weight: 900; letter-spacing: 1px; }
+.p-aha { color: #f97316; text-transform: lowercase; font-style: italic; font-size: 1.5rem; }
+.p-prime { color: #fff; font-weight: 600; font-size: 1rem; }
+.prime-blue { color: #00a8e1; }
+.p-hotstar { color: #ffffff; font-size: 0.8rem; font-weight: 700; text-align: center; line-height: 1.1; }
+.p-hotstar::first-line { font-size: 0.7rem; color: #3b82f6; }
+.p-zee5 { color: #ffffff; font-size: 1.1rem; }
+.zee-z { color: #a855f7; }
+.zee-5 { color: #3b82f6; font-size: 1.4rem; }
+
+/* Buttons */
+.ott-hero-v2__actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+}
+
+.btn-v2 {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.85rem 1.75rem;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.btn-v2 svg {
+  width: 20px;
+  height: 20px;
+}
+
+.btn-v2--primary {
+  background: #e50914;
+  color: #fff;
+  border: 1px solid #e50914;
+  box-shadow: 0 4px 14px rgba(229, 9, 20, 0.4);
+}
+
+.btn-v2--primary:hover {
+  background: #f6121d;
+  color: #fff;
+  border-color: #f6121d;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(229, 9, 20, 0.5);
+}
+
+.btn-v2--outline {
+  background: transparent;
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.btn-v2--outline:hover {
+  border-color: #fff;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
+}
+
+/* Footer Features */
+.ott-hero-v2__footer {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  align-items: center;
+  padding: 1.5rem 2.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(0, 0, 0, 0.3);
+  gap: 1.5rem;
+}
+
+.hero-feature {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.hero-feature__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: rgba(229, 9, 20, 0.1);
+  border-radius: 8px;
+  color: #e50914;
+  flex-shrink: 0;
+}
+
+.hero-feature__icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.hero-feature__text {
+  display: flex;
+  flex-direction: column;
+}
+
+.hero-feature__text strong {
+  font-size: 0.9rem;
+  color: #f8fafc;
+  line-height: 1.2;
+}
+
+.hero-feature__text span {
+  font-size: 0.8rem;
+  color: #94a3b8;
+  margin-top: 0.15rem;
+}
+
+/* Right Side Grid Visual */
+.ott-hero-v2__visual {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 100%;
+  width: 55%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  perspective: 1000px;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.ott-hero-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  transform: rotate(-6deg) scale(1.15) translateY(5%);
+  width: 120%;
+  margin-right: -10%;
+  pointer-events: none;
+}
+
+.ott-hero-grid__item {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+  aspect-ratio: 2/3;
+  background: #1e293b;
+  border: 1px solid rgba(255,255,255,0.05);
+  transition: transform 0.3s ease;
+}
+
+.ott-hero-grid__item.item-skeleton {
+  background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
+  background-size: 200% 100%;
+}
+
+.ott-hero-grid__img {
+  object-fit: cover;
+  width: 100%;
+  height: 100%;
+}
+
+.ott-hero-grid__placeholder {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  text-align: center;
+  font-weight: 700;
+  color: #94a3b8;
+  font-size: 0.9rem;
+  background: #0f172a;
+}
+
+/* Stagger columns */
+.ott-hero-grid__item:nth-child(3n+1) { transform: translateY(-50px); }
+.ott-hero-grid__item:nth-child(3n+2) { transform: translateY(20px); }
+.ott-hero-grid__item:nth-child(3n+3) { transform: translateY(-30px); }
+
+/* Responsive Adjustments */
+@media (max-width: 1100px) {
+  .ott-hero-v2__nav { gap: 1rem; }
+  .ott-hero-v2__nav a { font-size: 0.8rem; }
+  .ott-hero-grid { transform: rotate(-5deg) scale(1) translateY(0); margin-right: -5%; }
+  .ott-hero-v2__footer { grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
+}
+
+@media (max-width: 980px) {
+  .ott-hero-v2__header {
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: center;
+  }
+  .ott-hero-v2__nav {
+    display: none; /* Hide top nav on mobile hero to avoid clutter */
+  }
+  .ott-hero-v2__search-btn {
+    position: absolute;
+    right: 1.5rem;
+    top: 1.5rem;
+  }
+  
+  .ott-hero-v2__body {
+    grid-template-columns: 1fr;
+    padding: 2.5rem 1.5rem;
+    gap: 3rem;
+  }
+  
+  .ott-hero-v2__content {
+    align-items: center;
+    text-align: center;
+  }
+
+  .ott-hero-v2__desc {
+    max-width: 100%;
+  }
+  
+  .ott-hero-v2__platforms {
+    justify-content: center;
+  }
+  
+  .ott-hero-v2__actions {
+    justify-content: center;
+  }
+  
+  .ott-hero-v2__visual {
+    position: relative;
+    width: 100%;
+    height: 350px;
+    opacity: 0.8;
+  }
+  
+  .ott-hero-grid {
+    grid-template-columns: repeat(4, 1fr);
+    transform: rotate(-3deg) scale(1);
+    width: 120%;
+    margin-left: -10%;
+  }
+  .ott-hero-grid__item:nth-child(n+5) { display: none; }
+  .ott-hero-grid__item:nth-child(3n+1) { transform: none; }
+  .ott-hero-grid__item:nth-child(3n+2) { transform: none; }
+  .ott-hero-grid__item:nth-child(3n+3) { transform: none; }
+  
+  .ott-hero-grid__item:nth-child(4n+1) { transform: translateY(-30px); }
+  .ott-hero-grid__item:nth-child(4n+2) { transform: translateY(10px); }
+  .ott-hero-grid__item:nth-child(4n+3) { transform: translateY(-15px); }
+  .ott-hero-grid__item:nth-child(4n+4) { transform: translateY(25px); }
+}
+
+@media (max-width: 640px) {
+  .ott-hero-v2 {
+    border-radius: 16px; 
+    margin-left: -0.8rem; /* Full bleed on small mobile */
+    margin-right: -0.8rem;
+    width: calc(100% + 1.6rem);
+  }
+  
+  .ott-hero-v2__header {
+    padding: 1.25rem;
+  }
+  
+  .logo-sv { font-size: 1.8rem; }
+  .logo-telugu, .logo-ott { font-size: 0.8rem; }
+  
+  .ott-hero-v2__body {
+    padding: 1.5rem 1.25rem 0;
+    gap: 2rem;
+  }
+  
+  .ott-hero-v2__title {
+    font-size: 2.8rem;
+  }
+  
+  .btn-v2 {
+    width: 100%;
+  }
+  
+  .ott-hero-v2__footer {
+    grid-template-columns: 1fr;
+    padding: 1.5rem 1.25rem;
+    gap: 1.25rem;
+  }
+  
+  .ott-hero-v2__visual {
+    height: 250px;
+    margin-top: 1rem;
+  }
+  .ott-hero-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .ott-hero-grid__item:nth-child(4n+4) { display: none; }
+}

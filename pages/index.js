@@ -298,67 +298,137 @@ export default function HomePage() {
         jsonLd={jsonLd}
       />
 
+
       {/* Breadcrumb: shows current page context */}
       <Breadcrumb items={[{ name: 'Home', url: '/' }, { name: 'Latest OTT Releases' }]} />
 
       <section className="page-projects page-ott">
         <div className="projects-page-inner">
-          <section className="ott-hero">
-            <div className="ott-hero__visual">
-              <Image
-                src={`${assetBasePath}/images/ott-hero-banner.png`}
-                alt="Telugu OTT hero banner"
-                className="hero-image"
-                fill
-                sizes="(max-width: 980px) 100vw, 35vw"
-              />
+          <section className="ott-hero-v2">
+            <header className="ott-hero-v2__header">
+              <div className="ott-hero-v2__logo">
+                <span className="logo-sv">SV</span>
+                <span className="logo-telugu">TELUGU</span>
+                <span className="logo-ott">OTT</span>
+              </div>
+              <nav className="ott-hero-v2__nav">
+                <Link href="/">HOME</Link>
+                <Link href="/">MOVIES</Link>
+                <Link href="/">WEB SERIES</Link>
+                <Link href="/">PLATFORMS</Link>
+                <Link href="/">GENRES</Link>
+                <Link href="/telugu-ott-releases-this-week">UPCOMING</Link>
+                <Link href="/blog">NEWS</Link>
+              </nav>
+              <button className="ott-hero-v2__search-btn" aria-label="Search">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+              </button>
+            </header>
+
+            <div className="ott-hero-v2__body">
+              <div className="ott-hero-v2__content">
+                <p className="ott-hero-v2__eyebrow">YOUR ULTIMATE GUIDE TO</p>
+                <h1 className="ott-hero-v2__title">
+                  <span className="title-white">TELUGU</span>
+                  <br />
+                  <span className="title-red">OTT RELEASES</span>
+                </h1>
+                <p className="ott-hero-v2__desc">
+                  Find where to watch latest Telugu Movies &amp; Web Series across all OTT platforms.
+                </p>
+
+                <div className="ott-hero-v2__platforms">
+                  <span className="platform-logo p-netflix">NETFLIX</span>
+                  <span className="platform-logo p-aha">aha</span>
+                  <span className="platform-logo p-prime">
+                    <span className="prime-blue">prime</span> video
+                  </span>
+                  <span className="platform-logo p-hotstar">
+                    Disney+<br />hotstar
+                  </span>
+                  <span className="platform-logo p-zee5">
+                    <span className="zee-z">Z</span>EE<span className="zee-5">5</span>
+                  </span>
+                </div>
+
+                <div className="ott-hero-v2__actions">
+                  <Link href="#ott-movies-status" className="btn-v2 btn-v2--primary" onClick={(e) => {
+                    e.preventDefault();
+                    document.querySelector('.ott-table-section')?.scrollIntoView({ behavior: 'smooth' });
+                  }}>
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                    EXPLORE MOVIES
+                  </Link>
+                  <Link href="/telugu-ott-releases-this-week" className="btn-v2 btn-v2--outline">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    THIS WEEK RELEASES
+                  </Link>
+                </div>
+              </div>
+
+              <div className="ott-hero-v2__visual">
+                <div className="ott-hero-grid">
+                  {theatreMovies.length > 0 ? (
+                    theatreMovies.slice(0, 7).map((movie, index) => (
+                      <div key={movie.id || index} className={`ott-hero-grid__item item-${index + 1}`}>
+                        {movie.poster_path ? (
+                          <Image
+                            src={`${TMDB_POSTER_BASE}${movie.poster_path}`}
+                            alt={movie.title || movie.original_title || 'Movie Poster'}
+                            fill
+                            sizes="(max-width: 980px) 25vw, 15vw"
+                            className="ott-hero-grid__img"
+                          />
+                        ) : (
+                          <div className="ott-hero-grid__placeholder">{movie.title || 'Movie'}</div>
+                        )}
+                      </div>
+                    ))
+                  ) : (
+                    Array.from({ length: 7 }).map((_, i) => (
+                       <div key={i} className={`ott-hero-grid__item item-${i + 1} item-skeleton`} />
+                    ))
+                  )}
+                </div>
+              </div>
             </div>
-            <div className="ott-hero__panel">
-              <h1>Telugu OTT releases this week</h1>
-              <p className="ott-hero__tagline">
-                Find upcoming Telugu OTT movies on Netflix, Aha, Prime Video, JioHotstar, Zee5, Sun NXT and ETV Win with release dates and platform availability.
-              </p>
-              <div className="ott-hero__actions share-buttons">
-                <a
-                  className="share-button share-button--whatsapp"
-                  href={whatsappShareUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Share on WhatsApp"
-                  title="Share on WhatsApp"
-                >
-                  <span className="share-button__icon" aria-hidden="true">📱</span>
-                </a>
-                <a
-                  className="share-button share-button--facebook"
-                  href={facebookShareUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Share on Facebook"
-                  title="Share on Facebook"
-                >
-                  <span className="share-button__icon" aria-hidden="true">✈️</span>
-                </a>
-                <a
-                  className="share-button share-button--telegram"
-                  href={telegramShareUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Share on Telegram"
-                  title="Share on Telegram"
-                >
-                  <span className="share-button__icon" aria-hidden="true">Telegram</span>
-                </a>
-                <a
-                  className="share-button share-button--twitter"
-                  href={twitterShareUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Share on Twitter"
-                  title="Share on Twitter"
-                >
-                  <span className="share-button__icon" aria-hidden="true">🐦</span>
-                </a>
+
+            <div className="ott-hero-v2__footer">
+              <div className="hero-feature">
+                <div className="hero-feature__icon">
+                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="7" width="20" height="15" rx="2" ry="2"/><polyline points="17 2 12 7 7 2"/></svg>
+                </div>
+                <div className="hero-feature__text">
+                  <strong>All OTT Platforms</strong>
+                  <span>In One Place</span>
+                </div>
+              </div>
+              <div className="hero-feature">
+                <div className="hero-feature__icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                </div>
+                <div className="hero-feature__text">
+                  <strong>Daily Updates</strong>
+                  <span>Never Miss Anything</span>
+                </div>
+              </div>
+              <div className="hero-feature">
+                <div className="hero-feature__icon">
+                  <svg viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                </div>
+                <div className="hero-feature__text">
+                  <strong>Ratings &amp; Reviews</strong>
+                  <span>Choose The Best</span>
+                </div>
+              </div>
+              <div className="hero-feature">
+                <div className="hero-feature__icon">
+                  <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+                </div>
+                <div className="hero-feature__text">
+                  <strong>Get Notified</strong>
+                  <span>New Releases</span>
+                </div>
               </div>
             </div>
           </section>
