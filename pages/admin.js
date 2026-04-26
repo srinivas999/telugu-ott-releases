@@ -6,6 +6,7 @@ import { getTmdbDetails } from '../lib/utils/tmdb';
 
 const EMPTY_MOVIE = {
   movie_name: '',
+  year: '',
   streaming_partner: '',
   digital_release_date: '',
   language: '',
@@ -131,7 +132,7 @@ export default function AdminPage() {
     try {
       const { data: currentMovies, error } = await supabase
         .from('ott_movies')
-        .select('id,movie_name,digital_release_date');
+        .select('id,movie_name,year,digital_release_date');
 
       if (error) {
         throw error;
@@ -160,7 +161,7 @@ export default function AdminPage() {
       for (const movie of moviesToSync) {
         const title = movie.movie_name.trim();
         const searchQuery = buildTmdbSearchQuery(title);
-        const syncYear = String(movie.digital_release_date || '').slice(0, 4);
+        const syncYear = String(movie.year || movie.digital_release_date || '').slice(0, 4);
         const response = await fetch(
           `/api/tmdb/search?query=${encodeURIComponent(searchQuery)}&y=${encodeURIComponent(syncYear)}&mediaType=movie`
         );
@@ -355,6 +356,7 @@ export default function AdminPage() {
 
     const payload = {
       movie_name: movieForm.movie_name.trim(),
+      year: String(movieForm.year || '').trim(),
       streaming_partner: movieForm.streaming_partner.trim(),
       digital_release_date: movieForm.digital_release_date.trim(),
       language: movieForm.language.trim(),
@@ -385,8 +387,10 @@ export default function AdminPage() {
 
   const handleEditMovie = (movie) => {
     setEditingMovieId(movie.id);
+    setActiveTab('add');
     setMovieForm({
       movie_name: movie.movie_name || '',
+      year: String(movie.year || ''),
       streaming_partner: movie.streaming_partner || '',
       digital_release_date: movie.digital_release_date || '',
       language: movie.language || '',
@@ -484,6 +488,7 @@ export default function AdminPage() {
 
   const getOmdbSyncYear = (movie) =>
     String(
+      movie?.year ||
       movie?.release_date ||
       movie?.digital_release_date ||
       '',
@@ -556,6 +561,7 @@ export default function AdminPage() {
       const mediaType = getTmdbMediaType(movie.category);
       const searchQuery = buildTmdbSearchQuery(movieTitle);
       const syncYear = String(
+        movie.year ||
         movie.digital_release_date ||
         movie.release_date ||
         ''
@@ -609,6 +615,14 @@ export default function AdminPage() {
           bestMatch.release_date ||
           bestMatch.first_air_date ||
           null,
+        year: String(
+          movie.year ||
+          storedDetails.release_date ||
+          storedDetails.first_air_date ||
+          bestMatch.release_date ||
+          bestMatch.first_air_date ||
+          ''
+        ).slice(0, 4),
         genres: storedDetails.genres || null,
         genre_ids: storedDetails.genre_ids || null,
         cast_data: storedDetails.credits?.cast || null,
@@ -967,6 +981,17 @@ export default function AdminPage() {
                       required
                     />
 
+                    <label htmlFor="movie-year">Year</label>
+                    <input
+                      id="movie-year"
+                      type="number"
+                      min="1900"
+                      max="2100"
+                      value={movieForm.year}
+                      onChange={(event) => handleMovieFormChange('year', event.target.value)}
+                      placeholder="2026"
+                    />
+
                     <label htmlFor="movie-platform">Streaming partner</label>
                     <input
                       id="movie-platform"
@@ -1037,6 +1062,7 @@ export default function AdminPage() {
                           <thead>
                             <tr>
                               <th>Movie</th>
+                              <th>Year</th>
                               <th>Partner</th>
                               <th>Release date</th>
                               <th>Language</th>
@@ -1048,6 +1074,7 @@ export default function AdminPage() {
                           {movies.map((movie) => (
                             <tr key={movie.id || `${movie.movie_name}-${movie.digital_release_date}`}>
                               <td>{movie.movie_name || 'Untitled'}</td>
+                              <td>{movie.year || 'TBA'}</td>
                               <td>{movie.streaming_partner || 'TBA'}</td>
                               <td>{movie.digital_release_date || 'TBA'}</td>
                               <td>{movie.language || 'Telugu'}</td>
