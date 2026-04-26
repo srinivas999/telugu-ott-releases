@@ -1,11 +1,5 @@
 import https from 'https';
 
-const TITLE_SUFFIX_PATTERNS = [
-  /\(\s*telugu\s*\)/gi,
-  /\(\s*tamil\s*dubbed\s*\)/gi,
-  /\(\s*hindi\s*dubbed\s*\)/gi,
-];
-
 function fetchJsonFromUrl(url, headers = {}) {
   return new Promise((resolve, reject) => {
     const request = https.get(url, { headers }, (response) => {
@@ -43,26 +37,47 @@ function normalizeTitle(value) {
 }
 
 function cleanTitle(title) {
-  const withoutSuffixes = TITLE_SUFFIX_PATTERNS.reduce(
-    (currentTitle, pattern) => currentTitle.replace(pattern, ' '),
-    String(title || '')
-  );
+  const strippedTitle = String(title || '')
+    .replace(/\(.*?\)/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
 
-  return withoutSuffixes.replace(/\s+/g, ' ').trim();
+  if (!strippedTitle) {
+    return '';
+  }
+
+  const words = strippedTitle.split(' ').filter(Boolean);
+  if (words.length <= 1) {
+    return strippedTitle;
+  }
+
+  const [firstWord, ...remainingWords] = words;
+  if (/^(a|an|the)$/i.test(firstWord)) {
+    return `${firstWord} ${remainingWords.join('')}`.trim();
+  }
+
+  return words.join('');
 }
 
 function getResultTitle(result) {
   return result?.title || result?.original_title || result?.name || result?.original_name || '';
 }
 
+function getResultYear(result, mediaType) {
+  const dateValue = mediaType === 'tv'
+    ? result?.first_air_date || result?.release_date
+    : result?.release_date || result?.first_air_date;
+
+  return String(dateValue || '').slice(0, 4);
+}
+
 function uniqueValues(values) {
   return [...new Set(values.map((value) => String(value || '').trim()).filter(Boolean))];
 }
 
-function buildSearchCandidates({ query, originalTitle, year }) {
+function buildSearchCandidates({ query, year }) {
   const cleanedTitle = cleanTitle(query);
   const candidates = [
-    { label: 'original', query: originalTitle },
     { label: 'cleaned', query: cleanedTitle },
   ];
 
@@ -72,16 +87,11 @@ function buildSearchCandidates({ query, originalTitle, year }) {
 
   return uniqueValues(candidates.map((candidate) => candidate.query)).map((candidateQuery) => ({
     query: candidateQuery,
-    label:
-      candidateQuery === String(originalTitle || '').trim()
-        ? 'original'
-        : candidateQuery === cleanedTitle
-          ? 'cleaned'
-          : 'year',
+    label: candidateQuery === cleanedTitle ? 'cleaned' : 'year',
   }));
 }
 
-function scoreResult(result, referenceTitle) {
+function scoreResult(result, referenceTitle, year, mediaType) {
   const normalizedReference = normalizeTitle(referenceTitle);
   const normalizedCandidate = normalizeTitle(getResultTitle(result));
   let score = 0;
@@ -112,15 +122,24 @@ function scoreResult(result, referenceTitle) {
     score += result.vote_average * 5;
   }
 
+  if (year) {
+    const resultYear = getResultYear(result, mediaType);
+    if (resultYear === year) {
+      score += 400;
+    } else if (resultYear) {
+      score -= 250;
+    }
+  }
+
   return score;
 }
 
-function rankResults(results, referenceTitle, mediaType) {
+function rankResults(results, referenceTitle, mediaType, year) {
   return [...results]
     .filter((result) => !result.media_type || result.media_type === mediaType)
     .map((result) => ({
       ...result,
-      _score: scoreResult(result, referenceTitle),
+      _score: scoreResult(result, referenceTitle, year, mediaType),
     }))
     .sort((first, second) => second._score - first._score);
 }
@@ -154,8 +173,7 @@ export default async function handler(req, res) {
   }
 
   const query = String(req.query.query || '').trim();
-  const originalTitle = String(req.query.originalTitle || '').trim();
-  const year = String(req.query.year || '').trim();
+  const year = String(req.query.y || req.query.year || '').trim();
   const mediaType = String(req.query.mediaType || 'movie').trim().toLowerCase();
 
   if (!query) {
@@ -174,22 +192,23 @@ export default async function handler(req, res) {
   }
 
   try {
-    const referenceTitle = cleanTitle(originalTitle || query) || query;
-    const candidates = buildSearchCandidates({ query, originalTitle, year });
+    const cleanedQuery = cleanTitle(query) || query;
+    const referenceTitle = cleanedQuery;
+    const candidates = buildSearchCandidates({ query: cleanedQuery, year });
     const attempts = [];
     let rankedResults = [];
     let bestMatch = null;
 
     for (const candidate of candidates) {
       const payload = await fetchWithAuth(
-        buildTmdbUrl({ mediaType, query: candidate.query, year: candidate.label === 'year' ? year : '' }),
+        buildTmdbUrl({ mediaType, query: candidate.query, year }),
         { apiKey, readAccessToken }
       );
 
       const results = Array.isArray(payload?.results) ? payload.results : [];
       attempts.push({ strategy: candidate.label, query: candidate.query, count: results.length });
 
-      rankedResults = rankResults(results, referenceTitle, mediaType);
+      rankedResults = rankResults(results, referenceTitle, mediaType, year);
       bestMatch = rankedResults[0] || null;
 
       if (bestMatch) {
@@ -197,27 +216,27 @@ export default async function handler(req, res) {
           results: rankedResults,
           bestMatch,
           attempts,
-          cleanedTitle: cleanTitle(query),
+          cleanedTitle: cleanedQuery,
           message: `Match found using ${candidate.label} search.`,
         });
       }
     }
 
     const multiPayload = await fetchWithAuth(
-      `https://api.themoviedb.org/3/search/multi?query=${encodeURIComponent(referenceTitle)}&language=en-US&region=IN&page=1&include_adult=false`,
+      `https://api.themoviedb.org/3/search/multi?query=${encodeURIComponent(cleanedQuery)}&language=en-US&region=IN&page=1&include_adult=false`,
       { apiKey, readAccessToken }
     );
     const multiResults = Array.isArray(multiPayload?.results) ? multiPayload.results : [];
-    attempts.push({ strategy: 'multi', query: referenceTitle, count: multiResults.length });
+    attempts.push({ strategy: 'multi', query: cleanedQuery, count: multiResults.length });
 
-    rankedResults = rankResults(multiResults, referenceTitle, mediaType);
+    rankedResults = rankResults(multiResults, referenceTitle, mediaType, year);
     bestMatch = rankedResults[0] || null;
 
     return res.status(200).json({
       results: rankedResults,
       bestMatch,
       attempts,
-      cleanedTitle: cleanTitle(query),
+      cleanedTitle: cleanedQuery,
       message: bestMatch
         ? 'Match found using multi-search fallback.'
         : 'No TMDb match found after all fallback strategies.',

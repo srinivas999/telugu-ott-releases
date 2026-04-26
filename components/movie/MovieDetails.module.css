@@ -123,6 +123,37 @@
   margin-top: 1.5rem;
 }
 
+.omdbHeroGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 0.9rem;
+  margin-top: 1.5rem;
+}
+
+.omdbHeroCard {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 0.95rem 1rem;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.omdbHeroLabel {
+  color: rgba(255, 246, 232, 0.72);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.omdbHeroValue {
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 800;
+}
+
 .genreChip {
   padding: 0.7rem 1rem;
   border-radius: 999px;
@@ -214,6 +245,44 @@
   line-height: 1.85;
 }
 
+.omdbPlot {
+  margin: 0;
+  color: #4e3b31;
+  font-size: 1rem;
+  line-height: 1.8;
+}
+
+.omdbFactsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+  margin-top: 1.15rem;
+}
+
+.omdbFactCard {
+  padding: 1rem;
+  border-radius: 18px;
+  background: #fff;
+  border: 1px solid #f2e7d8;
+}
+
+.omdbFactLabel {
+  margin: 0;
+  color: #9b5f24;
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.omdbFactValue {
+  margin: 0.45rem 0 0;
+  color: #241713;
+  font-size: 0.97rem;
+  line-height: 1.6;
+  word-break: break-word;
+}
+
 .castGrid,
 .crewGrid {
   display: grid;
@@ -281,6 +350,10 @@
     justify-content: center;
   }
 
+  .omdbHeroGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .watchPanel {
     flex-direction: column;
   }
@@ -345,6 +418,11 @@
     gap: 0.6rem;
   }
 
+  .omdbHeroGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+  }
+
   .genreChip {
     padding: 0.5rem 0.9rem;
     font-size: 0.8rem;
@@ -384,7 +462,8 @@
     font-size: 1.35rem;
   }
 
-  .overview {
+  .overview,
+  .omdbPlot {
     font-size: 0.95rem;
   }
 
@@ -394,6 +473,11 @@
 
   .watchDetails p {
     font-size: 0.95rem;
+  }
+
+  .omdbFactsGrid {
+    grid-template-columns: 1fr;
+    gap: 0.8rem;
   }
 }
 
@@ -436,6 +520,11 @@
   .genreChip {
     padding: 0.4rem 0.7rem;
     font-size: 0.7rem;
+  }
+
+  .omdbHeroGrid {
+    grid-template-columns: 1fr;
+    gap: 0.6rem;
   }
 
   .watchPanel {

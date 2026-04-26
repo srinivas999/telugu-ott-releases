@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import Seo from '../components/Seo';
 import { supabase } from '../lib/supabaseClient';
 import { getOmdbRatingValue } from '../lib/utils/ratings';
+import { getTmdbDetails } from '../lib/utils/tmdb';
 
 const EMPTY_MOVIE = {
   movie_name: '',
@@ -158,8 +159,10 @@ export default function AdminPage() {
 
       for (const movie of moviesToSync) {
         const title = movie.movie_name.trim();
+        const searchQuery = buildTmdbSearchQuery(title);
+        const syncYear = String(movie.digital_release_date || '').slice(0, 4);
         const response = await fetch(
-          `/api/tmdb/search?query=${encodeURIComponent(title)}&originalTitle=${encodeURIComponent(title)}&mediaType=movie`
+          `/api/tmdb/search?query=${encodeURIComponent(searchQuery)}&y=${encodeURIComponent(syncYear)}&mediaType=movie`
         );
 
         if (!response.ok) {
@@ -420,6 +423,29 @@ export default function AdminPage() {
       .replace(/\s+/g, ' ')
       .trim();
 
+  const buildTmdbSearchQuery = (value) => {
+    const strippedTitle = String(value || '')
+      .replace(/\(.*?\)/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+
+    if (!strippedTitle) {
+      return '';
+    }
+
+    const words = strippedTitle.split(' ').filter(Boolean);
+    if (words.length <= 1) {
+      return strippedTitle;
+    }
+
+    const [firstWord, ...remainingWords] = words;
+    if (/^(a|an|the)$/i.test(firstWord)) {
+      return `${firstWord} ${remainingWords.join('')}`.trim();
+    }
+
+    return words.join('');
+  };
+
   const getTmdbMediaType = (category) => {
     const normalizedCategory = String(category || '').toLowerCase();
     if (
@@ -486,6 +512,28 @@ export default function AdminPage() {
     return result.error || null;
   };
 
+  const saveTmdbDetails = async (movieId, payload) => {
+    let result = await supabase
+      .from('ott_movies')
+      .update({ TMDB_Details: payload })
+      .eq('id', movieId);
+
+    if (!result.error) {
+      return null;
+    }
+
+    if (!/tmdb_details/i.test(result.error.message || '')) {
+      return result.error;
+    }
+
+    result = await supabase
+      .from('ott_movies')
+      .update({ tmdb_details: payload })
+      .eq('id', movieId);
+
+    return result.error || null;
+  };
+
   const handleSyncLiveData = async (movie) => {
     if (!supabase) {
       setLiveSyncError(true);
@@ -506,13 +554,14 @@ export default function AdminPage() {
 
     try {
       const mediaType = getTmdbMediaType(movie.category);
+      const searchQuery = buildTmdbSearchQuery(movieTitle);
       const syncYear = String(
-        movie.release_date ||
         movie.digital_release_date ||
+        movie.release_date ||
         ''
       ).slice(0, 4);
       const searchResponse = await fetch(
-        `/api/tmdb/search?query=${encodeURIComponent(movieTitle)}&originalTitle=${encodeURIComponent(movie.original_title || movieTitle)}&year=${encodeURIComponent(syncYear)}&mediaType=${encodeURIComponent(mediaType)}`
+        `/api/tmdb/search?query=${encodeURIComponent(searchQuery)}&y=${encodeURIComponent(syncYear)}&mediaType=${encodeURIComponent(mediaType)}`
       );
       if (!searchResponse.ok) {
         const errorBody = await searchResponse.text();
@@ -526,17 +575,45 @@ export default function AdminPage() {
         throw new Error(`No TMDB match found for "${movieTitle}".`);
       }
 
+      const detailsResponse = await fetch(
+        `/api/tmdb/details?id=${encodeURIComponent(bestMatch.id)}&mediaType=${encodeURIComponent(mediaType)}`
+      );
+      if (!detailsResponse.ok) {
+        const errorBody = await detailsResponse.text();
+        throw new Error(`TMDB details failed (${detailsResponse.status}): ${errorBody}`);
+      }
+
+      const detailsPayload = await detailsResponse.json();
+      const storedDetails = getTmdbDetails({ TMDB_Details: detailsPayload }) || detailsPayload;
+
       const payload = {
         tmdb_id: bestMatch.id,
         original_title:
+          storedDetails.original_title ||
+          storedDetails.original_name ||
           bestMatch.original_title ||
           bestMatch.original_name ||
           '',
-        poster_path: bestMatch.poster_path || '',
-        backdrop_path: bestMatch.backdrop_path || '',
-        overview: bestMatch.overview || '',
-        rating: typeof bestMatch.vote_average === 'number' ? Number(bestMatch.vote_average.toFixed(1)) : null,
-        release_date: bestMatch.release_date || bestMatch.first_air_date || null,
+        poster_path: storedDetails.poster_path || bestMatch.poster_path || '',
+        backdrop_path: storedDetails.backdrop_path || bestMatch.backdrop_path || '',
+        overview: storedDetails.overview || bestMatch.overview || '',
+        rating:
+          typeof storedDetails.vote_average === 'number'
+            ? Number(storedDetails.vote_average.toFixed(1))
+            : typeof bestMatch.vote_average === 'number'
+              ? Number(bestMatch.vote_average.toFixed(1))
+              : null,
+        release_date:
+          storedDetails.release_date ||
+          storedDetails.first_air_date ||
+          bestMatch.release_date ||
+          bestMatch.first_air_date ||
+          null,
+        genres: storedDetails.genres || null,
+        genre_ids: storedDetails.genre_ids || null,
+        cast_data: storedDetails.credits?.cast || null,
+        crew: storedDetails.credits?.crew || null,
+        runtime: storedDetails.runtime || null,
       };
 
       const { error } = await supabase
@@ -546,6 +623,11 @@ export default function AdminPage() {
 
       if (error) {
         throw error;
+      }
+
+      const tmdbDetailsError = await saveTmdbDetails(movie.id, detailsPayload);
+      if (tmdbDetailsError) {
+        throw tmdbDetailsError;
       }
 
       await fetchMovies();
