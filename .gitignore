@@ -14,3 +14,9 @@ supabase-config.example.js
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+sql
+architecture.md
+delivery_summary.md
+implementation_guide.md
+index.md
+.blackbox/

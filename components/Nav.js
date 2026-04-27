@@ -15,6 +15,7 @@ export default function Nav() {
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const isHomePage = router.pathname === '/';
 
   const isLinkActive = useCallback(
     (href) => (href === '/' ? router.pathname === href : router.pathname.startsWith(href)),
@@ -79,7 +80,7 @@ export default function Nav() {
 
   return (
     <>
-      <header className={`site-header ${menuOpen ? 'is-open' : ''}`}>
+      <header className={`site-header ${menuOpen ? 'is-open' : ''} ${isHomePage ? 'site-header--cinema' : ''}`}>
         <div className="header-glow" aria-hidden="true" />
         <nav className="site-nav" aria-label="Primary">
           <div className="site-nav__brand">
