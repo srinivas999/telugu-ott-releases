@@ -5,7 +5,12 @@
 
 import Image from 'next/image';
 import styles from './MovieDetails.module.css';
-import { getOmdbDetails, getPreferredMovieRating } from '../../lib/utils/ratings';
+import {
+  getOmdbDetails,
+  getOmdbRatingValue,
+  getTmdbRatingValue,
+  getTmdbVoteCountValue,
+} from '../../lib/utils/ratings';
 
 const TMDB_IMAGE_BASE = 'https://image.tmdb.org/t/p/w780';
 const FALLBACK_IMAGE = '/images/default_poster.png';
@@ -135,8 +140,8 @@ function getReleaseYear(movie) {
 }
 
 function getTmdbVoteCount(movie) {
-  const voteCount = typeof movie?.vote_count === 'number' ? movie.vote_count : Number(movie?.vote_count);
-  if (!Number.isFinite(voteCount) || voteCount <= 0) {
+  const voteCount = getTmdbVoteCountValue(movie);
+  if (voteCount === null) {
     return '';
   }
 
@@ -146,7 +151,7 @@ function getTmdbVoteCount(movie) {
 function getFallbackFieldValue(movie, label) {
   switch (label) {
     case 'IMDb Rating':
-      return getPreferredMovieRating(movie);
+      return getTmdbRatingValue(movie);
     case 'IMDb Votes':
       return getTmdbVoteCount(movie);
     case 'Year':
@@ -269,7 +274,7 @@ export default function MovieDetails({ movie, loading = false, error = null }) {
   const genres = Array.isArray(movie.genres) ? movie.genres : [];
   const cast = getTopCast(movie);
   const crew = getTopCrew(movie);
-  const rating = getPreferredMovieRating(movie);
+  const rating = getOmdbRatingValue(movie) ?? getTmdbRatingValue(movie);
   const omdb = getOmdbDetails(movie);
   const { highlightFields, detailFields } = buildOmdbFieldGroups(movie);
   const storyText = movie.overview || movie.description || '';
