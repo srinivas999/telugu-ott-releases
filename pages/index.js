@@ -11,7 +11,7 @@ import {
   useReleasingThisWeek,
   useRecentlyAdded,
 } from '../lib/hooks/useMovies';
-import { getPreferredMovieRating } from '../lib/utils/ratings';
+import { formatCompactVoteCount, getPreferredMovieRating, getTmdbVoteCountValue } from '../lib/utils/ratings';
 import { getAvailableEditorialCollections } from '../lib/utils/editorialCollections';
 import { generateUniqueSlug } from '../lib/utils/slug';
 import { withStoredTmdbDetails } from '../lib/utils/tmdb';
@@ -85,12 +85,23 @@ function toBackdropUrl(movie) {
   return `${TMDB_BACKDROP_BASE}${backdropPath}`;
 }
 
-function getCardBadge(movie, type = 'ott') {
-  if (type === 'theatre') return 'In Theatres';
-  if (!movie?.poster_path) return 'Poster Soon';
+function getCardBadge(movie, type = 'ott', signal = '') {
+  if (signal === 'trending') return 'Popular This Week';
+  if (signal === 'week') return 'Trending Release';
+  if (signal === 'recent') return 'Hot Pick';
+  if (type === 'theatre') return 'Popular This Week';
+  if (!movie?.poster_path) return '';
   const rating = getPreferredMovieRating(movie) || movie.vote_average || 0;
   if (rating >= 8) return 'Top Rated';
   return 'Streaming';
+}
+
+function getTrustSignal(signal = '', type = 'ott') {
+  if (signal === 'trending') return 'Popular this week';
+  if (signal === 'week') return 'Trending now';
+  if (signal === 'recent') return 'Fresh pick';
+  if (type === 'theatre') return 'Audience buzz';
+  return 'Viewer trust';
 }
 
 function sortByReleaseDate(movies, sortOrder) {
@@ -103,7 +114,7 @@ function sortByReleaseDate(movies, sortOrder) {
   });
 }
 
-function MovieRail({ title, movies, type = 'ott', viewAllHref = '' }) {
+function MovieRail({ title, movies, type = 'ott', viewAllHref = '', signal = '' }) {
   if (!movies || movies.length === 0) return null;
 
   return (
@@ -123,7 +134,9 @@ function MovieRail({ title, movies, type = 'ott', viewAllHref = '' }) {
           const href = isTheatre
             ? `/theatre-release/${movie.id}`
             : `/movie/${generateUniqueSlug(movie.movie_name || movie.title, movie.id)}`;
+          const badge = getCardBadge(movie, type, signal);
           const rating = getPreferredMovieRating(movie) || movie.vote_average || 0;
+          const voteCountLabel = formatCompactVoteCount(getTmdbVoteCountValue(movie));
           const label = isTheatre
             ? formatReleaseDate(movie.release_date)
             : formatReleaseDate(movie.digital_release_date);
@@ -138,7 +151,7 @@ function MovieRail({ title, movies, type = 'ott', viewAllHref = '' }) {
                   sizes="(max-width: 640px) 38vw, (max-width: 980px) 22vw, 16vw"
                   className="nf-card__image"
                 />
-                <span className="nf-card__badge">{getCardBadge(movie, type)}</span>
+                {badge ? <span className="nf-card__badge">{badge}</span> : null}
                 {rating > 0 ? (
                   <span className="nf-card__rating">{Number(rating).toFixed(1)}</span>
                 ) : null}
@@ -149,6 +162,10 @@ function MovieRail({ title, movies, type = 'ott', viewAllHref = '' }) {
               <div className="nf-card__meta">
                 <h3>{movie.movie_name || movie.title || 'Untitled'}</h3>
                 <p>{isTheatre ? 'Theatre' : movie.streaming_partner || 'OTT'} - {label}</p>
+                <div className="nf-card__trust">
+                  <span>{voteCountLabel || 'New audience signal'}</span>
+                  <span>{getTrustSignal(signal, type)}</span>
+                </div>
               </div>
             </Link>
           );
@@ -323,6 +340,9 @@ export default function HomePage() {
               {heroMovie && (getPreferredMovieRating(heroMovie) || 0) > 0 ? (
                 <span>{getPreferredMovieRating(heroMovie).toFixed(1)}/10</span>
               ) : null}
+              {heroMovie ? (
+                <span>{formatCompactVoteCount(getTmdbVoteCountValue(heroMovie)) || 'Popular pick'}</span>
+              ) : null}
             </div>
             <div className="nf-hero__actions">
               <Link href="/telugu-ott-releases-this-week" className="nf-btn nf-btn--primary">
@@ -385,12 +405,18 @@ export default function HomePage() {
             title="Trending Now"
             movies={moduleTrendingMovies.slice(0, 20).map(withDisplayFields)}
             viewAllHref="/browse/trending-now"
+            signal="trending"
           />
-          <MovieRail title="Coming This Week" movies={weekendReleases.slice(0, 20).map(withDisplayFields)} />
+          <MovieRail
+            title="Coming This Week"
+            movies={weekendReleases.slice(0, 20).map(withDisplayFields)}
+            signal="week"
+          />
           <MovieRail
             title="Recently Added"
             movies={recentlyAddedMovies.slice(0, 20).map(withDisplayFields)}
             viewAllHref="/browse/recently-added"
+            signal="recent"
           />
 
           <section className="nf-table">
@@ -468,6 +494,7 @@ export default function HomePage() {
             movies={theatreMovies.slice(0, 20)}
             type="theatre"
             viewAllHref="/theatre-release"
+            signal="trending"
           />
 
           <ContinueBrowsing

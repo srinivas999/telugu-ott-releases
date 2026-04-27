@@ -5,6 +5,7 @@ import Layout from '../components/Layout';
 import Seo from '../components/Seo';
 import Breadcrumb from '../components/common/Breadcrumb';
 import ContinueBrowsing from '../components/common/ContinueBrowsing';
+import { formatCompactVoteCount } from '../lib/utils/ratings';
 
 const TMDB_POSTER_BASE = 'https://image.tmdb.org/t/p/w500';
 const TMDB_BACKDROP_BASE = 'https://image.tmdb.org/t/p/w1280';
@@ -59,8 +60,24 @@ function toBackdropUrl(movie) {
   return `${TMDB_BACKDROP_BASE}${path}`;
 }
 
+function isFutureReleaseDate(value) {
+  if (!value) return false;
+
+  const today = new Date();
+  const todayKey = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
+  const releaseDate = new Date(value);
+
+  if (Number.isNaN(releaseDate.getTime())) {
+    return false;
+  }
+
+  return releaseDate.getTime() > todayKey;
+}
+
 function getTheatreBadge(movie) {
-  if (!movie?.poster_path) return 'Poster Soon';
+  if (isFutureReleaseDate(movie?.release_date)) return 'Coming Soon';
+  if (!movie?.poster_path) return '';
+  if ((movie.popularity || 0) >= 25) return 'Popular This Week';
   if ((movie.vote_average || 0) >= 7.5) return 'Critics Pick';
   return 'Now Showing';
 }
@@ -199,6 +216,7 @@ export default function TheatreReleasePage() {
               <span>{movies.length} Movies</span>
               <span>{featuredMovie ? formatReleaseDate(featuredMovie.release_date) : 'Updated Daily'}</span>
               {featuredMovie?.vote_average ? <span>{featuredMovie.vote_average.toFixed(1)}/10</span> : null}
+              {featuredMovie ? <span>{formatCompactVoteCount(featuredMovie.vote_count) || 'Popular this week'}</span> : null}
             </div>
             <div className="nf-hero__actions">
               {featuredMovie ? (
@@ -254,7 +272,9 @@ export default function TheatreReleasePage() {
               <p className="nf-status">No theatre titles right now. Fresh big-screen releases are coming soon.</p>
             ) : (
               <div className="nf-collection__grid">
-                {gridMovies.map((movie) => (
+                {gridMovies.map((movie) => {
+                  const badge = getTheatreBadge(movie);
+                  return (
                   <Link key={movie.id} href={`/theatre-release/${movie.id}`} className="nf-card">
                     <div className="nf-card__poster">
                       <Image
@@ -264,7 +284,7 @@ export default function TheatreReleasePage() {
                         sizes="(max-width: 640px) 44vw, (max-width: 980px) 22vw, 15vw"
                         className="nf-card__image"
                       />
-                      <span className="nf-card__badge">{getTheatreBadge(movie)}</span>
+                      {badge ? <span className="nf-card__badge">{badge}</span> : null}
                       <span className="nf-card__rating">
                         {movie.vote_average ? movie.vote_average.toFixed(1) : 'NR'}
                       </span>
@@ -272,12 +292,16 @@ export default function TheatreReleasePage() {
                         <span className="nf-card__overlay-cta">View Details</span>
                       </div>
                     </div>
-                    <div className="nf-card__meta">
-                      <h3>{movie.title || movie.original_title || 'Untitled'}</h3>
-                      <p>{getMovieGenres(movie.genre_ids)} - {formatReleaseDate(movie.release_date)}</p>
+                      <div className="nf-card__meta">
+                        <h3>{movie.title || movie.original_title || 'Untitled'}</h3>
+                        <p>{getMovieGenres(movie.genre_ids)} - {formatReleaseDate(movie.release_date)}</p>
+                      <div className="nf-card__trust">
+                        <span>{formatCompactVoteCount(movie.vote_count) || 'Audience building'}</span>
+                        <span>{isFutureReleaseDate(movie.release_date) ? 'Coming soon' : (movie.popularity || 0) >= 25 ? 'Popular this week' : 'Theatre buzz'}</span>
+                      </div>
                     </div>
                   </Link>
-                ))}
+                )})}
               </div>
             )}
           </section>

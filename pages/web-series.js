@@ -5,6 +5,7 @@ import Layout from '../components/Layout';
 import Seo from '../components/Seo';
 import Breadcrumb from '../components/common/Breadcrumb';
 import ContinueBrowsing from '../components/common/ContinueBrowsing';
+import { formatCompactVoteCount } from '../lib/utils/ratings';
 
 const TMDB_POSTER_BASE = 'https://image.tmdb.org/t/p/w500';
 const TMDB_BACKDROP_BASE = 'https://image.tmdb.org/t/p/w1280';
@@ -34,7 +35,8 @@ function toBackdropUrl(item) {
 }
 
 function getSeriesBadge(item) {
-  if (!item?.poster_path) return 'Poster Soon';
+  if (!item?.poster_path) return '';
+  if ((item.popularity || 0) >= 18) return 'Popular This Week';
   if ((item.vote_average || 0) >= 7.5) return 'Top Series';
   return 'Streaming';
 }
@@ -138,6 +140,7 @@ export default function WebSeriesPage() {
               <span>{loading ? 'Loading...' : `${series.length} Series`}</span>
               {featured?.first_air_date ? <span>{formatDate(featured.first_air_date)}</span> : null}
               {featured?.vote_average > 0 ? <span>{featured.vote_average.toFixed(1)}/10</span> : null}
+              {featured ? <span>{formatCompactVoteCount(featured.vote_count) || 'Popular this week'}</span> : null}
             </div>
             <div className="nf-hero__actions">
               <Link href="/ott-movies" className="nf-btn nf-btn--primary">Explore Movies</Link>
@@ -159,9 +162,12 @@ export default function WebSeriesPage() {
               <p className="nf-status">No web series here yet. New Telugu series will land soon.</p>
             ) : (
               <div className="nf-collection__grid webseries-grid">
-                {(featured ? [featured, ...list] : list).map((item) => (
+                {(featured ? [featured, ...list] : list).map((item) => {
+                  const badge = getSeriesBadge(item);
+                  return (
                   <article key={item.id} className="nf-card nf-card--static">
                     <div className="nf-card__poster">
+                      {badge ? <span className="nf-card__badge">{badge}</span> : null}
                       <Image
                         src={toPosterUrl(item)}
                         alt={item.name || 'Web series poster'}
@@ -169,7 +175,6 @@ export default function WebSeriesPage() {
                         sizes="(max-width: 640px) 44vw, (max-width: 980px) 22vw, 15vw"
                         className="nf-card__image"
                       />
-                      <span className="nf-card__badge">{getSeriesBadge(item)}</span>
                       {item.vote_average > 0 ? (
                         <span className="nf-card__rating">{item.vote_average.toFixed(1)}</span>
                       ) : null}
@@ -180,6 +185,10 @@ export default function WebSeriesPage() {
                     <div className="nf-card__meta">
                       <h3>{item.name || 'Untitled'}</h3>
                       <p>{formatDate(item.first_air_date)} - Telugu Series</p>
+                      <div className="nf-card__trust">
+                        <span>{formatCompactVoteCount(item.vote_count) || 'Audience building'}</span>
+                        <span>{(item.popularity || 0) >= 18 ? 'Popular this week' : 'Series buzz'}</span>
+                      </div>
                       <p className="webseries-card__overview">
                         {item.overview
                           ? item.overview.length > 110
@@ -189,7 +198,7 @@ export default function WebSeriesPage() {
                       </p>
                     </div>
                   </article>
-                ))}
+                )})}
               </div>
             )}
           </section>

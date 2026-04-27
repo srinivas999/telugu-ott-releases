@@ -5,6 +5,7 @@ import Seo from '../components/Seo';
 import Breadcrumb from '../components/common/Breadcrumb';
 import ContinueBrowsing from '../components/common/ContinueBrowsing';
 import { supabase } from '../lib/supabaseClient';
+import { formatCompactVoteCount, getTmdbVoteCountValue } from '../lib/utils/ratings';
 import { generateUniqueSlug } from '../lib/utils/slug';
 
 const TMDB_POSTER_BASE = 'https://image.tmdb.org/t/p/w500';
@@ -48,7 +49,8 @@ function toBackdropUrl(movie) {
 }
 
 function getWeekBadge(movie, hasWeekMovies) {
-  if (!movie?.poster_path) return 'Poster Soon';
+  if (!movie?.poster_path) return '';
+  if ((movie.popularity || 0) >= 18) return 'Popular This Week';
   if (hasWeekMovies) return 'New This Week';
   return 'This Month';
 }
@@ -230,6 +232,7 @@ export default function TeluguOttReleasesThisWeekPage({
               {!hasWeekMovies && monthRange ? (
                 <span>{formatReleaseDate(monthRange.start)} - {formatReleaseDate(monthRange.end)}</span>
               ) : null}
+              {featured ? <span>{formatCompactVoteCount(getTmdbVoteCountValue(featured)) || 'Popular this week'}</span> : null}
             </div>
             <div className="nf-hero__actions">
               <Link href="/browse/trending-now" className="nf-btn nf-btn--primary">
@@ -293,6 +296,7 @@ export default function TeluguOttReleasesThisWeekPage({
               <div className="nf-collection__grid week-grid">
                 {displayMovies.map((movie) => {
                   const slug = generateUniqueSlug(movie.movie_name, movie.id);
+                  const badge = getWeekBadge(movie, hasWeekMovies);
                   return (
                     <Link key={movie.id || slug} href={`/movie/${slug}`} className="nf-card">
                       <div className="nf-card__poster">
@@ -303,7 +307,7 @@ export default function TeluguOttReleasesThisWeekPage({
                           sizes="(max-width: 640px) 44vw, (max-width: 980px) 22vw, 15vw"
                           className="nf-card__image"
                         />
-                        <span className="nf-card__badge">{getWeekBadge(movie, hasWeekMovies)}</span>
+                        {badge ? <span className="nf-card__badge">{badge}</span> : null}
                         <div className="nf-card__overlay">
                           <span className="nf-card__overlay-cta">View Details</span>
                         </div>
@@ -311,6 +315,10 @@ export default function TeluguOttReleasesThisWeekPage({
                       <div className="nf-card__meta">
                         <h3>{movie.movie_name || 'Untitled'}</h3>
                         <p>{movie.streaming_partner || 'OTT'} - {formatReleaseDate(movie.digital_release_date)}</p>
+                        <div className="nf-card__trust">
+                          <span>{formatCompactVoteCount(getTmdbVoteCountValue(movie)) || 'Fresh audience signal'}</span>
+                          <span>{hasWeekMovies ? 'Popular this week' : 'Current release'}</span>
+                        </div>
                       </div>
                     </Link>
                   );
