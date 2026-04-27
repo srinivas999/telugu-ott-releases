@@ -9,6 +9,7 @@ import { formatCompactVoteCount } from '../lib/utils/ratings';
 
 const TMDB_POSTER_BASE = 'https://image.tmdb.org/t/p/w500';
 const TMDB_BACKDROP_BASE = 'https://image.tmdb.org/t/p/w1280';
+const SITE_URL = 'https://svteluguott.in';
 
 function formatDate(value) {
   if (!value) return 'TBA';
@@ -71,6 +72,9 @@ export default function WebSeriesPage() {
 
   const featured = useMemo(() => series[0] || null, [series]);
   const list = useMemo(() => series.slice(1), [series]);
+  const seoDescription = featured
+    ? `Discover the latest Telugu web series on OTT with release dates, ratings, and featured picks like ${featured.name || 'popular Telugu series'}.`
+    : 'Discover the latest Telugu web series on OTT with release dates, ratings, and streaming updates.';
   const retentionItems = [
     {
       href: '/browse/trending-now',
@@ -101,14 +105,43 @@ export default function WebSeriesPage() {
       cta: 'Browse Theatres',
     },
   ];
+  const jsonLd = [
+    {
+      '@context': 'https://schema.org',
+      '@type': 'CollectionPage',
+      name: 'Latest Telugu Web Series',
+      url: `${SITE_URL}/web-series`,
+      description: seoDescription,
+    },
+    {
+      '@context': 'https://schema.org',
+      '@type': 'ItemList',
+      name: 'Latest Telugu Web Series',
+      numberOfItems: series.slice(0, 20).length,
+      itemListElement: series.slice(0, 20).map((item, index) => ({
+        '@type': 'ListItem',
+        position: index + 1,
+        item: {
+          '@type': 'TVSeries',
+          name: item.name || 'Untitled',
+          description: item.overview || 'Latest Telugu web series streaming on OTT.',
+          datePublished: item.first_air_date || '',
+          inLanguage: 'te',
+          image: toPosterUrl(item),
+          url: `${SITE_URL}/web-series`,
+        },
+      })),
+    },
+  ];
 
   return (
     <Layout>
       <Seo
         title="Latest Telugu Web Series"
-        description="Latest Telugu web series streaming on OTT platforms. Find new Telugu web series releases with posters and ratings."
+        description={seoDescription}
         url="/web-series"
         keywords="latest Telugu web series, Telugu OTT web series, Telugu streaming series"
+        jsonLd={jsonLd}
       />
 
       <main className="netflix-home webseries-page">
@@ -154,6 +187,11 @@ export default function WebSeriesPage() {
             <div className="nf-rail__header">
               <h2>{loading ? 'Loading Series' : `All Series (${series.length})`}</h2>
             </div>
+            <p className="nf-collection-copy">
+              Looking beyond series? Pair this page with <Link href="/telugu-ott-releases-this-week" className="nf-inline-link">Telugu OTT releases this week</Link>,
+              <Link href="/top-rated-telugu-ott-movies" className="nf-inline-link"> best Telugu OTT movies</Link>, and
+              <Link href="/theatre-release" className="nf-inline-link"> Telugu theatre releases</Link> to widen discovery across formats.
+            </p>
             {loading ? (
               <p className="nf-status">Loading web series...</p>
             ) : error ? (

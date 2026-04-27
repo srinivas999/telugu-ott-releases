@@ -19,6 +19,7 @@ import { withStoredTmdbDetails } from '../lib/utils/tmdb';
 const TMDB_POSTER_BASE = 'https://image.tmdb.org/t/p/w500';
 const TMDB_BACKDROP_BASE = 'https://image.tmdb.org/t/p/w1280';
 const FALLBACK_POSTER = '/images/default_poster.png';
+const SITE_URL = 'https://svteluguott.in';
 
 const platformOptions = [
   { value: 'all', label: 'All' },
@@ -247,6 +248,39 @@ export default function HomePage() {
     () => getAvailableEditorialCollections(ottMovies, 10).slice(0, 6),
     [ottMovies]
   );
+  const topGenresText = useMemo(
+    () => editorialCollections.slice(0, 3).map((collection) => collection.shortLabel).join(', '),
+    [editorialCollections]
+  );
+  const platformSections = useMemo(
+    () => [
+      {
+        title: 'Netflix Releases',
+        viewAllHref: '/platform/netflix',
+        movies: sortByReleaseDate(
+          ottMovies.filter((movie) => normalizePlatform(movie.streaming_partner) === 'Netflix'),
+          'desc'
+        ).slice(0, 18),
+      },
+      {
+        title: 'Aha Releases',
+        viewAllHref: '/platform/aha',
+        movies: sortByReleaseDate(
+          ottMovies.filter((movie) => normalizePlatform(movie.streaming_partner) === 'Aha'),
+          'desc'
+        ).slice(0, 18),
+      },
+      {
+        title: 'Prime Video Releases',
+        viewAllHref: '/platform/prime-video',
+        movies: sortByReleaseDate(
+          ottMovies.filter((movie) => normalizePlatform(movie.streaming_partner) === 'Prime Video'),
+          'desc'
+        ).slice(0, 18),
+      },
+    ].filter((section) => section.movies.length > 0),
+    [ottMovies]
+  );
 
   const heroMovie = filteredMovies[0] || moduleTrendingMovies[0] || recentlyAddedMovies[0] || null;
   const heroTitle = heroMovie?.movie_name || heroMovie?.title || 'Telugu OTT Releases';
@@ -284,28 +318,44 @@ export default function HomePage() {
     },
   ];
 
-  const jsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'ItemList',
-    name: 'Latest Telugu OTT Releases',
-    itemListElement: filteredMovies.slice(0, 10).map((movie, index) => ({
-      '@type': 'ListItem',
-      position: index + 1,
-      item: {
-        '@type': 'Movie',
-        name: movie.movie_name || 'Untitled',
-        datePublished: movie.digital_release_date || '',
-        description: movie.streaming_partner ? `Streaming on ${movie.streaming_partner}` : 'Telugu OTT movie release',
-        url: `https://svteluguott.in/movie/${generateUniqueSlug(movie.movie_name, movie.id)}`,
-      },
-    })),
-  };
+  const seoDescription = [
+    'Track Telugu OTT releases with streaming dates, platform updates, and direct movie pages.',
+    topGenresText ? `Browse ${topGenresText} collections, top-rated picks, and this week releases.` : '',
+  ].filter(Boolean).join(' ');
+  const jsonLd = [
+    {
+      '@context': 'https://schema.org',
+      '@type': 'WebPage',
+      name: 'Latest Telugu OTT Releases',
+      url: `${SITE_URL}/`,
+      description: seoDescription,
+    },
+    {
+      '@context': 'https://schema.org',
+      '@type': 'ItemList',
+      name: 'Latest Telugu OTT Releases',
+      numberOfItems: filteredMovies.slice(0, 10).length,
+      itemListElement: filteredMovies.slice(0, 10).map((movie, index) => ({
+        '@type': 'ListItem',
+        position: index + 1,
+        item: {
+          '@type': 'Movie',
+          name: movie.movie_name || 'Untitled',
+          description: movie.streaming_partner ? `Streaming on ${movie.streaming_partner}` : 'Telugu OTT movie release',
+          datePublished: movie.digital_release_date || '',
+          inLanguage: movie.language || movie.movie_language || 'te',
+          image: toPosterUrl(movie),
+          url: `${SITE_URL}/movie/${generateUniqueSlug(movie.movie_name, movie.id)}`,
+        },
+      })),
+    },
+  ];
 
   return (
     <Layout>
       <Seo
-        title="Telugu OTT releases this week | OTT Movies"
-        description={defaultSeoDescription}
+        title="Latest Telugu OTT releases, streaming dates and movie updates"
+        description={seoDescription}
         url="/"
         keywords="Telugu OTT releases this week, upcoming OTT movies Telugu, Netflix Telugu, Aha Telugu, Prime Video Telugu, JioHotstar Telugu, Zee5 Telugu, Sun NXT Telugu, ETV Win Telugu"
         jsonLd={jsonLd}
@@ -360,6 +410,11 @@ export default function HomePage() {
             <div className="nf-explore__header">
               <h2>Explore More</h2>
             </div>
+            <p className="nf-collection-copy">
+              Start with the <Link href="/telugu-ott-releases-this-week" className="nf-inline-link">Telugu OTT releases this week</Link> page,
+              compare it with <Link href="/top-rated-telugu-ott-movies" className="nf-inline-link">top rated Telugu OTT movies</Link>,
+              or jump into <Link href="/browse/trending-now" className="nf-inline-link">trending Telugu OTT movies</Link> when you want the fastest discovery path.
+            </p>
             <div className="nf-explore__grid">
               <Link href="/telugu-ott-releases-this-week" className="nf-explore__card">
                 <span>This Week</span>
@@ -418,6 +473,15 @@ export default function HomePage() {
             viewAllHref="/browse/recently-added"
             signal="recent"
           />
+
+          {platformSections.map((section) => (
+            <MovieRail
+              key={section.title}
+              title={section.title}
+              movies={section.movies}
+              viewAllHref={section.viewAllHref}
+            />
+          ))}
 
           <section className="nf-table">
             <section className="nf-controls" aria-label="Browse filters">
