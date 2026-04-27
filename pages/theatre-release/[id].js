@@ -1,16 +1,19 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Image from 'next/image';
-import { useRouter } from 'next/router';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 import Layout from '../../components/Layout';
 import Seo from '../../components/Seo';
 import Breadcrumb from '../../components/common/Breadcrumb';
+import ContinueBrowsing from '../../components/common/ContinueBrowsing';
+import { formatCompactVoteCount } from '../../lib/utils/ratings';
 
 const TMDB_POSTER_BASE = 'https://image.tmdb.org/t/p/w500';
 const TMDB_BACKDROP_BASE = 'https://image.tmdb.org/t/p/original';
 const YOUTUBE_SEARCH_URL_BASE = 'https://www.youtube.com/results?search_query=';
 const CACHE_KEY = 'theatreReleaseMoviesCache';
-const CACHE_TTL = 1000 * 60 * 60; // 1 hour
+const CACHE_TTL = 1000 * 60 * 60;
+const FALLBACK_POSTER = '/images/default_poster.png';
 
 const TMDB_GENRES = {
   28: 'Action',
@@ -39,7 +42,7 @@ function formatReleaseDate(date) {
   const parsed = new Date(date);
   if (Number.isNaN(parsed.getTime())) return date;
   return parsed.toLocaleDateString('en-IN', {
-    day: 'numeric',
+    day: '2-digit',
     month: 'short',
     year: 'numeric',
   });
@@ -63,6 +66,77 @@ function getMovieGenres(genreIds) {
     .slice(0, 2);
 
   return names.length > 0 ? names.join(', ') : 'Genre N/A';
+}
+
+function isFutureReleaseDate(value) {
+  if (!value) return false;
+
+  const today = new Date();
+  const todayKey = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
+  const releaseDate = new Date(value);
+
+  if (Number.isNaN(releaseDate.getTime())) {
+    return false;
+  }
+
+  return releaseDate.getTime() > todayKey;
+}
+
+function getTheatreBadge(movie) {
+  if (isFutureReleaseDate(movie?.release_date)) return 'Coming Soon';
+  if ((movie?.popularity || 0) >= 25) return 'Popular This Week';
+  if ((movie?.vote_average || 0) >= 7.5) return 'Critics Pick';
+  return 'Now Showing';
+}
+
+function toPosterUrl(movie) {
+  if (!movie?.poster_path) return FALLBACK_POSTER;
+  if (String(movie.poster_path).startsWith('http')) return movie.poster_path;
+  return `${TMDB_POSTER_BASE}${movie.poster_path}`;
+}
+
+function toBackdropUrl(movie) {
+  const path = movie?.backdrop_path || movie?.poster_path;
+  if (!path) return FALLBACK_POSTER;
+  if (String(path).startsWith('http')) return path;
+  return `${TMDB_BACKDROP_BASE}${path}`;
+}
+
+function getGenreNames(movie) {
+  if (Array.isArray(movie?.genres) && movie.genres.length > 0) {
+    return movie.genres
+      .map((genre) => genre?.name)
+      .filter(Boolean)
+      .join(', ');
+  }
+
+  return getMovieGenres(movie?.genre_ids);
+}
+
+function getTrailerSearchUrl(movie) {
+  const title = movie?.title || movie?.original_title || 'Movie';
+  return `${YOUTUBE_SEARCH_URL_BASE}${encodeURIComponent(`${title} trailer`)}`;
+}
+
+function getTopCast(movie) {
+  if (!Array.isArray(movie?.credits?.cast)) {
+    return [];
+  }
+
+  return movie.credits.cast.slice(0, 6);
+}
+
+function getTopCrew(movie) {
+  if (!Array.isArray(movie?.credits?.crew)) {
+    return [];
+  }
+
+  const priorityJobs = ['Director', 'Writer', 'Screenplay', 'Producer', 'Original Music Composer'];
+  const matched = priorityJobs
+    .map((job) => movie.credits.crew.find((member) => member?.job === job))
+    .filter(Boolean);
+
+  return [...new Map(matched.map((member) => [`${member.name}-${member.job}`, member])).values()];
 }
 
 export default function MovieDetailsPage() {
@@ -153,165 +227,277 @@ export default function MovieDetailsPage() {
     loadMovies();
   }, []);
 
+  const relatedMovies = useMemo(() => {
+    if (!movie || movies.length === 0) return [];
+    return movies
+      .filter((item) => String(item.id) !== String(movie.id))
+      .slice(0, 12);
+  }, [movie, movies]);
+
+  const castMembers = useMemo(() => getTopCast(movie), [movie]);
+  const crewMembers = useMemo(() => getTopCrew(movie), [movie]);
+  const movieTitle = movie?.title || movie?.original_title || 'Movie Details';
+  const movieOverview = movie?.overview || 'No overview available.';
+  const genreText = getGenreNames(movie);
+  const releaseLabel = formatReleaseDate(movie?.release_date);
+  const ratingLabel = movie?.vote_average ? `${movie.vote_average.toFixed(1)}/10` : 'NR';
+  const voteCountLabel = formatCompactVoteCount(movie?.vote_count) || 'Audience building';
+  const trailerUrl = getTrailerSearchUrl(movie);
+  const heroBadge = getTheatreBadge(movie);
+
+  const retentionItems = [
+    {
+      href: '/theatre-release',
+      eyebrow: 'Theatre Feed',
+      title: 'Back to all theatre releases',
+      description: 'Return to the full Telugu theatre browse page and keep scanning new arrivals.',
+      cta: 'Open Releases',
+    },
+    {
+      href: '/telugu-ott-releases-this-week',
+      eyebrow: 'Weekly Calendar',
+      title: 'Shift from theatres into this week OTT drops',
+      description: 'Move from big-screen release tracking into the current Telugu streaming schedule.',
+      cta: 'See This Week',
+    },
+    {
+      href: '/top-rated-telugu-ott-movies',
+      eyebrow: 'Top Rated',
+      title: 'Jump into the highest-rated OTT titles',
+      description: 'If this theatre title caught your eye, the ratings-first OTT list is a strong next stop.',
+      cta: 'View Top Picks',
+    },
+    {
+      href: '/web-series',
+      eyebrow: 'Series Mode',
+      title: 'Continue with Telugu web series',
+      description: 'Keep the session going by switching formats instead of ending the browse journey here.',
+      cta: 'Browse Series',
+    },
+  ];
+
   return (
     <Layout>
       <Seo
-        title={movie?.title || movie?.original_title || 'Movie details'}
+        title={movieTitle}
         description={movie?.overview || 'Movie details and trailer links.'}
         url={id ? `/theatre-release/${id}` : '/theatre-release'}
         keywords="Telugu theatre movie details, movie details"
-        image={movie?.poster_path ? `${TMDB_POSTER_BASE}${movie.poster_path}` : undefined}
+        image={movie?.poster_path ? toPosterUrl(movie) : undefined}
       />
 
-      <Breadcrumb
-        items={[
-          { name: 'Home', url: '/' },
-          { name: 'Theatre Releases', url: '/theatre-release' },
-          { name: movie?.title || movie?.original_title || 'Movie Details' },
-        ]}
-      />
+      <main className="netflix-home theatre-detail-page">
+        <div className="nf-breadcrumb-wrap">
+          <Breadcrumb
+            items={[
+              { name: 'Home', url: '/' },
+              { name: 'Theatre Releases', url: '/theatre-release' },
+              { name: movieTitle },
+            ]}
+          />
+        </div>
 
-      <main className="page-projects page-ott movie-detail-page">
-        <div className="projects-page-inner">
-          <div className="projects-page-header">
-            <p className="eyebrow">Theatre Release</p>
-            <p className="projects-page-title">Movie details</p>
-          </div>
+        {loading ? (
+          <section className="nf-content theatre-detail-page__status-wrap">
+            <p className="nf-status">Loading movie details...</p>
+          </section>
+        ) : error ? (
+          <section className="nf-content theatre-detail-page__status-wrap">
+            <p className="nf-status nf-status--error">{error}</p>
+          </section>
+        ) : movie ? (
+          <>
+            <section className="nf-hero theatre-detail-hero">
+              <div className="nf-hero__bg">
+                <Image
+                  src={toBackdropUrl(movie)}
+                  alt={movieTitle}
+                  fill
+                  priority
+                  sizes="100vw"
+                  className="nf-hero__bg-image"
+                />
+              </div>
+              <div className="nf-hero__overlay theatre-detail-hero__overlay" />
 
-          {loading ? (
-            <p className="admin-status">Loading movie details…</p>
-          ) : error ? (
-            <p className="admin-status admin-status--error">{error}</p>
-          ) : movie ? (
-            <>
-              {!moviesLoading && movies.length > 0 && (
-                <section className="movie-carousel">
-                  <div className="movie-carousel__inner">
-                    {movies.map((carouselMovie) => (
-                      <article key={carouselMovie.id} className="tmdb-release-card">
-                        <div className="tmdb-release-card__poster">
-                          {carouselMovie.poster_path ? (
-                            <Image
-                              src={`${TMDB_POSTER_BASE}${carouselMovie.poster_path}`}
-                              alt={carouselMovie.title || carouselMovie.original_title}
-                              className="tmdb-release-card__image"
-                              fill
-                              sizes="220px"
-                            />
-                          ) : (
-                            <div className="tmdb-release-card__image tmdb-release-card__placeholder">
-                              <span>No poster available</span>
-                            </div>
-                          )}
-                          <div className="tmdb-release-card__pill">{formatReleaseDate(carouselMovie.release_date)}</div>
-                          <div className="tmdb-release-card__badge">OTT</div>
+              <div className="nf-hero__content theatre-detail-hero__content">
+                <p className="nf-hero__kicker">Theatre Release</p>
+                <h1>{movieTitle}</h1>
+                {movie.tagline ? <p className="theatre-detail-hero__tagline">{movie.tagline}</p> : null}
+                <p className="nf-hero__desc">{movieOverview}</p>
 
-                          <div className="tmdb-release-card__overlay">
-                            <div className="tmdb-release-card__content">
-                              <h2 className="tmdb-release-card__title">{carouselMovie.title || carouselMovie.original_title || 'Untitled'}</h2>
-                              <p className="tmdb-release-card__meta">
-                                {getMovieGenres(carouselMovie.genre_ids)} &middot; {carouselMovie.vote_average ? carouselMovie.vote_average.toFixed(1) : 'NR'}
-                              </p>
-                              <div className="tmdb-release-card__actions">
-                                <Link
-                                  href={`/theatre-release/${carouselMovie.id}`}
-                                  className="tmdb-release-card__action tmdb-release-card__action--primary"
-                                >
-                                  Details
-                                </Link>
-                                <a
-                                  href={`${YOUTUBE_SEARCH_URL_BASE}${encodeURIComponent(`${carouselMovie.title || carouselMovie.original_title || 'Movie'} trailer`)}`}
-                                  target="_blank"
-                                  rel="noreferrer"
-                                  className="tmdb-release-card__action tmdb-release-card__action--secondary"
-                                >
-                                  Trailer
-                                </a>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
+                <div className="nf-hero__meta">
+                  <span>{heroBadge}</span>
+                  <span>{releaseLabel}</span>
+                  <span>{formatRuntime(movie.runtime)}</span>
+                  <span>{ratingLabel}</span>
+                  <span>{voteCountLabel}</span>
+                </div>
+
+                <div className="theatre-detail-hero__genres">
+                  {genreText.split(', ').filter(Boolean).map((genre) => (
+                    <span key={genre} className="theatre-detail-hero__genre-chip">{genre}</span>
+                  ))}
+                </div>
+
+                <div className="nf-hero__actions">
+                  <a href={trailerUrl} target="_blank" rel="noreferrer" className="nf-btn nf-btn--primary">
+                    Watch Trailer
+                  </a>
+                  {movie.homepage ? (
+                    <a href={movie.homepage} target="_blank" rel="noreferrer" className="nf-btn nf-btn--ghost">
+                      Official Site
+                    </a>
+                  ) : null}
+                  <Link href="/theatre-release" className="nf-btn nf-btn--ghost">
+                    Back to Releases
+                  </Link>
+                </div>
+              </div>
+
+              <div className="theatre-detail-hero__poster">
+                <div className="theatre-detail-hero__poster-frame">
+                  <Image
+                    src={toPosterUrl(movie)}
+                    alt={`${movieTitle} poster`}
+                    fill
+                    sizes="(max-width: 980px) 240px, 300px"
+                    className="theatre-detail-hero__poster-image"
+                  />
+                </div>
+              </div>
+            </section>
+
+            <section className="nf-content theatre-detail-page__content">
+              <section className="theatre-detail-section">
+                <div className="theatre-detail-section__header">
+                  <p className="theatre-detail-section__eyebrow">Movie Snapshot</p>
+                  <h2 className="theatre-detail-section__title">Quick Facts</h2>
+                </div>
+                <div className="theatre-detail-facts">
+                  <article className="theatre-detail-facts__card">
+                    <span className="theatre-detail-facts__label">Release Date</span>
+                    <strong className="theatre-detail-facts__value">{releaseLabel}</strong>
+                  </article>
+                  <article className="theatre-detail-facts__card">
+                    <span className="theatre-detail-facts__label">Runtime</span>
+                    <strong className="theatre-detail-facts__value">{formatRuntime(movie.runtime)}</strong>
+                  </article>
+                  <article className="theatre-detail-facts__card">
+                    <span className="theatre-detail-facts__label">TMDb Rating</span>
+                    <strong className="theatre-detail-facts__value">{ratingLabel}</strong>
+                  </article>
+                  <article className="theatre-detail-facts__card">
+                    <span className="theatre-detail-facts__label">Votes</span>
+                    <strong className="theatre-detail-facts__value">{voteCountLabel}</strong>
+                  </article>
+                  <article className="theatre-detail-facts__card">
+                    <span className="theatre-detail-facts__label">Status</span>
+                    <strong className="theatre-detail-facts__value">{movie.status || heroBadge}</strong>
+                  </article>
+                  <article className="theatre-detail-facts__card">
+                    <span className="theatre-detail-facts__label">Genres</span>
+                    <strong className="theatre-detail-facts__value">{genreText}</strong>
+                  </article>
+                </div>
+              </section>
+
+              <section className="theatre-detail-section">
+                <div className="theatre-detail-section__header">
+                  <p className="theatre-detail-section__eyebrow">Story</p>
+                  <h2 className="theatre-detail-section__title">Overview</h2>
+                </div>
+                <div className="theatre-detail-prose">
+                  <p>{movieOverview}</p>
+                </div>
+              </section>
+
+              {castMembers.length > 0 ? (
+                <section className="theatre-detail-section">
+                  <div className="theatre-detail-section__header">
+                    <p className="theatre-detail-section__eyebrow">Talent</p>
+                    <h2 className="theatre-detail-section__title">Top Cast</h2>
+                  </div>
+                  <div className="theatre-detail-people-grid">
+                    {castMembers.map((member, index) => (
+                      <article key={`${member.id || member.name}-${index}`} className="theatre-detail-person-card">
+                        <h3>{member.name}</h3>
+                        {member.character ? <p>{member.character}</p> : null}
                       </article>
                     ))}
                   </div>
                 </section>
-              )}
-
-              <section className="movie-detail-hero">
-              {movie.backdrop_path ? (
-                <Image
-                  src={`${TMDB_BACKDROP_BASE}${movie.backdrop_path}`}
-                  alt={movie.title || movie.original_title}
-                  className="movie-detail-hero__backdrop"
-                  fill
-                  priority
-                  sizes="100vw"
-                />
               ) : null}
 
-              <div className="movie-detail-hero__inner">
-                <div className="movie-detail-poster">
-                  {movie.poster_path ? (
-                    <Image
-                      src={`${TMDB_POSTER_BASE}${movie.poster_path}`}
-                      alt={`${movie.title || movie.original_title} poster`}
-                      fill
-                      sizes="(max-width: 980px) 320px, 280px"
-                    />
-                  ) : (
-                    <div className="movie-detail-poster__placeholder">
-                      <span>No poster available</span>
-                    </div>
-                  )}
-                  <span className="movie-detail-poster__pill">{formatReleaseDate(movie.release_date)}</span>
-                  {/* <span className="movie-detail-poster__badge">OTT</span> */}
+              {crewMembers.length > 0 ? (
+                <section className="theatre-detail-section">
+                  <div className="theatre-detail-section__header">
+                    <p className="theatre-detail-section__eyebrow">Craft</p>
+                    <h2 className="theatre-detail-section__title">Core Crew</h2>
+                  </div>
+                  <div className="theatre-detail-people-grid">
+                    {crewMembers.map((member, index) => (
+                      <article key={`${member.name}-${member.job}-${index}`} className="theatre-detail-person-card">
+                        <h3>{member.name}</h3>
+                        <p>{member.job}</p>
+                      </article>
+                    ))}
+                  </div>
+                </section>
+              ) : null}
+
+              <section className="nf-rail theatre-detail-page__rail">
+                <div className="nf-rail__header">
+                  <h2>{moviesLoading ? 'Loading Related Titles' : 'More Theatre Releases'}</h2>
+                  <Link href="/theatre-release" className="nf-rail__view-all">View All</Link>
                 </div>
 
-                <div className="movie-detail-copy">
-                  <p className="eyebrow movie-detail-eyebrow">{movie.status || 'Released'}</p>
-                  <h1 className="movie-detail-title">{movie.title || movie.original_title}</h1>
-                  {movie.tagline ? <p className="movie-detail-tagline">{movie.tagline}</p> : null}
-
-                  <div className="movie-detail-stats">
-                    <span>{formatReleaseDate(movie.release_date)}</span>
-                    <span>{formatRuntime(movie.runtime)}</span>
-                    <span>{movie.vote_average ? movie.vote_average.toFixed(1) : 'NR'}</span>
-                    <span>{movie.genres?.map((genre) => genre.name).join(', ') || 'Genre N/A'}</span>
+                {moviesLoading ? (
+                  <p className="nf-status">Loading theatre titles...</p>
+                ) : relatedMovies.length === 0 ? (
+                  <p className="nf-status">More theatre titles are not available right now.</p>
+                ) : (
+                  <div className="nf-rail__track">
+                    {relatedMovies.map((carouselMovie) => (
+                      <Link key={carouselMovie.id} href={`/theatre-release/${carouselMovie.id}`} className="nf-card">
+                        <div className="nf-card__poster">
+                          <Image
+                            src={toPosterUrl(carouselMovie)}
+                            alt={carouselMovie.title || carouselMovie.original_title || 'Movie poster'}
+                            fill
+                            sizes="(max-width: 640px) 44vw, 180px"
+                            className="nf-card__image"
+                          />
+                          <span className="nf-card__badge">{getTheatreBadge(carouselMovie)}</span>
+                          <span className="nf-card__rating">
+                            {carouselMovie.vote_average ? carouselMovie.vote_average.toFixed(1) : 'NR'}
+                          </span>
+                          <div className="nf-card__overlay">
+                            <span className="nf-card__overlay-cta">View Details</span>
+                          </div>
+                        </div>
+                        <div className="nf-card__meta">
+                          <h3>{carouselMovie.title || carouselMovie.original_title || 'Untitled'}</h3>
+                          <p>{getMovieGenres(carouselMovie.genre_ids)} - {formatReleaseDate(carouselMovie.release_date)}</p>
+                        </div>
+                      </Link>
+                    ))}
                   </div>
+                )}
+              </section>
 
-                  <p className="movie-detail-overview">{movie.overview || 'No overview available.'}</p>
-
-                  <div className="movie-detail-actions">
-                    {movie.homepage && (
-                      <a
-                        href={movie.homepage}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="tmdb-release-card__action tmdb-release-card__action--primary"
-                      >
-                        Official site
-                      </a>
-                    )}
-                    <a
-                      href={`${YOUTUBE_SEARCH_URL_BASE}${encodeURIComponent(`${movie.title || movie.original_title} trailer`)}`}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="tmdb-release-card__action tmdb-release-card__action--secondary"
-                    >
-                      Watch trailer
-                    </a>
-                    <Link href="/theatre-release" className="tmdb-release-card__action tmdb-release-card__action--secondary">
-                      Back to releases
-                    </Link>
-                  </div>
-                </div>
-              </div>
+              <ContinueBrowsing
+                title="Keep Browsing"
+                description="A detail page should keep the discovery loop moving."
+                items={retentionItems}
+              />
             </section>
-            </>
-          ) : (
-            <p className="admin-status">Movie details are unavailable.</p>
-          )}
-        </div>
+          </>
+        ) : (
+          <section className="nf-content theatre-detail-page__status-wrap">
+            <p className="nf-status">Movie details are unavailable.</p>
+          </section>
+        )}
       </main>
     </Layout>
   );

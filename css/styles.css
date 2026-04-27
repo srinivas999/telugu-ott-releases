@@ -6044,6 +6044,180 @@ html[data-hide-contact="true"] #contact {
   padding: 0.25rem 0 0.75rem;
 }
 
+.theatre-detail-page__status-wrap {
+  padding-top: 1rem;
+}
+
+.theatre-detail-hero {
+  min-height: clamp(420px, 70vh, 760px);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 300px);
+  align-items: end;
+  gap: 1.4rem;
+}
+
+.theatre-detail-hero__overlay {
+  background:
+    linear-gradient(90deg, rgba(20, 20, 20, 0.95) 0%, rgba(20, 20, 20, 0.62) 44%, rgba(20, 20, 20, 0.86) 100%),
+    linear-gradient(0deg, rgba(20, 20, 20, 1) 10%, rgba(20, 20, 20, 0.16) 58%, rgba(20, 20, 20, 0.82) 100%);
+}
+
+.theatre-detail-hero__content {
+  max-width: 760px;
+}
+
+.theatre-detail-hero__tagline {
+  margin: 0.7rem 0 0;
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.theatre-detail-hero__genres {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  margin-top: 1rem;
+}
+
+.theatre-detail-hero__genre-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2rem;
+  padding: 0.36rem 0.72rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.88);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.theatre-detail-hero__poster {
+  position: relative;
+  z-index: 1;
+  align-self: center;
+  justify-self: end;
+  width: min(100%, 300px);
+}
+
+.theatre-detail-hero__poster-frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  overflow: hidden;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.36);
+}
+
+.theatre-detail-hero__poster-image {
+  object-fit: cover;
+}
+
+.theatre-detail-page__content {
+  padding-top: 1rem;
+}
+
+.theatre-detail-section {
+  margin-top: 1.25rem;
+}
+
+.theatre-detail-section__header {
+  margin-bottom: 0.8rem;
+}
+
+.theatre-detail-section__eyebrow {
+  margin: 0;
+  color: #e50914;
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.theatre-detail-section__title {
+  margin: 0.32rem 0 0;
+  font-family: var(--font-body);
+  font-size: clamp(1.1rem, 2vw, 1.5rem);
+  font-weight: 750;
+}
+
+.theatre-detail-facts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.8rem;
+}
+
+.theatre-detail-facts__card,
+.theatre-detail-person-card,
+.theatre-detail-prose {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.2);
+}
+
+.theatre-detail-facts__card {
+  padding: 0.95rem;
+}
+
+.theatre-detail-facts__label {
+  display: block;
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.theatre-detail-facts__value {
+  display: block;
+  margin-top: 0.4rem;
+  color: #ffffff;
+  font-size: 1rem;
+  line-height: 1.45;
+}
+
+.theatre-detail-prose {
+  padding: 1rem 1.05rem;
+}
+
+.theatre-detail-prose p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.84);
+  font-size: 0.96rem;
+  line-height: 1.72;
+}
+
+.theatre-detail-people-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.8rem;
+}
+
+.theatre-detail-person-card {
+  padding: 0.95rem;
+}
+
+.theatre-detail-person-card h3 {
+  margin: 0;
+  color: #ffffff;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.theatre-detail-person-card p {
+  margin: 0.35rem 0 0;
+  color: rgba(255, 255, 255, 0.68);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.theatre-detail-page__rail {
+  margin-top: 1.35rem;
+}
+
 .week-page .nf-hero {
   min-height: clamp(310px, 46vh, 500px);
 }
@@ -6712,6 +6886,21 @@ html[data-hide-contact="true"] #contact {
     padding-top: 2.35rem;
   }
 
+  .theatre-detail-hero {
+    grid-template-columns: 1fr;
+    align-items: end;
+  }
+
+  .theatre-detail-hero__poster {
+    justify-self: start;
+    width: min(240px, 56vw);
+  }
+
+  .theatre-detail-facts,
+  .theatre-detail-people-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .theatre-browse-page .nf-collection__grid {
     gap: 0.8rem;
   }
@@ -6769,6 +6958,19 @@ html[data-hide-contact="true"] #contact {
 
   .nf-collection__grid {
     gap: 0.52rem;
+  }
+
+  .theatre-detail-hero {
+    min-height: 380px;
+  }
+
+  .theatre-detail-facts,
+  .theatre-detail-people-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .theatre-detail-hero__poster {
+    width: min(220px, 62vw);
   }
 
   .nf-card__meta {
