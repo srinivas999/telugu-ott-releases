@@ -3,6 +3,7 @@ import Link from 'next/link';
 import Layout from '../components/Layout';
 import Seo from '../components/Seo';
 import Breadcrumb from '../components/common/Breadcrumb';
+import ContinueBrowsing from '../components/common/ContinueBrowsing';
 import { supabase } from '../lib/supabaseClient';
 import { getPreferredMovieRating, withPreferredMovieRating } from '../lib/utils/ratings';
 import { generateUniqueSlug } from '../lib/utils/slug';
@@ -80,6 +81,36 @@ export default function TopRatedTeluguOttMoviesPage({ movies = [] }) {
   const title = 'Top Rated Telugu OTT Movies';
   const description = 'Browse highest rated Telugu OTT movies from the Telugu OTT database.';
   const featured = movies[0] || null;
+  const retentionItems = [
+    {
+      href: '/browse/trending-now',
+      eyebrow: 'Because You Liked Top Picks',
+      title: 'Move into what is trending now',
+      description: 'After the highest-rated titles, jump into what is currently getting attention.',
+      cta: 'Open Trending',
+    },
+    {
+      href: '/browse/recently-added',
+      eyebrow: 'Recently Added',
+      title: 'Continue with fresh library additions',
+      description: 'Keep browsing with newer entries added to the Telugu OTT database.',
+      cta: 'See New Additions',
+    },
+    {
+      href: '/telugu-ott-releases-this-week',
+      eyebrow: 'Release Loop',
+      title: 'From best picks to newest drops',
+      description: 'Switch from top-rated picks into this week OTT release calendar.',
+      cta: 'See This Week',
+    },
+    {
+      href: '/theatre-release',
+      eyebrow: 'Big Screen',
+      title: 'Keep going with theatre releases',
+      description: 'Step out of OTT and into the latest Telugu movies playing in theatres.',
+      cta: 'Browse Theatres',
+    },
+  ];
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'ItemList',
@@ -197,6 +228,12 @@ export default function TopRatedTeluguOttMoviesPage({ movies = [] }) {
               </div>
             )}
           </section>
+
+          <ContinueBrowsing
+            title="Keep Watching"
+            description="Top-rated pages should never be the end of the journey. Here is where to go next."
+            items={retentionItems}
+          />
         </section>
       </main>
     </Layout>

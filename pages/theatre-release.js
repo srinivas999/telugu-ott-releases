@@ -4,6 +4,7 @@ import Link from 'next/link';
 import Layout from '../components/Layout';
 import Seo from '../components/Seo';
 import Breadcrumb from '../components/common/Breadcrumb';
+import ContinueBrowsing from '../components/common/ContinueBrowsing';
 
 const TMDB_POSTER_BASE = 'https://image.tmdb.org/t/p/w500';
 const TMDB_BACKDROP_BASE = 'https://image.tmdb.org/t/p/w1280';
@@ -129,6 +130,36 @@ export default function TheatreReleasePage() {
 
   const featuredMovie = sortedMovies[0];
   const gridMovies = sortedMovies.slice(1);
+  const retentionItems = [
+    {
+      href: '/top-rated-telugu-ott-movies',
+      eyebrow: 'Because You Watched Theatre Releases',
+      title: 'Switch into the best OTT picks next',
+      description: 'Move from big-screen excitement into the strongest Telugu OTT movies.',
+      cta: 'Open Top Picks',
+    },
+    {
+      href: '/browse/trending-now',
+      eyebrow: 'Trending Now',
+      title: 'See what is hot beyond theatres',
+      description: 'Continue into OTT titles that are currently getting the most attention.',
+      cta: 'Open Trending',
+    },
+    {
+      href: '/telugu-ott-releases-this-week',
+      eyebrow: 'Release Calendar',
+      title: 'Keep the release loop alive',
+      description: 'Go from theatre dates into this week Telugu OTT release schedule.',
+      cta: 'See This Week',
+    },
+    {
+      href: '/web-series',
+      eyebrow: 'Series Mode',
+      title: 'Keep watching with Telugu web series',
+      description: 'When films are done, jump into the latest Telugu web series page.',
+      cta: 'Browse Web Series',
+    },
+  ];
 
   return (
     <Layout>
@@ -250,6 +281,12 @@ export default function TheatreReleasePage() {
               </div>
             )}
           </section>
+
+          <ContinueBrowsing
+            title="Keep Exploring"
+            description="A theatre page should hand off into another discovery path."
+            items={retentionItems}
+          />
         </section>
       </main>
     </Layout>

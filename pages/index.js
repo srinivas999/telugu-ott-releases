@@ -4,6 +4,7 @@ import Link from 'next/link';
 import Layout from '../components/Layout';
 import Seo from '../components/Seo';
 import Breadcrumb from '../components/common/Breadcrumb';
+import ContinueBrowsing from '../components/common/ContinueBrowsing';
 import { supabase } from '../lib/supabaseClient';
 import {
   useTrendingMovies,
@@ -235,6 +236,36 @@ export default function HomePage() {
   const heroDescription =
     heroMovie?.overview ||
     'Discover the latest Telugu OTT drops, trending movies, and this week releases across every major streaming platform.';
+  const retentionItems = [
+    {
+      href: '/browse/trending-now',
+      eyebrow: 'Trending Now',
+      title: 'Because you are browsing new Telugu OTT releases',
+      description: 'Jump into the hottest titles people are likely to click next.',
+      cta: 'Open Trending',
+    },
+    {
+      href: '/top-rated-telugu-ott-movies',
+      eyebrow: 'Top Rated',
+      title: 'Stay with the strongest picks',
+      description: 'Move from fresh releases into the best-rated Telugu OTT movies.',
+      cta: 'View Top Picks',
+    },
+    {
+      href: '/telugu-ott-releases-this-week',
+      eyebrow: 'This Week',
+      title: 'Keep the release loop going',
+      description: 'See what is dropping over the next 7 days across OTT platforms.',
+      cta: 'See This Week',
+    },
+    {
+      href: '/theatre-release',
+      eyebrow: 'Beyond OTT',
+      title: 'Continue into theatre releases',
+      description: 'Switch from streaming to the latest big-screen Telugu movies.',
+      cta: 'Browse Theatres',
+    },
+  ];
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -437,6 +468,12 @@ export default function HomePage() {
             movies={theatreMovies.slice(0, 20)}
             type="theatre"
             viewAllHref="/theatre-release"
+          />
+
+          <ContinueBrowsing
+            title="Continue Browsing"
+            description="Every section should lead to the next watchlist. Pick where you want to go next."
+            items={retentionItems}
           />
         </div>
 

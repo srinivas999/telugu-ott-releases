@@ -3,6 +3,7 @@ import Link from 'next/link';
 import Layout from '../components/Layout';
 import Seo from '../components/Seo';
 import Breadcrumb from '../components/common/Breadcrumb';
+import ContinueBrowsing from '../components/common/ContinueBrowsing';
 import { supabase } from '../lib/supabaseClient';
 import { generateUniqueSlug } from '../lib/utils/slug';
 
@@ -130,6 +131,36 @@ export default function TeluguOttReleasesThisWeekPage({
   const description = hasWeekMovies
     ? 'See Telugu OTT releases this week with platforms, release dates, and movie links.'
     : 'No releases in the next 7 days. Explore Telugu OTT releases for the current month.';
+  const retentionItems = [
+    {
+      href: '/browse/trending-now',
+      eyebrow: 'Trending Now',
+      title: 'After the release calendar, see what is buzzing',
+      description: 'Move from scheduled drops into the titles that are hottest right now.',
+      cta: 'Open Trending',
+    },
+    {
+      href: '/top-rated-telugu-ott-movies',
+      eyebrow: 'Top Picks',
+      title: 'Balance new releases with proven favorites',
+      description: 'Pair this week OTT drops with the highest-rated Telugu streaming movies.',
+      cta: 'View Top Picks',
+    },
+    {
+      href: '/browse/recently-added',
+      eyebrow: 'Continue Browsing',
+      title: 'Keep going with recently added titles',
+      description: 'Stay in discovery mode with fresh additions to the database.',
+      cta: 'See New Additions',
+    },
+    {
+      href: '/theatre-release',
+      eyebrow: 'Beyond OTT',
+      title: 'Take the next step into theatres',
+      description: 'When the OTT queue ends, continue into current Telugu theatre releases.',
+      cta: 'Browse Theatres',
+    },
+  ];
 
   const featured = displayMovies[0] || null;
   const jsonLd = {
@@ -287,6 +318,12 @@ export default function TeluguOttReleasesThisWeekPage({
               </div>
             )}
           </section>
+
+          <ContinueBrowsing
+            title="Continue Browsing"
+            description="The release calendar should lead into another watch path, not a dead end."
+            items={retentionItems}
+          />
         </section>
       </main>
     </Layout>

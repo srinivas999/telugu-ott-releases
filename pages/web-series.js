@@ -4,6 +4,7 @@ import Link from 'next/link';
 import Layout from '../components/Layout';
 import Seo from '../components/Seo';
 import Breadcrumb from '../components/common/Breadcrumb';
+import ContinueBrowsing from '../components/common/ContinueBrowsing';
 
 const TMDB_POSTER_BASE = 'https://image.tmdb.org/t/p/w500';
 const TMDB_BACKDROP_BASE = 'https://image.tmdb.org/t/p/w1280';
@@ -68,6 +69,36 @@ export default function WebSeriesPage() {
 
   const featured = useMemo(() => series[0] || null, [series]);
   const list = useMemo(() => series.slice(1), [series]);
+  const retentionItems = [
+    {
+      href: '/browse/trending-now',
+      eyebrow: 'Trending Now',
+      title: 'After series, jump into trending movies',
+      description: 'Keep the binge flow alive with the Telugu OTT titles everyone is checking out.',
+      cta: 'Open Trending',
+    },
+    {
+      href: '/top-rated-telugu-ott-movies',
+      eyebrow: 'Top Picks',
+      title: 'Continue with the highest-rated Telugu OTT movies',
+      description: 'Move from web series discovery into the strongest film recommendations.',
+      cta: 'View Top Picks',
+    },
+    {
+      href: '/telugu-ott-releases-this-week',
+      eyebrow: 'New Releases',
+      title: 'Keep going with this week OTT drops',
+      description: 'See which Telugu movies are newly landing on OTT over the next few days.',
+      cta: 'See This Week',
+    },
+    {
+      href: '/theatre-release',
+      eyebrow: 'Beyond Series',
+      title: 'Switch from streaming series to theatre releases',
+      description: 'Continue the session with the latest Telugu movies playing in theatres.',
+      cta: 'Browse Theatres',
+    },
+  ];
 
   return (
     <Layout>
@@ -162,6 +193,12 @@ export default function WebSeriesPage() {
               </div>
             )}
           </section>
+
+          <ContinueBrowsing
+            title="Keep Watching"
+            description="A series page should point straight into the next binge path."
+            items={retentionItems}
+          />
         </section>
       </main>
     </Layout>
