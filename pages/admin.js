@@ -46,6 +46,51 @@ export default function AdminPage() {
   const [csvStatus, setCsvStatus] = useState('');
   const [csvStatusError, setCsvStatusError] = useState(false);
   const [csvLoading, setCsvLoading] = useState(false);
+  const [toasts, setToasts] = useState([]);
+
+  const dismissToast = (toastId) => {
+    setToasts((current) => current.filter((toast) => toast.id !== toastId));
+  };
+
+  const showErrorToast = (message) => {
+    const trimmedMessage = String(message || '').trim();
+    if (!trimmedMessage) return;
+
+    const toastId = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    setToasts((current) => [...current, { id: toastId, message: trimmedMessage }].slice(-4));
+
+    setTimeout(() => {
+      dismissToast(toastId);
+    }, 7000);
+  };
+
+  const extractApiErrorMessage = async (response, fallbackMessage) => {
+    const rawBody = await response.text();
+    if (!rawBody) {
+      return `${fallbackMessage} (${response.status})`;
+    }
+
+    try {
+      const parsed = JSON.parse(rawBody);
+      const parsedMessage =
+        parsed?.error ||
+        parsed?.message ||
+        parsed?.status_message ||
+        parsed?.details?.error ||
+        parsed?.details?.message ||
+        parsed?.details?.status_message ||
+        parsed?.details?.Error ||
+        parsed?.data?.Error;
+
+      if (parsedMessage) {
+        return `${fallbackMessage} (${response.status}): ${parsedMessage}`;
+      }
+    } catch (_error) {
+      // The API may return plain text/HTML on failure; keep the raw body fallback below.
+    }
+
+    return `${fallbackMessage} (${response.status}): ${rawBody.slice(0, 240)}`;
+  };
 
   useEffect(() => {
     if (!supabase) return undefined;
@@ -157,6 +202,7 @@ export default function AdminPage() {
         noReleaseDate: 0,
         failedRequests: 0,
       };
+      let firstFailedRequestMessage = '';
 
       for (const movie of moviesToSync) {
         const title = movie.movie_name.trim();
@@ -167,6 +213,9 @@ export default function AdminPage() {
         );
 
         if (!response.ok) {
+          if (!firstFailedRequestMessage) {
+            firstFailedRequestMessage = await extractApiErrorMessage(response, 'TMDb search failed');
+          }
           stats.failedRequests += 1;
           continue;
         }
@@ -201,7 +250,16 @@ export default function AdminPage() {
         }
       }
 
-      await fetchMovies();
+      if (updates.length > 0) {
+        const updatesById = new Map(updates.map((item) => [item.id, item]));
+        setMovies((currentMovies) =>
+          currentMovies.map((currentMovie) =>
+            updatesById.has(currentMovie.id)
+              ? { ...currentMovie, ...updatesById.get(currentMovie.id) }
+              : currentMovie,
+          ),
+        );
+      }
 
       let statusMessage = `${stats.updated} movie release date(s) synced from TMDb.`;
       if (stats.noMatch > 0) {
@@ -212,6 +270,9 @@ export default function AdminPage() {
       }
       if (stats.failedRequests > 0) {
         statusMessage += ` ${stats.failedRequests} request(s) failed.`;
+        if (firstFailedRequestMessage) {
+          showErrorToast(firstFailedRequestMessage);
+        }
       }
       if (stats.updated === 0 && stats.noMatch === 0 && stats.noReleaseDate === 0 && stats.failedRequests === 0) {
         statusMessage = 'TMDb search completed, but no updateable titles were found.';
@@ -219,8 +280,10 @@ export default function AdminPage() {
 
       setTmdbSyncStatus(statusMessage);
     } catch (error) {
-      setTmdbSyncStatus(error?.message || 'Unable to sync TMDb metadata.');
+      const errorMessage = error?.message || 'Unable to sync TMDb metadata.';
+      setTmdbSyncStatus(errorMessage);
       setTmdbSyncError(true);
+      showErrorToast(errorMessage);
     } finally {
       setTmdbSyncLoading(false);
     }
@@ -240,8 +303,7 @@ export default function AdminPage() {
     try {
       const response = await fetch('/api/tmdb/latest');
       if (!response.ok) {
-        const errorBody = await response.text();
-        throw new Error(`TMDb request failed (${response.status}): ${errorBody}`);
+        throw new Error(await extractApiErrorMessage(response, 'TMDb request failed'));
       }
 
       const payload = await response.json();
@@ -253,8 +315,10 @@ export default function AdminPage() {
 
       setTmdbFetchStatus(`Fetched ${results.length} Tollywood movie(s) from TMDb. They were not saved to the database.`);
     } catch (error) {
-      setTmdbFetchStatus(error?.message || 'Unable to fetch latest Tollywood movies from TMDb.');
+      const errorMessage = error?.message || 'Unable to fetch latest Tollywood movies from TMDb.';
+      setTmdbFetchStatus(errorMessage);
       setTmdbFetchError(true);
+      showErrorToast(errorMessage);
     } finally {
       setTmdbFetchLoading(false);
     }
@@ -337,6 +401,16 @@ export default function AdminPage() {
 
   const handleMovieFormChange = (field, value) => {
     setMovieForm((current) => ({ ...current, [field]: value }));
+  };
+
+  const patchMovieInState = (movieId, updates) => {
+    setMovies((currentMovies) =>
+      currentMovies.map((currentMovie) =>
+        currentMovie.id === movieId
+          ? { ...currentMovie, ...updates }
+          : currentMovie
+      ),
+    );
   };
 
   const handleMovieSave = async (event) => {
@@ -570,8 +644,7 @@ export default function AdminPage() {
         `/api/tmdb/search?query=${encodeURIComponent(searchQuery)}&y=${encodeURIComponent(syncYear)}&mediaType=${encodeURIComponent(mediaType)}`
       );
       if (!searchResponse.ok) {
-        const errorBody = await searchResponse.text();
-        throw new Error(`TMDB search failed (${searchResponse.status}): ${errorBody}`);
+        throw new Error(await extractApiErrorMessage(searchResponse, 'TMDB search failed'));
       }
 
       const searchPayload = await searchResponse.json();
@@ -585,8 +658,7 @@ export default function AdminPage() {
         `/api/tmdb/details?id=${encodeURIComponent(bestMatch.id)}&mediaType=${encodeURIComponent(mediaType)}`
       );
       if (!detailsResponse.ok) {
-        const errorBody = await detailsResponse.text();
-        throw new Error(`TMDB details failed (${detailsResponse.status}): ${errorBody}`);
+        throw new Error(await extractApiErrorMessage(detailsResponse, 'TMDB details failed'));
       }
 
       const detailsPayload = await detailsResponse.json();
@@ -644,11 +716,19 @@ export default function AdminPage() {
         throw tmdbDetailsError;
       }
 
-      await fetchMovies();
+      const tmdbSyncedAt = new Date().toISOString();
+      patchMovieInState(movie.id, {
+        ...payload,
+        TMDB_Details: detailsPayload,
+        tmdb_details: detailsPayload,
+        tmdb_last_sync: tmdbSyncedAt,
+      });
       setLiveSyncStatus(`Live TMDB data synced for "${movieTitle}".`);
     } catch (error) {
+      const errorMessage = error?.message || 'Unable to sync live TMDB data.';
       setLiveSyncError(true);
-      setLiveSyncStatus(error?.message || 'Unable to sync live TMDB data.');
+      setLiveSyncStatus(errorMessage);
+      showErrorToast(errorMessage);
     } finally {
       setLiveSyncMovieId(null);
     }
@@ -686,8 +766,7 @@ export default function AdminPage() {
 
       const response = await fetch(`/api/omdb?${query.toString()}`);
       if (!response.ok) {
-        const errorBody = await response.text();
-        throw new Error(`OMDb sync failed (${response.status}): ${errorBody}`);
+        throw new Error(await extractApiErrorMessage(response, 'OMDb sync failed'));
       }
 
       const payload = await response.json();
@@ -699,11 +778,19 @@ export default function AdminPage() {
         );
       }
 
-      await fetchMovies();
+      const omdbSyncedAt = new Date().toISOString();
+      patchMovieInState(movie.id, {
+        OMTB_Details: payload,
+        omtb_details: payload,
+        rating: getOmdbRatingValue({ OMTB_Details: payload }),
+        omdb_last_sync: omdbSyncedAt,
+      });
       setOmdbSyncStatus(`OMDb details synced for "${movieTitle}".`);
     } catch (error) {
+      const errorMessage = error?.message || 'Unable to sync OMDb details.';
       setOmdbSyncError(true);
-      setOmdbSyncStatus(error?.message || 'Unable to sync OMDb details.');
+      setOmdbSyncStatus(errorMessage);
+      showErrorToast(errorMessage);
     } finally {
       setOmdbSyncMovieId(null);
     }
@@ -1223,6 +1310,24 @@ export default function AdminPage() {
               </div>
             </div>
           )}
+
+          {toasts.length > 0 ? (
+            <div className="admin-toast-stack" role="status" aria-live="polite">
+              {toasts.map((toast) => (
+                <div className="admin-toast admin-toast--error" key={toast.id}>
+                  <p className="admin-toast__message">{toast.message}</p>
+                  <button
+                    type="button"
+                    className="admin-toast__close"
+                    onClick={() => dismissToast(toast.id)}
+                    aria-label="Dismiss notification"
+                  >
+                    Close
+                  </button>
+                </div>
+              ))}
+            </div>
+          ) : null}
 
           {status ? <p className="admin-status">{status}</p> : null}
         </div>

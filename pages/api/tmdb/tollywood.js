@@ -3,7 +3,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const apiKey =  process.env.NEXT_PUBLIC_TMDB_API_KEY;
+  const apiKey = process.env.TMDB_API_KEY || process.env.NEXT_PUBLIC_TMDB_API_KEY;
   const readToken = process.env.TMDB_API_READ_ACCESS_TOKEN;
 
   if (!apiKey && !readToken) {
@@ -16,9 +16,14 @@ export default async function handler(req, res) {
     headers.Authorization = `Bearer ${readToken}`;
   }
 
-  const response = await fetch(`${url}${!readToken ? `&api_key=${encodeURIComponent(apiKey)}` : ''}`, {
+  const apiKeyQuery = `&api_key=${encodeURIComponent(apiKey)}`;
+  let response = await fetch(`${url}${!readToken ? apiKeyQuery : ''}`, {
     headers,
   });
+
+  if ((response.status === 401 || response.status === 403) && readToken && apiKey) {
+    response = await fetch(`${url}${apiKeyQuery}`);
+  }
 
   if (!response.ok) {
     const errorBody = await response.text();

@@ -4667,6 +4667,58 @@ html[data-hide-contact="true"] #contact {
   color: #64748b;
 }
 
+.admin-toast-stack {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 1100;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: min(420px, calc(100vw - 2rem));
+}
+
+.admin-toast {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.85rem 0.95rem;
+  border-radius: 10px;
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  background: #fff2f2;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.16);
+}
+
+.admin-toast--error {
+  border-left: 4px solid #dc2626;
+}
+
+.admin-toast__message {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.45;
+  color: #7f1d1d;
+  overflow-wrap: anywhere;
+}
+
+.admin-toast__close {
+  border: 0;
+  background: transparent;
+  color: #991b1b;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0.1rem 0.25rem;
+  line-height: 1;
+}
+
+.admin-toast__close:hover,
+.admin-toast__close:focus-visible {
+  color: #7f1d1d;
+  text-decoration: underline;
+}
+
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
 
