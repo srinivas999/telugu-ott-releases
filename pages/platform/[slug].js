@@ -6,18 +6,13 @@ import Layout from '../../components/Layout';
 import Seo from '../../components/Seo';
 import Breadcrumb from '../../components/common/Breadcrumb';
 import { supabase } from '../../lib/supabaseClient';
+import {
+  normalizePlatform,
+  PLATFORM_DIRECTORY,
+} from '../../lib/utils/platforms';
 import { getPreferredMovieRating, withPreferredMovieRating } from '../../lib/utils/ratings';
+import { generateCollectionPageSchema, generateItemListSchema } from '../../lib/utils/schema';
 import { generateUniqueSlug } from '../../lib/utils/slug';
-
-const PLATFORM_MAP = {
-  netflix: 'Netflix',
-  aha: 'Aha',
-  'prime-video': 'Prime Video',
-  jiohotstar: 'JioHotstar',
-  zee5: 'Zee5',
-  'sun-nxt': 'Sun NXT',
-  'etv-win': 'ETV Win',
-};
 
 const TMDB_POSTER_BASE = 'https://image.tmdb.org/t/p/w500';
 const TMDB_BACKDROP_BASE = 'https://image.tmdb.org/t/p/w1280';
@@ -53,7 +48,8 @@ export default function PlatformPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  const platformName = slug ? PLATFORM_MAP[slug] : '';
+  const platformMeta = slug ? PLATFORM_DIRECTORY.find((platform) => platform.slug === slug) || null : null;
+  const platformName = platformMeta?.name || '';
   const safePlatformName = platformName || 'Platform';
 
   useEffect(() => {
@@ -72,11 +68,16 @@ export default function PlatformPage() {
         const { data, error: fetchError } = await supabase
           .from('ott_movies')
           .select('*')
-          .eq('streaming_partner', platformName)
           .order('digital_release_date', { ascending: false });
 
         if (fetchError) throw fetchError;
-        setMovies((data || []).map(withPreferredMovieRating));
+        const normalizedMovies = (data || [])
+          .map((movie) => ({
+            ...withPreferredMovieRating(movie),
+            streaming_partner: normalizePlatform(movie.streaming_partner),
+          }))
+          .filter((movie) => movie.streaming_partner === platformName);
+        setMovies(normalizedMovies);
       } catch (fetchError) {
         console.error('Fetch platform movies error:', fetchError);
         setError('Unable to load movies right now. Please refresh and try again.');
@@ -89,14 +90,34 @@ export default function PlatformPage() {
   }, [slug, platformName]);
 
   const featured = useMemo(() => movies[0] || null, [movies]);
+  const directoryPlatforms = useMemo(
+    () => PLATFORM_DIRECTORY.filter((platform) => platform.slug !== slug).slice(0, 6),
+    [slug]
+  );
+  const seoDescription = featured
+    ? `Browse ${movies.length} Telugu movies available on ${safePlatformName}. Latest tracked release: ${featured.movie_name || 'Telugu movie'} on ${formatReleaseDate(featured.digital_release_date)}.`
+    : `Browse Telugu movies available on ${safePlatformName}, with latest tracked releases, release dates, and direct movie pages.`;
+  const jsonLd = [
+    generateCollectionPageSchema({
+      name: `${safePlatformName} Telugu Movies`,
+      description: seoDescription,
+      url: slug ? `/platform/${slug}` : '/ott-movies',
+    }),
+    generateItemListSchema({
+      title: `${safePlatformName} Telugu Movies`,
+      items: movies.slice(0, 20),
+      url: slug ? `/platform/${slug}` : '/ott-movies',
+    }),
+  ];
 
   return (
     <Layout>
       <Seo
-        title={`${safePlatformName} Telugu Movies`}
-        description={`Browse Telugu movies available on ${safePlatformName}.`}
+        title={`What's New on ${safePlatformName} | Telugu Movies`}
+        description={seoDescription}
         url={slug ? `/platform/${slug}` : '/ott-movies'}
-        keywords={`${safePlatformName} Telugu movies, ${safePlatformName} OTT`}
+        keywords={`${safePlatformName} Telugu movies, what's new on ${safePlatformName}, ${safePlatformName} OTT`}
+        jsonLd={jsonLd}
       />
 
       <main className="netflix-home platform-page">
@@ -126,8 +147,8 @@ export default function PlatformPage() {
           <div className="nf-hero__overlay" />
           <div className="nf-hero__content">
             <p className="nf-hero__kicker">Platform Spotlight</p>
-            <h1>{safePlatformName} Telugu Movies</h1>
-            <p className="nf-hero__desc">Discover all Telugu movies available on {safePlatformName}.</p>
+            <h1>What&apos;s New on {safePlatformName}?</h1>
+            <p className="nf-hero__desc">Discover the latest tracked Telugu movies on {safePlatformName}, with release dates and direct movie pages.</p>
             <div className="nf-hero__meta">
               <span>{loading ? 'Loading...' : `${movies.length} movies`}</span>
               {featured?.digital_release_date ? <span>{formatReleaseDate(featured.digital_release_date)}</span> : null}
@@ -139,6 +160,30 @@ export default function PlatformPage() {
         </section>
 
         <section className="nf-content">
+          <section className="nf-platform-jump">
+            <div className="nf-platform-jump__header">
+              <h2>Browse Other Platforms</h2>
+              <p>
+                Switch services quickly when the title you want is on another app. You can also jump back to the{' '}
+                <Link href="/ott-movies" className="nf-inline-link">full Telugu OTT archive</Link>,{' '}
+                <Link href="/top-rated-telugu-ott-movies" className="nf-inline-link">top rated picks</Link>, or{' '}
+                <Link href="/telugu-ott-releases-this-week" className="nf-inline-link">this week&apos;s releases</Link>.
+              </p>
+            </div>
+            <div className="nf-platform-jump__row">
+              {directoryPlatforms.map((platform) => (
+                <Link
+                  key={platform.slug}
+                  href={`/platform/${platform.slug}`}
+                  className="nf-platform-jump__chip"
+                  style={{ '--platform-accent': platform.color }}
+                >
+                  {platform.name}
+                </Link>
+              ))}
+            </div>
+          </section>
+
           <section className="nf-rail">
             <div className="nf-rail__header">
               <h2>{safePlatformName} Releases</h2>

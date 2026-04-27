@@ -5,12 +5,11 @@ import Layout from '../components/Layout';
 import Seo from '../components/Seo';
 import Breadcrumb from '../components/common/Breadcrumb';
 import ContinueBrowsing from '../components/common/ContinueBrowsing';
+import { generateCollectionPageSchema, generateItemListSchema } from '../lib/utils/schema';
 import { formatCompactVoteCount } from '../lib/utils/ratings';
 
 const TMDB_POSTER_BASE = 'https://image.tmdb.org/t/p/w500';
 const TMDB_BACKDROP_BASE = 'https://image.tmdb.org/t/p/w1280';
-const SITE_URL = 'https://svteluguott.in';
-
 function formatDate(value) {
   if (!value) return 'TBA';
   const date = new Date(value);
@@ -106,32 +105,24 @@ export default function WebSeriesPage() {
     },
   ];
   const jsonLd = [
-    {
-      '@context': 'https://schema.org',
-      '@type': 'CollectionPage',
+    generateCollectionPageSchema({
       name: 'Latest Telugu Web Series',
-      url: `${SITE_URL}/web-series`,
       description: seoDescription,
-    },
-    {
-      '@context': 'https://schema.org',
-      '@type': 'ItemList',
-      name: 'Latest Telugu Web Series',
-      numberOfItems: series.slice(0, 20).length,
-      itemListElement: series.slice(0, 20).map((item, index) => ({
-        '@type': 'ListItem',
-        position: index + 1,
-        item: {
-          '@type': 'TVSeries',
-          name: item.name || 'Untitled',
-          description: item.overview || 'Latest Telugu web series streaming on OTT.',
-          datePublished: item.first_air_date || '',
-          inLanguage: 'te',
-          image: toPosterUrl(item),
-          url: `${SITE_URL}/web-series`,
-        },
+      url: '/web-series',
+    }),
+    generateItemListSchema({
+      title: 'Latest Telugu Web Series',
+      items: series.slice(0, 20).map((item) => ({
+        movie_name: item.name,
+        title: item.name,
+        overview: item.overview,
+        digital_release_date: item.first_air_date,
+        language: 'Telugu',
+        poster_path: item.poster_path,
+        url: '/web-series',
       })),
-    },
+      url: '/web-series',
+    }),
   ];
 
   return (
@@ -189,8 +180,9 @@ export default function WebSeriesPage() {
             </div>
             <p className="nf-collection-copy">
               Looking beyond series? Pair this page with <Link href="/telugu-ott-releases-this-week" className="nf-inline-link">Telugu OTT releases this week</Link>,
-              <Link href="/top-rated-telugu-ott-movies" className="nf-inline-link"> best Telugu OTT movies</Link>, and
-              <Link href="/theatre-release" className="nf-inline-link"> Telugu theatre releases</Link> to widen discovery across formats.
+              <Link href="/top-rated-telugu-ott-movies" className="nf-inline-link"> best Telugu OTT movies</Link>,{' '}
+              <Link href="/platform/netflix" className="nf-inline-link">Netflix Telugu movies</Link>, and{' '}
+              <Link href="/theatre-release" className="nf-inline-link">Telugu theatre releases</Link> to widen discovery across formats.
             </p>
             {loading ? (
               <p className="nf-status">Loading web series...</p>

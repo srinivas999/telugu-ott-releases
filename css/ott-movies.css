@@ -1792,6 +1792,95 @@
   }
 }
 
+.ott-platform-discovery {
+  margin-bottom: 1.5rem;
+}
+
+.ott-platform-discovery__header {
+  margin-bottom: 0.9rem;
+}
+
+.ott-platform-discovery__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.5rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  background: rgba(99, 102, 241, 0.14);
+  color: #a5b4fc;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.ott-platform-discovery__header h2 {
+  margin: 0.75rem 0 0;
+  font-size: clamp(1.35rem, 2vw, 1.8rem);
+  color: #f8fafc;
+}
+
+.ott-platform-discovery__copy {
+  margin: 0.45rem 0 0;
+  max-width: 68ch;
+  color: #94a3b8;
+  font-size: 0.95rem;
+  line-height: 1.7;
+}
+
+.ott-platform-discovery__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.8rem;
+}
+
+.ott-platform-discovery__card {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 156px;
+  padding: 1rem;
+  border-radius: 20px;
+  text-decoration: none;
+  color: #f8fafc;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background:
+    radial-gradient(circle at top right, color-mix(in srgb, var(--platform-color, #6366f1) 24%, transparent), transparent 42%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02)),
+    rgba(15, 23, 42, 0.78);
+  box-shadow: 0 18px 40px rgba(2, 6, 23, 0.24);
+  transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.ott-platform-discovery__card:hover,
+.ott-platform-discovery__card:focus-visible {
+  transform: translateY(-4px);
+  border-color: color-mix(in srgb, var(--platform-color, #6366f1) 70%, white 10%);
+  box-shadow: 0 26px 48px rgba(2, 6, 23, 0.3);
+}
+
+.ott-platform-discovery__label {
+  color: color-mix(in srgb, var(--platform-color, #6366f1) 72%, white 22%);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.ott-platform-discovery__card strong {
+  margin-top: 0.8rem;
+  font-size: 1.05rem;
+  line-height: 1.35;
+}
+
+.ott-platform-discovery__card p {
+  margin: 0.55rem 0 0;
+  color: #cbd5e1;
+  font-size: 0.84rem;
+  line-height: 1.55;
+}
+
 /* Filters */
 .ott-movies-filters {
   display: flex;
@@ -1807,6 +1896,15 @@
 }
 
 @media (max-width: 640px) {
+  .ott-platform-discovery__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ott-platform-discovery__card {
+    min-height: 140px;
+    padding: 0.9rem;
+  }
+
   .ott-movies-filters__platforms {
     overflow-x: auto;
     flex-wrap: nowrap;

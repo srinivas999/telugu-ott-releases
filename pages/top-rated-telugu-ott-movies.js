@@ -11,6 +11,7 @@ import {
   getTmdbVoteCountValue,
   withPreferredMovieRating,
 } from '../lib/utils/ratings';
+import { generateCollectionPageSchema, generateItemListSchema } from '../lib/utils/schema';
 import { generateUniqueSlug } from '../lib/utils/slug';
 
 const TMDB_POSTER_BASE = 'https://image.tmdb.org/t/p/w500';
@@ -85,7 +86,9 @@ export async function getStaticProps() {
 
 export default function TopRatedTeluguOttMoviesPage({ movies = [] }) {
   const title = 'Top Rated Telugu OTT Movies';
-  const description = 'Browse highest rated Telugu OTT movies from the Telugu OTT database.';
+  const description = movies[0]
+    ? `Browse ${movies.length} top rated Telugu OTT movies ranked by viewer ratings, with ${movies[0].movie_name || 'the latest featured pick'} leading the list.`
+    : 'Browse highest rated Telugu OTT movies from the Telugu OTT database.';
   const featured = movies[0] || null;
   const retentionItems = [
     {
@@ -117,24 +120,18 @@ export default function TopRatedTeluguOttMoviesPage({ movies = [] }) {
       cta: 'Browse Theatres',
     },
   ];
-  const jsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'ItemList',
-    name: title,
-    itemListElement: movies.slice(0, 20).map((movie, index) => ({
-      '@type': 'ListItem',
-      position: index + 1,
-      item: {
-        '@type': 'Movie',
-        name: movie.movie_name || 'Untitled',
-        datePublished: movie.digital_release_date || '',
-        aggregateRating: getPreferredMovieRating(movie)
-          ? { '@type': 'AggregateRating', ratingValue: getPreferredMovieRating(movie), bestRating: 10 }
-          : undefined,
-        url: `https://svteluguott.in/movie/${generateUniqueSlug(movie.movie_name, movie.id)}`,
-      },
-    })),
-  };
+  const jsonLd = [
+    generateCollectionPageSchema({
+      name: title,
+      description,
+      url: '/top-rated-telugu-ott-movies',
+    }),
+    generateItemListSchema({
+      title,
+      items: movies.slice(0, 20),
+      url: '/top-rated-telugu-ott-movies',
+    }),
+  ];
 
   return (
     <Layout>
@@ -203,6 +200,12 @@ export default function TopRatedTeluguOttMoviesPage({ movies = [] }) {
             <div className="nf-rail__header">
               <h2>All Top Rated ({movies.length})</h2>
             </div>
+            <p className="nf-collection-copy">
+              Use this ratings-first list with <Link href="/platform/netflix" className="nf-inline-link">Netflix Telugu movies</Link>,{' '}
+              <Link href="/platform/aha" className="nf-inline-link">Aha Telugu movies</Link>,{' '}
+              <Link href="/ott-movies" className="nf-inline-link">the full OTT archive</Link>, and{' '}
+              <Link href="/telugu-ott-releases-this-week" className="nf-inline-link">this week&apos;s release calendar</Link> to cover both quality and freshness.
+            </p>
             {movies.length === 0 ? (
               <p className="nf-status">No rated titles yet. Fresh top picks will appear here soon.</p>
             ) : (
