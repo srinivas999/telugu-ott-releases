@@ -68,7 +68,35 @@ function getTopCrew(movie) {
 }
 
 function isPresentOmdbValue(value) {
-  return value !== null && value !== undefined && value !== '' && value !== 'N/A';
+  const normalized = normalizeDisplayValue(value);
+  return normalized !== '' && normalized !== 'N/A';
+}
+
+function normalizeDisplayValue(value) {
+  if (value === null || value === undefined) return '';
+  if (typeof value === 'string') return value.trim();
+  if (typeof value === 'number' || typeof value === 'boolean') return String(value);
+
+  if (Array.isArray(value)) {
+    return value
+      .map((item) => normalizeDisplayValue(item))
+      .filter(Boolean)
+      .join(', ');
+  }
+
+  if (typeof value === 'object') {
+    if (typeof value.name === 'string' && value.name.trim()) {
+      return value.name.trim();
+    }
+
+    try {
+      return JSON.stringify(value);
+    } catch {
+      return '';
+    }
+  }
+
+  return '';
 }
 
 function getCrewNamesByJobs(movie, jobs) {
@@ -152,14 +180,14 @@ function buildOmdbFieldGroups(movie) {
   const highlightFields = [
     {
       label: hasOmdbRating ? 'IMDb Rating' : 'TMDb Rating',
-      value: omdb?.imdbRating ?? getFallbackFieldValue(movie, 'IMDb Rating'),
+      value: normalizeDisplayValue(omdb?.imdbRating ?? getFallbackFieldValue(movie, 'IMDb Rating')),
     },
     {
       label: hasOmdbVotes ? 'IMDb Votes' : 'TMDb Votes',
-      value: omdb?.imdbVotes ?? getFallbackFieldValue(movie, 'IMDb Votes'),
+      value: normalizeDisplayValue(omdb?.imdbVotes ?? getFallbackFieldValue(movie, 'IMDb Votes')),
     },
-    { label: 'Rated', value: omdb?.Rated },
-    { label: 'Awards', value: omdb?.Awards },
+    { label: 'Rated', value: normalizeDisplayValue(omdb?.Rated) },
+    { label: 'Awards', value: normalizeDisplayValue(omdb?.Awards) },
   ].filter((field) => isPresentOmdbValue(field.value));
 
   const primaryFieldMap = [
@@ -195,7 +223,7 @@ function buildOmdbFieldGroups(movie) {
   ]);
 
   const detailFields = primaryFieldMap
-    .map(([label, value]) => ({ label, value }))
+    .map(([label, value]) => ({ label, value: normalizeDisplayValue(value) }))
     .filter((field) => isPresentOmdbValue(field.value));
 
   if (omdb) {
@@ -213,7 +241,7 @@ function buildOmdbFieldGroups(movie) {
 
       detailFields.push({
         label: key.replace(/([a-z])([A-Z])/g, '$1 $2'),
-        value,
+        value: normalizeDisplayValue(value),
       });
     });
   }
@@ -227,7 +255,8 @@ export default function MovieDetails({ movie, loading = false, error = null }) {
   }
 
   if (error) {
-    return <div className={styles.container}>Error: {error}</div>;
+    const errorMessage = typeof error === 'string' ? error : error?.message || 'Unable to load movie details.';
+    return <div className={styles.container}>Error: {errorMessage}</div>;
   }
 
   if (!movie) {
