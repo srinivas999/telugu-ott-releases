@@ -9,7 +9,6 @@ import { supabase } from '../lib/supabaseClient';
 import {
   useTrendingMovies,
   useReleasingThisWeek,
-  useRecentlyAdded,
 } from '../lib/hooks/useMovies';
 import {
   buildPlatformSpotlights,
@@ -68,7 +67,6 @@ function toBackdropUrl(movie) {
 function getCardBadge(movie, type = 'ott', signal = '') {
   if (signal === 'trending') return 'Popular This Week';
   if (signal === 'week') return 'Trending Release';
-  if (signal === 'recent') return 'Hot Pick';
   if (type === 'theatre') return 'Popular This Week';
   if (!movie?.poster_path) return '';
   const rating = getPreferredMovieRating(movie) || movie.vote_average || 0;
@@ -79,7 +77,6 @@ function getCardBadge(movie, type = 'ott', signal = '') {
 function getTrustSignal(signal = '', type = 'ott') {
   if (signal === 'trending') return 'Popular this week';
   if (signal === 'week') return 'Trending now';
-  if (signal === 'recent') return 'Fresh pick';
   if (type === 'theatre') return 'Audience buzz';
   return 'Viewer trust';
 }
@@ -90,6 +87,22 @@ function sortByReleaseDate(movies, sortOrder) {
     const secondTime = new Date(`${b.digital_release_date || ''}T00:00:00`).getTime();
     if (Number.isNaN(firstTime) || Number.isNaN(secondTime)) return 0;
     if (sortOrder === 'asc') return firstTime - secondTime;
+    return secondTime - firstTime;
+  });
+}
+
+function sortByRating(movies) {
+  return [...movies].sort((firstMovie, secondMovie) => {
+    const firstRating = getPreferredMovieRating(firstMovie) || 0;
+    const secondRating = getPreferredMovieRating(secondMovie) || 0;
+
+    if (secondRating !== firstRating) {
+      return secondRating - firstRating;
+    }
+
+    const firstTime = new Date(`${firstMovie.digital_release_date || ''}T00:00:00`).getTime();
+    const secondTime = new Date(`${secondMovie.digital_release_date || ''}T00:00:00`).getTime();
+    if (Number.isNaN(firstTime) || Number.isNaN(secondTime)) return 0;
     return secondTime - firstTime;
   });
 }
@@ -165,8 +178,7 @@ export default function HomePage() {
   const [error, setError] = useState('');
 
   const { movies: moduleTrendingMovies } = useTrendingMovies(16);
-  const { movies: weekendReleases } = useReleasingThisWeek();
-  const { movies: recentlyAddedMovies } = useRecentlyAdded(16);
+  const { movies: weekReleases } = useReleasingThisWeek();
 
   useEffect(() => {
     async function loadMovies() {
@@ -216,9 +228,7 @@ export default function HomePage() {
     const filtered = ottMovies.filter((movie) => {
       const normalized = normalizePlatform(movie.streaming_partner);
       if (selectedPlatform === 'all') return true;
-      if (selectedPlatform === 'other') {
-        return !knownPlatformNames.includes(normalized);
-      }
+      if (selectedPlatform === 'other') return !knownPlatformNames.includes(normalized);
       return normalized === selectedPlatform;
     });
 
@@ -262,9 +272,26 @@ export default function HomePage() {
     ].filter((section) => section.movies.length > 0),
     [ottMovies]
   );
+  const genreSections = useMemo(
+    () => editorialCollections
+      .slice(0, 4)
+      .map((collection) => ({
+        title: collection.shortLabel,
+        viewAllHref: collection.href,
+        movies: (collection.movies || []).slice(0, 12).map(withDisplayFields),
+      }))
+      .filter((section) => section.movies.length > 0),
+    [editorialCollections]
+  );
+  const topRatedMovies = useMemo(
+    () => sortByRating(
+      ottMovies.filter((movie) => (getPreferredMovieRating(movie) || 0) > 0)
+    ).slice(0, 20),
+    [ottMovies]
+  );
   const platformSpotlights = useMemo(() => buildPlatformSpotlights(ottMovies, 6), [ottMovies]);
 
-  const heroMovie = filteredMovies[0] || moduleTrendingMovies[0] || recentlyAddedMovies[0] || null;
+  const heroMovie = moduleTrendingMovies[0] || weekReleases[0] || filteredMovies[0] || null;
   const heroTitle = heroMovie?.movie_name || heroMovie?.title || 'Telugu OTT Releases';
   const heroDescription =
     heroMovie?.overview ||
@@ -273,31 +300,31 @@ export default function HomePage() {
   const retentionItems = [
     {
       href: '/browse/trending-now',
-      eyebrow: 'Trending Now',
-      title: 'Because you are browsing new Telugu OTT releases',
-      description: 'Jump into the hottest titles people are likely to click next.',
+      eyebrow: 'Next Click',
+      title: 'Because you viewed trending Telugu OTT releases',
+      description: 'Stay in the same discovery mood and jump into the titles most likely to earn the next click.',
       cta: 'Open Trending',
     },
     {
-      href: '/top-rated-telugu-ott-movies',
-      eyebrow: 'Top Rated',
-      title: 'Stay with the strongest picks',
-      description: 'Move from fresh releases into the best-rated Telugu OTT movies.',
-      cta: 'View Top Picks',
+      href: platformSpotlights[0]?.href || '/platform/netflix',
+      eyebrow: 'Platform Jump',
+      title: `Because you viewed ${platformSpotlights[0]?.name || 'platform'} releases`,
+      description: 'Keep browsing inside one app feed instead of resetting back to the full archive.',
+      cta: 'Open Platform',
     },
     {
       href: '/telugu-ott-releases-this-week',
-      eyebrow: 'This Week',
-      title: 'Keep the release loop going',
-      description: 'See what is dropping over the next 7 days across OTT platforms.',
+      eyebrow: 'Fresh Loop',
+      title: 'Because you viewed the latest drops',
+      description: 'Continue into the weekly release calendar and keep the session anchored in freshness.',
       cta: 'See This Week',
     },
     {
-      href: '/theatre-release',
-      eyebrow: 'Beyond OTT',
-      title: 'Continue into theatre releases',
-      description: 'Switch from streaming to the latest big-screen Telugu movies.',
-      cta: 'Browse Theatres',
+      href: '/top-rated-telugu-ott-movies',
+      eyebrow: 'Quality Loop',
+      title: 'Because you viewed what is new',
+      description: 'Switch from recency to quality and keep exploring the strongest Telugu OTT titles.',
+      cta: 'View Top Rated',
     },
   ];
 
@@ -333,7 +360,7 @@ export default function HomePage() {
           <Breadcrumb items={[{ name: 'Home', url: '/' }, { name: 'Latest OTT Releases' }]} />
         </div>
 
-        <section className="nf-hero">
+        <section className="nf-hero nf-hero--compact">
           {heroMovie ? (
             <div className="nf-hero__bg">
               <Image
@@ -371,7 +398,7 @@ export default function HomePage() {
                 </Link>
               ) : (
                 <Link href="/browse/trending-now" className="nf-btn nf-btn--ghost">
-                  View Top Picks
+                  View Trending
                 </Link>
               )}
             </div>
@@ -379,101 +406,18 @@ export default function HomePage() {
         </section>
 
         <div className="nf-content">
-          {platformSpotlights.length > 0 ? (
-            <section className="nf-platform-hub">
-              <div className="nf-platform-hub__header">
-                <h2>Browse by Platform</h2>
-                <p>
-                  Start with the service you already open first. Check what&apos;s new on Netflix, Aha, Prime Video, JioHotstar, and more without backing into genre filters.
-                </p>
-              </div>
-              <div className="nf-platform-hub__grid">
-                {platformSpotlights.map((platform) => (
-                  <Link
-                    key={platform.slug}
-                    href={platform.href}
-                    className="nf-platform-hub__card"
-                    style={{ '--platform-accent': platform.color }}
-                  >
-                    <h3>What&apos;s New on {platform.name}?</h3>
-                    <p>
-                      {platform.movieCount} Telugu release{platform.movieCount !== 1 ? 's' : ''} tracked
-                      {platform.latestMovie?.digital_release_date ? ` · latest ${formatReleaseDate(platform.latestMovie.digital_release_date)}` : ''}.
-                    </p>
-                    <strong>{platform.latestMovie?.movie_name || `Open ${platform.name}`}</strong>
-                  </Link>
-                ))}
-              </div>
-            </section>
-          ) : null}
-
-          <section className="nf-explore">
-            <div className="nf-explore__header">
-              <h2>Explore More</h2>
-            </div>
-            <p className="nf-collection-copy">
-              Start with the <Link href="/telugu-ott-releases-this-week" className="nf-inline-link">Telugu OTT releases this week</Link> page,
-              compare it with <Link href="/top-rated-telugu-ott-movies" className="nf-inline-link">top rated Telugu OTT movies</Link>,
-              jump into <Link href="/browse/trending-now" className="nf-inline-link">trending Telugu OTT movies</Link>,
-              or browse directly by <Link href="/platform/netflix" className="nf-inline-link">Netflix</Link>, <Link href="/platform/aha" className="nf-inline-link">Aha</Link>, and <Link href="/platform/prime-video" className="nf-inline-link">Prime Video</Link> when you already know the app you want.
-            </p>
-            <div className="nf-explore__grid">
-              <Link href="/telugu-ott-releases-this-week" className="nf-explore__card">
-                <span>This Week</span>
-                <h3>New Telugu OTT Releases</h3>
-                <p>Only movies releasing in the next 7 days.</p>
-              </Link>
-              <Link href="/top-rated-telugu-ott-movies" className="nf-explore__card">
-                <span>Top Rated</span>
-                <h3>Best Telugu OTT Movies</h3>
-                <p>Highest-rated titles from your library.</p>
-              </Link>
-              <Link href="/theatre-release" className="nf-explore__card">
-                <span>Theatres</span>
-                <h3>Latest Theatre Releases</h3>
-                <p>Track new big-screen Telugu movies.</p>
-              </Link>
-              <Link href="/blog" className="nf-explore__card">
-                <span>Editorial</span>
-                <h3>News and Stories</h3>
-                <p>Updates and explainers from the site.</p>
-              </Link>
-            </div>
-          </section>
-
-          {editorialCollections.length > 0 ? (
-            <section className="nf-genre">
-              <div className="nf-genre__header">
-                <h2>Browse by Genre</h2>
-              </div>
-              <div className="nf-genre__grid">
-                {editorialCollections.map((collection) => (
-                  <Link key={collection.slug} href={collection.href} className="nf-genre__card">
-                    <span>{collection.shortLabel}</span>
-                    <h3>{collection.title}</h3>
-                    <p>{collection.movieCount} rated movies</p>
-                  </Link>
-                ))}
-              </div>
-            </section>
-          ) : null}
-
           <MovieRail
             title="Trending Now"
             movies={moduleTrendingMovies.slice(0, 20).map(withDisplayFields)}
             viewAllHref="/browse/trending-now"
             signal="trending"
           />
+
           <MovieRail
-            title="Coming This Week"
-            movies={weekendReleases.slice(0, 20).map(withDisplayFields)}
+            title="Released This Week"
+            movies={weekReleases.slice(0, 20).map(withDisplayFields)}
+            viewAllHref="/telugu-ott-releases-this-week"
             signal="week"
-          />
-          <MovieRail
-            title="Recently Added"
-            movies={recentlyAddedMovies.slice(0, 20).map(withDisplayFields)}
-            viewAllHref="/browse/recently-added"
-            signal="recent"
           />
 
           {platformSections.map((section) => (
@@ -484,6 +428,57 @@ export default function HomePage() {
               viewAllHref={section.viewAllHref}
             />
           ))}
+
+          {genreSections.map((section) => (
+            <MovieRail
+              key={section.title}
+              title={section.title}
+              movies={section.movies}
+              viewAllHref={section.viewAllHref}
+            />
+          ))}
+
+          <MovieRail
+            title="Top Rated"
+            movies={topRatedMovies.map(withDisplayFields)}
+            viewAllHref="/top-rated-telugu-ott-movies"
+            signal="trending"
+          />
+
+          <ContinueBrowsing
+            title="Because You Viewed"
+            description="The home page should hand off to the next browsing path instead of ending at one row."
+            items={retentionItems}
+          />
+
+          {platformSpotlights.length > 0 ? (
+            <section className="nf-platform-hub">
+              <div className="nf-platform-hub__header">
+                <h2>Platform Shortcuts</h2>
+                <p>
+                  Jump directly into Netflix, Aha, Prime Video, JioHotstar, and more when you already know which app you want to open next.
+                </p>
+              </div>
+              <div className="nf-platform-hub__grid">
+                {platformSpotlights.map((platform) => (
+                  <Link
+                    key={platform.slug}
+                    href={platform.href}
+                    className="nf-platform-hub__card"
+                    style={{ '--platform-accent': platform.color }}
+                  >
+                    <span className="nf-platform-hub__eyebrow">{platform.name}</span>
+                    <h3>What&apos;s new on {platform.name}?</h3>
+                    <p>
+                      {platform.movieCount} Telugu release{platform.movieCount !== 1 ? 's' : ''} tracked
+                      {platform.latestMovie?.digital_release_date ? ` · latest ${formatReleaseDate(platform.latestMovie.digital_release_date)}` : ''}.
+                    </p>
+                    <strong>{platform.latestMovie?.movie_name || `Open ${platform.name}`}</strong>
+                  </Link>
+                ))}
+              </div>
+            </section>
+          ) : null}
 
           <section className="nf-table">
             <section className="nf-controls" aria-label="Browse filters">
@@ -535,20 +530,19 @@ export default function HomePage() {
                     filteredMovies.map((movie) => {
                       const movieUrl = `/movie/${generateUniqueSlug(movie.movie_name, movie.id)}`;
                       return (
-                      <tr
-                        key={movie.id || `${movie.movie_name}-${movie.digital_release_date}`}
-                      >
-                        <td>
-                          <Link href={movieUrl} className="nf-table__movie">
-                            {movie.movie_name || 'Untitled'}
-                          </Link>
-                        </td>
-                        <td>{formatReleaseDate(movie.digital_release_date)}</td>
-                        <td>{movie.streaming_partner || 'TBA'}</td>
-                        <td>{movie.language || movie.movie_language || 'Telugu'}</td>
-                        <td>{movie.category || 'Film'}</td>
-                      </tr>
-                    )})
+                        <tr key={movie.id || `${movie.movie_name}-${movie.digital_release_date}`}>
+                          <td>
+                            <Link href={movieUrl} className="nf-table__movie">
+                              {movie.movie_name || 'Untitled'}
+                            </Link>
+                          </td>
+                          <td>{formatReleaseDate(movie.digital_release_date)}</td>
+                          <td>{movie.streaming_partner || 'TBA'}</td>
+                          <td>{movie.language || movie.movie_language || 'Telugu'}</td>
+                          <td>{movie.category || 'Film'}</td>
+                        </tr>
+                      );
+                    })
                   )}
                 </tbody>
               </table>
@@ -561,12 +555,6 @@ export default function HomePage() {
             type="theatre"
             viewAllHref="/theatre-release"
             signal="trending"
-          />
-
-          <ContinueBrowsing
-            title="Continue Browsing"
-            description="Every section should lead to the next watchlist. Pick where you want to go next."
-            items={retentionItems}
           />
         </div>
 
