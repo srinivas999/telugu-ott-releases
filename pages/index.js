@@ -20,16 +20,13 @@ import {
 } from '../lib/utils/platforms';
 import { formatCompactVoteCount, getPreferredMovieRating, getTmdbVoteCountValue } from '../lib/utils/ratings';
 import { getAvailableEditorialCollections } from '../lib/utils/editorialCollections';
+import { generateCollectionPageSchema, generateItemListSchema } from '../lib/utils/schema';
 import { generateUniqueSlug } from '../lib/utils/slug';
 import { withStoredTmdbDetails } from '../lib/utils/tmdb';
 
 const TMDB_POSTER_BASE = 'https://image.tmdb.org/t/p/w500';
 const TMDB_BACKDROP_BASE = 'https://image.tmdb.org/t/p/w1280';
 const FALLBACK_POSTER = '/images/default_poster.png';
-const SITE_URL = 'https://svteluguott.in';
-
-const defaultSeoDescription =
-  'Telugu OTT release schedule for upcoming Telugu OTT movies, streaming dates, and platform availability across Netflix, Aha, Prime Video, JioHotstar, Zee5, Sun NXT, and ETV Win.';
 
 function formatReleaseDate(value) {
   if (!value) return 'TBA';
@@ -305,36 +302,20 @@ export default function HomePage() {
   ];
 
   const seoDescription = [
-    'Track Telugu OTT releases with streaming dates, platform updates, and direct movie pages.',
+    `Track ${ottMovies.length || 'latest'} Telugu OTT releases with streaming dates, platform updates, and direct movie pages.`,
     topGenresText ? `Browse ${topGenresText} collections, top-rated picks, and this week releases.` : '',
   ].filter(Boolean).join(' ');
   const jsonLd = [
-    {
-      '@context': 'https://schema.org',
-      '@type': 'WebPage',
+    generateCollectionPageSchema({
       name: 'Latest Telugu OTT Releases',
-      url: `${SITE_URL}/`,
       description: seoDescription,
-    },
-    {
-      '@context': 'https://schema.org',
-      '@type': 'ItemList',
-      name: 'Latest Telugu OTT Releases',
-      numberOfItems: filteredMovies.slice(0, 10).length,
-      itemListElement: filteredMovies.slice(0, 10).map((movie, index) => ({
-        '@type': 'ListItem',
-        position: index + 1,
-        item: {
-          '@type': 'Movie',
-          name: movie.movie_name || 'Untitled',
-          description: movie.streaming_partner ? `Streaming on ${movie.streaming_partner}` : 'Telugu OTT movie release',
-          datePublished: movie.digital_release_date || '',
-          inLanguage: movie.language || movie.movie_language || 'te',
-          image: toPosterUrl(movie),
-          url: `${SITE_URL}/movie/${generateUniqueSlug(movie.movie_name, movie.id)}`,
-        },
-      })),
-    },
+      url: '/',
+    }),
+    generateItemListSchema({
+      title: 'Latest Telugu OTT Releases',
+      items: filteredMovies.slice(0, 10),
+      url: '/',
+    }),
   ];
 
   return (
@@ -414,7 +395,6 @@ export default function HomePage() {
                     className="nf-platform-hub__card"
                     style={{ '--platform-accent': platform.color }}
                   >
-                    <span className="nf-platform-hub__eyebrow">Platform First</span>
                     <h3>What&apos;s New on {platform.name}?</h3>
                     <p>
                       {platform.movieCount} Telugu release{platform.movieCount !== 1 ? 's' : ''} tracked
@@ -434,7 +414,8 @@ export default function HomePage() {
             <p className="nf-collection-copy">
               Start with the <Link href="/telugu-ott-releases-this-week" className="nf-inline-link">Telugu OTT releases this week</Link> page,
               compare it with <Link href="/top-rated-telugu-ott-movies" className="nf-inline-link">top rated Telugu OTT movies</Link>,
-              or jump into <Link href="/browse/trending-now" className="nf-inline-link">trending Telugu OTT movies</Link> when you want the fastest discovery path.
+              jump into <Link href="/browse/trending-now" className="nf-inline-link">trending Telugu OTT movies</Link>,
+              or browse directly by <Link href="/platform/netflix" className="nf-inline-link">Netflix</Link>, <Link href="/platform/aha" className="nf-inline-link">Aha</Link>, and <Link href="/platform/prime-video" className="nf-inline-link">Prime Video</Link> when you already know the app you want.
             </p>
             <div className="nf-explore__grid">
               <Link href="/telugu-ott-releases-this-week" className="nf-explore__card">

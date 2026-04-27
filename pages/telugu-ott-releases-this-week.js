@@ -5,12 +5,12 @@ import Seo from '../components/Seo';
 import Breadcrumb from '../components/common/Breadcrumb';
 import ContinueBrowsing from '../components/common/ContinueBrowsing';
 import { supabase } from '../lib/supabaseClient';
+import { generateCollectionPageSchema, generateItemListSchema } from '../lib/utils/schema';
 import { formatCompactVoteCount, getTmdbVoteCountValue } from '../lib/utils/ratings';
 import { generateUniqueSlug } from '../lib/utils/slug';
 
 const TMDB_POSTER_BASE = 'https://image.tmdb.org/t/p/w500';
 const TMDB_BACKDROP_BASE = 'https://image.tmdb.org/t/p/w1280';
-const SITE_URL = 'https://svteluguott.in';
 
 function normalizePlatform(value) {
   if (!value) return '';
@@ -172,32 +172,16 @@ export default function TeluguOttReleasesThisWeekPage({
 
   const featured = displayMovies[0] || null;
   const jsonLd = [
-    {
-      '@context': 'https://schema.org',
-      '@type': 'CollectionPage',
+    generateCollectionPageSchema({
       name: title,
-      url: `${SITE_URL}/telugu-ott-releases-this-week`,
       description,
-    },
-    {
-      '@context': 'https://schema.org',
-      '@type': 'ItemList',
-      name: title,
-      numberOfItems: displayMovies.slice(0, 20).length,
-      itemListElement: displayMovies.slice(0, 20).map((movie, index) => ({
-        '@type': 'ListItem',
-        position: index + 1,
-        item: {
-          '@type': 'Movie',
-          name: movie.movie_name || 'Untitled',
-          description: movie.streaming_partner ? `Streaming on ${movie.streaming_partner}` : 'Telugu OTT movie release',
-          datePublished: movie.digital_release_date || '',
-          inLanguage: movie.language || movie.movie_language || 'te',
-          image: toPosterUrl(movie),
-          url: `${SITE_URL}/movie/${generateUniqueSlug(movie.movie_name, movie.id)}`,
-        },
-      })),
-    },
+      url: '/telugu-ott-releases-this-week',
+    }),
+    generateItemListSchema({
+      title,
+      items: displayMovies.slice(0, 20),
+      url: '/telugu-ott-releases-this-week',
+    }),
   ];
 
   return (
@@ -272,8 +256,9 @@ export default function TeluguOttReleasesThisWeekPage({
               </div>
               <p className="nf-collection-copy">
                 Use this weekly calendar with <Link href="/browse/trending-now" className="nf-inline-link">trending Telugu OTT movies</Link>,
-                the full <Link href="/ott-movies" className="nf-inline-link">OTT archive</Link>, and
-                <Link href="/top-rated-telugu-ott-movies" className="nf-inline-link"> top rated Telugu OTT movies</Link> to cover both fresh releases and evergreen picks.
+                {' '}the full <Link href="/ott-movies" className="nf-inline-link">OTT archive</Link>, and
+                <Link href="/top-rated-telugu-ott-movies" className="nf-inline-link"> top rated Telugu OTT movies</Link>,
+                plus direct platform pages like <Link href="/platform/netflix" className="nf-inline-link">Netflix</Link> and <Link href="/platform/aha" className="nf-inline-link">Aha</Link> to cover both fresh releases and evergreen picks.
               </p>
               <div className="nf-explore__grid">
                 <Link href="/browse/trending-now" className="nf-explore__card">

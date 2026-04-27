@@ -11,6 +11,7 @@ import {
   PLATFORM_DIRECTORY,
 } from '../../lib/utils/platforms';
 import { getPreferredMovieRating, withPreferredMovieRating } from '../../lib/utils/ratings';
+import { generateCollectionPageSchema, generateItemListSchema } from '../../lib/utils/schema';
 import { generateUniqueSlug } from '../../lib/utils/slug';
 
 const TMDB_POSTER_BASE = 'https://image.tmdb.org/t/p/w500';
@@ -93,14 +94,30 @@ export default function PlatformPage() {
     () => PLATFORM_DIRECTORY.filter((platform) => platform.slug !== slug).slice(0, 6),
     [slug]
   );
+  const seoDescription = featured
+    ? `Browse ${movies.length} Telugu movies available on ${safePlatformName}. Latest tracked release: ${featured.movie_name || 'Telugu movie'} on ${formatReleaseDate(featured.digital_release_date)}.`
+    : `Browse Telugu movies available on ${safePlatformName}, with latest tracked releases, release dates, and direct movie pages.`;
+  const jsonLd = [
+    generateCollectionPageSchema({
+      name: `${safePlatformName} Telugu Movies`,
+      description: seoDescription,
+      url: slug ? `/platform/${slug}` : '/ott-movies',
+    }),
+    generateItemListSchema({
+      title: `${safePlatformName} Telugu Movies`,
+      items: movies.slice(0, 20),
+      url: slug ? `/platform/${slug}` : '/ott-movies',
+    }),
+  ];
 
   return (
     <Layout>
       <Seo
         title={`What's New on ${safePlatformName} | Telugu Movies`}
-        description={`Browse Telugu movies available on ${safePlatformName}, with latest tracked releases, release dates, and direct movie pages.`}
+        description={seoDescription}
         url={slug ? `/platform/${slug}` : '/ott-movies'}
         keywords={`${safePlatformName} Telugu movies, what's new on ${safePlatformName}, ${safePlatformName} OTT`}
+        jsonLd={jsonLd}
       />
 
       <main className="netflix-home platform-page">
@@ -146,7 +163,12 @@ export default function PlatformPage() {
           <section className="nf-platform-jump">
             <div className="nf-platform-jump__header">
               <h2>Browse Other Platforms</h2>
-              <p>Switch services quickly when the title you want is on another app.</p>
+              <p>
+                Switch services quickly when the title you want is on another app. You can also jump back to the{' '}
+                <Link href="/ott-movies" className="nf-inline-link">full Telugu OTT archive</Link>,{' '}
+                <Link href="/top-rated-telugu-ott-movies" className="nf-inline-link">top rated picks</Link>, or{' '}
+                <Link href="/telugu-ott-releases-this-week" className="nf-inline-link">this week&apos;s releases</Link>.
+              </p>
             </div>
             <div className="nf-platform-jump__row">
               {directoryPlatforms.map((platform) => (
