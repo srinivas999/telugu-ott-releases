@@ -11,7 +11,8 @@ import MovieDetails from '../../components/movie/MovieDetails';
 import Breadcrumb from '../../components/common/Breadcrumb';
 import SchemaMarkup from '../../components/seo/SchemaMarkup';
 import SimilarMovies from '../../components/movie/SimilarMovies';
-import { useMovie, useSimilarMovies } from '../../lib/hooks/useMovies';
+import ContinueBrowsing from '../../components/common/ContinueBrowsing';
+import { useMovie, useMovieRetentionRows } from '../../lib/hooks/useMovies';
 import {
   generateMovieSchema,
   generateFaqSchema,
@@ -19,6 +20,7 @@ import {
 import { getPreferredMovieRating } from '../../lib/utils/ratings';
 import { withStoredTmdbDetails } from '../../lib/utils/tmdb';
 import { generateUniqueSlug, parseSlug } from '../../lib/utils/slug';
+import { getPlatformHref, normalizePlatform } from '../../lib/utils/platforms';
 import { supabase } from '../../lib/supabaseClient';
 
 export default function MovieDetailPage({ movie: initialMovie }) {
@@ -54,9 +56,8 @@ export default function MovieDetailPage({ movie: initialMovie }) {
         trailer_url: actualMovie?.trailer_url,
       }
     : null;
-
-  // Fetch similar movies
-  const { movies: similarMovies } = useSimilarMovies(actualMovie?.id, 6);
+  const retentionSourceMovie = mergedMovie || actualMovie;
+  const { rows: retentionRows } = useMovieRetentionRows(retentionSourceMovie, 8);
 
   if (!router.isFallback && !actualMovie && !loading) {
     return (
@@ -122,6 +123,37 @@ export default function MovieDetailPage({ movie: initialMovie }) {
   ];
 
   const faqSchema = generateFaqSchema(faqData.filter((item) => item.answer));
+  const platformName = normalizePlatform(actualMovie?.streaming_partner);
+  const retentionItems = [
+    {
+      href: getPlatformHref(platformName),
+      eyebrow: platformName || 'Platform',
+      title: `More from ${platformName || 'this platform'}`,
+      description: `Jump into the ${platformName || 'OTT'} catalog and keep moving through Telugu releases without restarting your search.`,
+      cta: 'Open Platform Feed',
+    },
+    {
+      href: '/telugu-ott-releases-this-week',
+      eyebrow: 'Fresh Drops',
+      title: 'See what lands this week',
+      description: 'Move from one title page into the next set of upcoming Telugu OTT releases.',
+      cta: 'Browse This Week',
+    },
+    {
+      href: '/top-rated-telugu-ott-movies',
+      eyebrow: 'Quality Picks',
+      title: 'Switch to top-rated titles',
+      description: 'If this title worked for you, the ratings-first list is the fastest next rabbit hole.',
+      cta: 'View Top Rated',
+    },
+    {
+      href: '/ott-movies',
+      eyebrow: 'Full Archive',
+      title: 'Keep exploring the full OTT archive',
+      description: 'Open the larger catalog and pivot by platform, date, and release freshness.',
+      cta: 'Explore All Movies',
+    },
+  ];
 
   return (
     <Layout>
@@ -149,11 +181,41 @@ export default function MovieDetailPage({ movie: initialMovie }) {
             error={error}
           />
 
-          {similarMovies && similarMovies.length > 0 && (
+          {retentionRows.moreLikeThis.length > 0 && (
             <section className="movie-detail-page-shell__similar">
-              <SimilarMovies movies={similarMovies} />
+              <SimilarMovies
+                title="More like this"
+                description="Start with the closest match in mood, genre, or category and keep the session moving."
+                movies={retentionRows.moreLikeThis}
+              />
             </section>
           )}
+
+          {retentionRows.peopleAlsoWatched.length > 0 && (
+            <section className="movie-detail-page-shell__similar">
+              <SimilarMovies
+                title="People also watched"
+                description="Strong nearby picks from the Telugu OTT catalog for the next click after this page."
+                movies={retentionRows.peopleAlsoWatched}
+              />
+            </section>
+          )}
+
+          {retentionRows.moreFromPlatform.length > 0 && (
+            <section className="movie-detail-page-shell__similar">
+              <SimilarMovies
+                title={`More from ${platformName || 'this platform'}`}
+                description={`Stay inside ${platformName || 'the same app'} and keep browsing releases without changing context.`}
+                movies={retentionRows.moreFromPlatform}
+              />
+            </section>
+          )}
+
+          <ContinueBrowsing
+            title="Keep Browsing"
+            description="A movie detail page should open the next path, not end the session."
+            items={retentionItems}
+          />
         </section>
       </main>
     </Layout>
