@@ -6,7 +6,7 @@
   font-size: 1.5rem;
   font-weight: bold;
   margin: 0 0 1.5rem 0;
-  color: #000;
+  color: #fff;
 }
 
 .scrollContainer {
@@ -19,7 +19,7 @@
 
   /* Scrollbar styling */
   scrollbar-width: thin;
-  scrollbar-color: #ccc #f0f0f0;
+  scrollbar-color: rgba(255, 255, 255, 0.3) rgba(255, 255, 255, 0.08);
 }
 
 .scrollContainer::-webkit-scrollbar {
@@ -27,17 +27,17 @@
 }
 
 .scrollContainer::-webkit-scrollbar-track {
-  background: #f0f0f0;
+  background: rgba(255, 255, 255, 0.08);
   border-radius: 4px;
 }
 
 .scrollContainer::-webkit-scrollbar-thumb {
-  background: #ccc;
+  background: rgba(255, 255, 255, 0.3);
   border-radius: 4px;
 }
 
 .scrollContainer::-webkit-scrollbar-thumb:hover {
-  background: #999;
+  background: rgba(255, 255, 255, 0.45);
 }
 
 .movieCard {
@@ -60,7 +60,7 @@
   width: 100%;
   aspect-ratio: 2/3;
   overflow: hidden;
-  background: #f0f0f0;
+  background: rgba(255, 255, 255, 0.08);
   border-radius: 8px;
 }
 
@@ -77,14 +77,15 @@
 
 .movieInfo {
   padding: 0.75rem;
-  background: #f9f9f9;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .movieTitle {
   font-size: 0.85rem;
   font-weight: 600;
   margin: 0 0 0.25rem 0;
-  color: #333;
+  color: #f4f4f4;
   line-height: 1.2;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -94,7 +95,7 @@
 
 .platform {
   font-size: 0.7rem;
-  color: #0070f3;
+  color: #ff8f8f;
   margin: 0.25rem 0 0 0;
   font-weight: 500;
 }
@@ -203,7 +204,7 @@
 
 .releaseDate {
   font-size: 0.7rem;
-  color: #666;
+  color: rgba(255, 255, 255, 0.7);
   margin: 0.25rem 0 0 0;
 }
 

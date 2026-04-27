@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
@@ -10,40 +10,40 @@ import { getPreferredMovieRating, withPreferredMovieRating } from '../../lib/uti
 import { generateUniqueSlug } from '../../lib/utils/slug';
 
 const PLATFORM_MAP = {
-  'netflix': 'Netflix',
-  'aha': 'Aha',
+  netflix: 'Netflix',
+  aha: 'Aha',
   'prime-video': 'Prime Video',
-  'jiohotstar': 'JioHotstar',
-  'zee5': 'Zee5',
+  jiohotstar: 'JioHotstar',
+  zee5: 'Zee5',
   'sun-nxt': 'Sun NXT',
   'etv-win': 'ETV Win',
 };
 
-function PlatformMovieCard({ movie }) {
-  const movieSlug = generateUniqueSlug(movie.movie_name, movie.id);
-  const rating = getPreferredMovieRating(movie);
+const TMDB_POSTER_BASE = 'https://image.tmdb.org/t/p/w500';
+const TMDB_BACKDROP_BASE = 'https://image.tmdb.org/t/p/w1280';
 
-  return (
-    <Link href={`/movie/${movieSlug}`} className="webseries-card">
-      <div className="webseries-card__img-wrap">
-        <Image
-          src={movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : '/images/default_poster.png'}
-          alt={movie.movie_name}
-          className="webseries-card__img"
-          fill
-          sizes="(max-width: 480px) 100vw, (max-width: 768px) 50vw, 33vw"
-        />
-      </div>
-      <div className="webseries-card__body">
-        <h3 className="webseries-card__title">{movie.movie_name}</h3>
-        <div className="webseries-card__meta">
-          <span>{movie.digital_release_date ? new Date(`${movie.digital_release_date}T00:00:00`).toLocaleDateString() : 'TBA'}</span>
-          {rating !== null && rating > 0 && <span className="webseries-card__rating">★ {rating.toFixed(1)}</span>}
-        </div>
-        <p className="webseries-card__desc">{movie.overview || 'No description available.'}</p>
-      </div>
-    </Link>
-  );
+function formatReleaseDate(value) {
+  if (!value) return 'TBA';
+  const date = new Date(`${value}T00:00:00`);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleDateString('en-IN', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  });
+}
+
+function toPosterUrl(movie) {
+  if (!movie?.poster_path) return '/images/default_poster.png';
+  if (String(movie.poster_path).startsWith('http')) return movie.poster_path;
+  return `${TMDB_POSTER_BASE}${movie.poster_path}`;
+}
+
+function toBackdropUrl(movie) {
+  const path = movie?.backdrop_path || movie?.poster_path;
+  if (!path) return '/images/default_poster.png';
+  if (String(path).startsWith('http')) return path;
+  return `${TMDB_BACKDROP_BASE}${path}`;
 }
 
 export default function PlatformPage() {
@@ -68,7 +68,6 @@ export default function PlatformPage() {
 
       setLoading(true);
       setError('');
-
       try {
         const { data, error: fetchError } = await supabase
           .from('ott_movies')
@@ -76,13 +75,10 @@ export default function PlatformPage() {
           .eq('streaming_partner', platformName)
           .order('digital_release_date', { ascending: false });
 
-        if (fetchError) {
-          throw fetchError;
-        }
-
+        if (fetchError) throw fetchError;
         setMovies((data || []).map(withPreferredMovieRating));
       } catch (fetchError) {
-        console.error('Fetch movies error:', fetchError);
+        console.error('Fetch platform movies error:', fetchError);
         setError('Unable to load movies right now. Please refresh and try again.');
       } finally {
         setLoading(false);
@@ -92,48 +88,97 @@ export default function PlatformPage() {
     loadMovies();
   }, [slug, platformName]);
 
+  const featured = useMemo(() => movies[0] || null, [movies]);
+
   return (
     <Layout>
       <Seo
         title={`${safePlatformName} Telugu Movies`}
-        description={`Browse Telugu movies available on ${safePlatformName}. Find OTT release dates, ratings, and streaming information.`}
+        description={`Browse Telugu movies available on ${safePlatformName}.`}
         url={slug ? `/platform/${slug}` : '/ott-movies'}
-        keywords={`${safePlatformName} Telugu movies, ${safePlatformName} OTT, Telugu streaming movies`}
+        keywords={`${safePlatformName} Telugu movies, ${safePlatformName} OTT`}
       />
 
-      <Breadcrumb
-        items={[
-          { name: 'Home', url: '/' },
-          { name: 'OTT Movies', url: '/ott-movies' },
-          { name: safePlatformName },
-        ]}
-      />
-
-      <section className="ott-hero">
-        <div className="ott-hero__panel">
-          <h1>{safePlatformName} Telugu Movies</h1>
-          <p className="ott-hero__tagline">Discover all Telugu movies available on {safePlatformName}</p>
+      <main className="netflix-home platform-page">
+        <div className="nf-breadcrumb-wrap">
+          <Breadcrumb
+            items={[
+              { name: 'Home', url: '/' },
+              { name: 'OTT Movies', url: '/ott-movies' },
+              { name: safePlatformName },
+            ]}
+          />
         </div>
-      </section>
 
-      <section className="webseries-list-section">
-        <h2 className="visually-hidden">{safePlatformName} movie list</h2>
-        {error && (
-          <div className="webseries-list__error">{error}</div>
-        )}
-
-        {loading ? (
-          <div className="webseries-list__loading">Loading {safePlatformName} movies...</div>
-        ) : movies.length === 0 ? (
-          <div className="webseries-list__empty">No movies found on {safePlatformName}.</div>
-        ) : (
-          <div className="webseries-list-grid">
-            {movies.map((movie) => (
-              <PlatformMovieCard key={movie.id} movie={movie} />
-            ))}
+        <section className="nf-hero">
+          {featured ? (
+            <div className="nf-hero__bg">
+              <Image
+                src={toBackdropUrl(featured)}
+                alt={featured.movie_name || 'Featured movie'}
+                fill
+                priority
+                sizes="100vw"
+                className="nf-hero__bg-image"
+              />
+            </div>
+          ) : null}
+          <div className="nf-hero__overlay" />
+          <div className="nf-hero__content">
+            <p className="nf-hero__kicker">Platform Spotlight</p>
+            <h1>{safePlatformName} Telugu Movies</h1>
+            <p className="nf-hero__desc">Discover all Telugu movies available on {safePlatformName}.</p>
+            <div className="nf-hero__meta">
+              <span>{loading ? 'Loading...' : `${movies.length} movies`}</span>
+              {featured?.digital_release_date ? <span>{formatReleaseDate(featured.digital_release_date)}</span> : null}
+              {featured && (getPreferredMovieRating(featured) || 0) > 0 ? (
+                <span>{getPreferredMovieRating(featured).toFixed(1)}/10</span>
+              ) : null}
+            </div>
           </div>
-        )}
-      </section>
+        </section>
+
+        <section className="nf-content">
+          <section className="nf-rail">
+            <div className="nf-rail__header">
+              <h2>{safePlatformName} Releases</h2>
+            </div>
+            {error ? (
+              <p className="nf-status nf-status--error">{error}</p>
+            ) : loading ? (
+              <p className="nf-status">Loading {safePlatformName} movies...</p>
+            ) : movies.length === 0 ? (
+              <p className="nf-status">No movies found on {safePlatformName}.</p>
+            ) : (
+              <div className="nf-collection__grid">
+                {movies.map((movie) => {
+                  const movieSlug = generateUniqueSlug(movie.movie_name, movie.id);
+                  return (
+                    <Link key={movie.id} href={`/movie/${movieSlug}`} className="nf-card">
+                      <div className="nf-card__poster">
+                        <Image
+                          src={toPosterUrl(movie)}
+                          alt={movie.movie_name || 'Movie'}
+                          fill
+                          sizes="(max-width: 640px) 44vw, (max-width: 980px) 22vw, 15vw"
+                          className="nf-card__image"
+                        />
+                        {(getPreferredMovieRating(movie) || 0) > 0 ? (
+                          <span className="nf-card__rating">{getPreferredMovieRating(movie).toFixed(1)}</span>
+                        ) : null}
+                      </div>
+                      <div className="nf-card__meta">
+                        <h3>{movie.movie_name || 'Untitled'}</h3>
+                        <p>{formatReleaseDate(movie.digital_release_date)} - {safePlatformName}</p>
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+            )}
+          </section>
+        </section>
+      </main>
     </Layout>
   );
 }

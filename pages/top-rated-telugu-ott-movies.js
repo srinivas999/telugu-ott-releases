@@ -7,6 +7,9 @@ import { supabase } from '../lib/supabaseClient';
 import { getPreferredMovieRating, withPreferredMovieRating } from '../lib/utils/ratings';
 import { generateUniqueSlug } from '../lib/utils/slug';
 
+const TMDB_POSTER_BASE = 'https://image.tmdb.org/t/p/w500';
+const TMDB_BACKDROP_BASE = 'https://image.tmdb.org/t/p/w1280';
+
 function normalizePlatform(value) {
   if (!value) return '';
   const lower = String(value).toLowerCase();
@@ -25,10 +28,23 @@ function formatReleaseDate(value) {
   const date = new Date(`${value}T00:00:00`);
   if (Number.isNaN(date.getTime())) return value;
   return date.toLocaleDateString('en-IN', {
-    day: 'numeric',
+    day: '2-digit',
     month: 'short',
     year: 'numeric',
   });
+}
+
+function toPosterUrl(movie) {
+  if (!movie?.poster_path) return '/images/default_poster.png';
+  if (String(movie.poster_path).startsWith('http')) return movie.poster_path;
+  return `${TMDB_POSTER_BASE}${movie.poster_path}`;
+}
+
+function toBackdropUrl(movie) {
+  const path = movie?.backdrop_path || movie?.poster_path;
+  if (!path) return '/images/default_poster.png';
+  if (String(path).startsWith('http')) return path;
+  return `${TMDB_BACKDROP_BASE}${path}`;
 }
 
 export async function getStaticProps() {
@@ -43,22 +59,20 @@ export async function getStaticProps() {
     .gt('rating', 0)
     .order('rating', { ascending: false })
     .order('digital_release_date', { ascending: false })
-    .limit(30);
+    .limit(60);
 
   const movies = (data || []).map((movie) => ({
     ...withPreferredMovieRating(movie),
     streaming_partner: normalizePlatform(movie.streaming_partner),
   }));
 
-  return {
-    props: { movies },
-    revalidate: 3600,
-  };
+  return { props: { movies }, revalidate: 3600 };
 }
 
 export default function TopRatedTeluguOttMoviesPage({ movies = [] }) {
   const title = 'Top Rated Telugu OTT Movies';
-  const description = 'Browse the highest rated Telugu OTT movies from the Telugu OTT Releases database, sorted by rating and release freshness.';
+  const description = 'Browse highest rated Telugu OTT movies from the Telugu OTT database.';
+  const featured = movies[0] || null;
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'ItemList',
@@ -71,11 +85,7 @@ export default function TopRatedTeluguOttMoviesPage({ movies = [] }) {
         name: movie.movie_name || 'Untitled',
         datePublished: movie.digital_release_date || '',
         aggregateRating: getPreferredMovieRating(movie)
-          ? {
-              '@type': 'AggregateRating',
-              ratingValue: getPreferredMovieRating(movie),
-              bestRating: 10,
-            }
+          ? { '@type': 'AggregateRating', ratingValue: getPreferredMovieRating(movie), bestRating: 10 }
           : undefined,
         url: `https://svteluguott.in/movie/${generateUniqueSlug(movie.movie_name, movie.id)}`,
       },
@@ -92,80 +102,83 @@ export default function TopRatedTeluguOttMoviesPage({ movies = [] }) {
         jsonLd={jsonLd}
       />
 
-      <Breadcrumb
-        items={[
-          { name: 'Home', url: '/' },
-          { name: 'OTT Movies', url: '/ott-movies' },
-          { name: 'Top Rated' },
-        ]}
-      />
+      <main className="netflix-home top-rated-page">
+        <div className="nf-breadcrumb-wrap">
+          <Breadcrumb
+            items={[
+              { name: 'Home', url: '/' },
+              { name: 'OTT Movies', url: '/ott-movies' },
+              { name: 'Top Rated' },
+            ]}
+          />
+        </div>
 
-      <main className="page-projects page-ott">
-        <div className="projects-page-inner">
-          <section className="ott-hero">
-            <div className="ott-hero__panel">
-              <h1>{title}</h1>
-              <p className="ott-hero__tagline">
-                Discover the highest rated Telugu OTT movies currently available in the Telugu OTT Releases database.
-              </p>
+        <section className="nf-hero">
+          {featured ? (
+            <div className="nf-hero__bg">
+              <Image
+                src={toBackdropUrl(featured)}
+                alt={featured.movie_name || 'Featured movie'}
+                fill
+                priority
+                sizes="100vw"
+                className="nf-hero__bg-image"
+              />
             </div>
-          </section>
-
-          <section className="ott-section ott-seo-copy">
-            <div className="section-heading">
-              <h2>Best Rated Telugu Movies on OTT</h2>
+          ) : null}
+          <div className="nf-hero__overlay" />
+          <div className="nf-hero__content">
+            <p className="nf-hero__kicker">Top Rated</p>
+            <h1>{title}</h1>
+            <p className="nf-hero__desc">
+              Discover the strongest Telugu OTT picks ranked by ratings and release freshness.
+            </p>
+            <div className="nf-hero__meta">
+              <span>{movies.length} movies</span>
+              {featured ? <span>{featured.streaming_partner || 'OTT'}</span> : null}
+              {featured && (getPreferredMovieRating(featured) || 0) > 0 ? (
+                <span>{getPreferredMovieRating(featured).toFixed(1)}/10</span>
+              ) : null}
             </div>
-            <p>
-              This page highlights the strongest rated Telugu OTT titles, helping users quickly find standout releases without filtering through the full schedule.
-            </p>
-            <p>
-              For upcoming titles, also check <Link href="/telugu-ott-releases-this-week">Telugu OTT releases this week</Link> and the complete <Link href="/ott-movies">OTT movie archive</Link>.
-            </p>
-          </section>
+          </div>
+        </section>
 
-          <section className="ott-movies-grid">
+        <section className="nf-content">
+          <section className="nf-rail">
+            <div className="nf-rail__header">
+              <h2>All Top Rated ({movies.length})</h2>
+            </div>
             {movies.length === 0 ? (
-              <div className="ott-movies-empty">No rated Telugu OTT movies are available right now.</div>
+              <p className="nf-status">No rated Telugu OTT movies are available right now.</p>
             ) : (
-              movies.map((movie) => {
-                const movieSlug = generateUniqueSlug(movie.movie_name, movie.id);
-                const posterUrl = movie.poster_path
-                  ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
-                  : '/images/default_poster.png';
-
-                return (
-                  <Link key={movie.id || movieSlug} href={`/movie/${movieSlug}`} className="ott-movie-card-link">
-                    <article className="ott-movie-card-v2">
-                      <div className="ott-movie-card-v2__poster-wrap">
+              <div className="nf-collection__grid">
+                {movies.map((movie) => {
+                  const movieSlug = generateUniqueSlug(movie.movie_name, movie.id);
+                  return (
+                    <Link key={movie.id || movieSlug} href={`/movie/${movieSlug}`} className="nf-card">
+                      <div className="nf-card__poster">
                         <Image
-                          src={posterUrl}
+                          src={toPosterUrl(movie)}
                           alt={`${movie.movie_name || 'Movie'} poster`}
-                          className="ott-movie-card-v2__poster"
                           fill
-                          sizes="(max-width: 400px) 100vw, (max-width: 640px) 50vw, (max-width: 1200px) 25vw, 200px"
+                          sizes="(max-width: 640px) 44vw, (max-width: 980px) 22vw, 15vw"
+                          className="nf-card__image"
                         />
-                        <span className="ott-movie-card-v2__platform-badge">
-                          {movie.streaming_partner || 'TBA'}
-                        </span>
                         {(getPreferredMovieRating(movie) || 0) > 0 ? (
-                          <span className="ott-movie-card-v2__rating-badge">{getPreferredMovieRating(movie).toFixed(1)}</span>
+                          <span className="nf-card__rating">{getPreferredMovieRating(movie).toFixed(1)}</span>
                         ) : null}
                       </div>
-                      <div className="ott-movie-card-v2__info">
-                        <h3 className="ott-movie-card-v2__title">{movie.movie_name || 'Untitled'}</h3>
-                        <div className="ott-movie-card-v2__meta-row">
-                          <span className="ott-movie-card-v2__date">{formatReleaseDate(movie.digital_release_date)}</span>
-                          <span className="ott-movie-card-v2__divider" />
-                          <span className="ott-movie-card-v2__lang">{movie.language || movie.movie_language || 'Telugu'}</span>
-                        </div>
+                      <div className="nf-card__meta">
+                        <h3>{movie.movie_name || 'Untitled'}</h3>
+                        <p>{movie.streaming_partner || 'OTT'} - {formatReleaseDate(movie.digital_release_date)}</p>
                       </div>
-                    </article>
-                  </Link>
-                );
-              })
+                    </Link>
+                  );
+                })}
+              </div>
             )}
           </section>
-        </div>
+        </section>
       </main>
     </Layout>
   );

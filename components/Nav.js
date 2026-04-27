@@ -15,6 +15,17 @@ export default function Nav() {
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const isCinemaHeader =
+    router.pathname === '/' ||
+    router.pathname.startsWith('/browse') ||
+    router.pathname.startsWith('/best-telugu-ott-movies') ||
+    router.pathname.startsWith('/theatre-release') ||
+    router.pathname.startsWith('/web-series') ||
+    router.pathname.startsWith('/blog') ||
+    router.pathname.startsWith('/telugu-ott-releases-this-week') ||
+    router.pathname.startsWith('/top-rated-telugu-ott-movies') ||
+    router.pathname.startsWith('/movie') ||
+    router.pathname.startsWith('/platform');
 
   const isLinkActive = useCallback(
     (href) => (href === '/' ? router.pathname === href : router.pathname.startsWith(href)),
@@ -79,7 +90,7 @@ export default function Nav() {
 
   return (
     <>
-      <header className={`site-header ${menuOpen ? 'is-open' : ''}`}>
+      <header className={`site-header ${menuOpen ? 'is-open' : ''} ${isCinemaHeader ? 'site-header--cinema' : ''}`}>
         <div className="header-glow" aria-hidden="true" />
         <nav className="site-nav" aria-label="Primary">
           <div className="site-nav__brand">

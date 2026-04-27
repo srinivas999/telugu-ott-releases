@@ -13,6 +13,10 @@ import {
 } from '../../lib/utils/editorialCollections';
 import { generateUniqueSlug } from '../../lib/utils/slug';
 
+const TMDB_POSTER_BASE = 'https://image.tmdb.org/t/p/w500';
+const TMDB_BACKDROP_BASE = 'https://image.tmdb.org/t/p/w1280';
+const FALLBACK_POSTER = '/images/default_poster.png';
+
 function normalizePlatform(value) {
   if (!value) return '';
   const lower = String(value).toLowerCase();
@@ -37,6 +41,19 @@ function formatReleaseDate(value) {
   });
 }
 
+function toPosterUrl(movie) {
+  if (!movie?.poster_path) return FALLBACK_POSTER;
+  if (String(movie.poster_path).startsWith('http')) return movie.poster_path;
+  return `${TMDB_POSTER_BASE}${movie.poster_path}`;
+}
+
+function toBackdropUrl(movie) {
+  const path = movie?.backdrop_path || movie?.poster_path;
+  if (!path) return FALLBACK_POSTER;
+  if (String(path).startsWith('http')) return path;
+  return `${TMDB_BACKDROP_BASE}${path}`;
+}
+
 export async function getServerSideProps({ params }) {
   if (!supabase) {
     return { notFound: true };
@@ -53,14 +70,15 @@ export async function getServerSideProps({ params }) {
     .order('digital_release_date', { ascending: false });
 
   const allMovies = data || [];
-  const movies = getCollectionMovies(allMovies, collection.slug, 10).map((movie) => ({
+  const movies = getCollectionMovies(allMovies, collection.slug, 40).map((movie) => ({
     ...movie,
     streaming_partner: normalizePlatform(movie.streaming_partner),
     imdbRating: getOmdbRatingValue(movie),
   }));
+
   const relatedCollections = getAvailableEditorialCollections(allMovies, 10)
     .filter((item) => item.slug !== collection.slug)
-    .slice(0, 4)
+    .slice(0, 6)
     .map((item) => ({
       slug: item.slug,
       shortLabel: item.shortLabel,
@@ -86,15 +104,9 @@ export default function BestTeluguOttCollectionPage({
   const title = collection?.title || 'Best Telugu OTT Movies';
   const description = collection?.description || 'Discover curated Telugu OTT movie picks ranked by IMDb rating.';
   const featuredMovie = movies[0] || null;
-  const featuredMovieSlug = featuredMovie ? generateUniqueSlug(featuredMovie.movie_name, featuredMovie.id) : null;
-  const featuredPosterUrl = featuredMovie?.poster_path
-    ? `https://image.tmdb.org/t/p/w500${featuredMovie.poster_path}`
-    : '/images/default_poster.png';
-  const collectionTheme = {
-    '--collection-accent': collection?.accentColor || '#4f46e5',
-    '--collection-accent-soft': collection?.accentSoft || 'rgba(79, 70, 229, 0.14)',
-    '--collection-glow': collection?.glowColor || 'rgba(79, 70, 229, 0.18)',
-  };
+  const featuredMovieSlug = featuredMovie
+    ? generateUniqueSlug(featuredMovie.movie_name, featuredMovie.id)
+    : null;
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -130,131 +142,111 @@ export default function BestTeluguOttCollectionPage({
         jsonLd={jsonLd}
       />
 
-      <Breadcrumb
-        items={[
-          { name: 'Home', url: '/' },
-          { name: 'Best Telugu OTT Movies' },
-          { name: collection.shortLabel },
-        ]}
-      />
+      <main className="netflix-home nf-collection-page">
+        <div className="nf-breadcrumb-wrap">
+          <Breadcrumb
+            items={[
+              { name: 'Home', url: '/' },
+              { name: 'Best Telugu OTT Movies' },
+              { name: collection.shortLabel },
+            ]}
+          />
+        </div>
 
-      <main className="page-projects page-ott ott-collection-page" style={collectionTheme}>
-        <div className="projects-page-inner">
-          <section className="ott-hero ott-collection-hero">
-            <div className="ott-collection-hero__inner">
-              <div className="ott-collection-hero__copy">
-                <p className="eyebrow">{collection.shortLabel}</p>
-                <h1>{title}</h1>
-                <p className="ott-hero__tagline">
-                  {collection.intro}
-                </p>
-                <div className="ott-collection-hero__meta">
-                  <span>{movies.length} curated picks</span>
-                  <span>IMDb ranked</span>
-                  <span>Updated from OTT database</span>
+        <section className="nf-collection-hero">
+          <div className="nf-content">
+            <div className="nf-collection-hero__panel">
+              {featuredMovie ? (
+                <div className="nf-collection-hero__background" aria-hidden="true">
+                  <Image
+                    src={toBackdropUrl(featuredMovie)}
+                    alt=""
+                    fill
+                    priority
+                    sizes="100vw"
+                    className="nf-collection-hero__background-image"
+                  />
                 </div>
-                <div className="ott-collection-hero__actions">
-                  <a href="#collection-list" className="ott-collection-hero__action ott-collection-hero__action--primary">
-                    Browse the list
-                  </a>
+              ) : null}
+              <div className="nf-collection-hero__scrim" aria-hidden="true" />
+              <div className="nf-collection-hero__copy">
+                <p className="nf-hero__kicker">{collection.shortLabel}</p>
+                <h1>{title}</h1>
+                <p className="nf-hero__desc">{collection.intro || description}</p>
+                <div className="nf-hero__meta">
+                  <span>{movies.length} curated picks</span>
+                  <span>IMDb focused</span>
+                  <span>Telugu OTT only</span>
+                </div>
+                <div className="nf-hero__actions">
+                  <a href="#collection-list" className="nf-btn nf-btn--primary">Browse List</a>
                   {featuredMovie ? (
-                    <Link href={`/movie/${featuredMovieSlug}`} className="ott-collection-hero__action ott-collection-hero__action--secondary">
-                      Open top pick
+                    <Link href={`/movie/${featuredMovieSlug}`} className="nf-btn nf-btn--ghost">
+                      Open Top Pick
                     </Link>
                   ) : null}
                 </div>
               </div>
 
               {featuredMovie ? (
-                <Link href={`/movie/${featuredMovieSlug}`} className="ott-collection-hero__visual">
-                  <div className="ott-collection-hero__poster">
-                    <Image
-                      src={featuredPosterUrl}
-                      alt={`${featuredMovie.movie_name || 'Movie'} poster`}
-                      fill
-                      priority
-                      sizes="(max-width: 640px) 100vw, 280px"
-                      className="ott-collection-hero__poster-image"
-                    />
-                    <div className="ott-collection-hero__poster-badge">
-                      <span>{featuredMovie.streaming_partner || 'OTT'}</span>
-                      <strong>{featuredMovie.imdbRating.toFixed(1)}</strong>
-                    </div>
-                  </div>
-                  <div className="ott-collection-hero__visual-copy">
-                    <span className="ott-collection-hero__visual-label">Top Pick</span>
-                    <h2>{featuredMovie.movie_name || 'Untitled'}</h2>
-                    <p>{featuredMovie.imdbRating.toFixed(1)}/10 on IMDb</p>
-                  </div>
+                <Link href={`/movie/${featuredMovieSlug}`} className="nf-collection-hero__top-pick">
+                  <span className="nf-collection-hero__top-pick-label">Top Pick</span>
+                  <h2>{featuredMovie.movie_name || 'Untitled'}</h2>
+                  <p>{featuredMovie.imdbRating ? featuredMovie.imdbRating.toFixed(1) : 'NR'}/10 IMDb</p>
                 </Link>
               ) : null}
             </div>
-          </section>
+          </div>
+        </section>
 
-          <section className="ott-section ott-seo-copy">
-            <div className="section-heading">
+        <section className="nf-content">
+          <section id="collection-list" className="nf-rail">
+            <div className="nf-rail__header">
               <h2>{collection.sectionHeading || title}</h2>
+              <span className="nf-collection-count">{movies.length} movies</span>
             </div>
-            <p>
-              {collection.sectionText || description}
-            </p>
-            <p>
-              For more Telugu OTT picks, browse <Link href="/top-rated-telugu-ott-movies">top rated Telugu OTT movies</Link> and the full <Link href="/ott-movies">OTT movie list</Link>.
-            </p>
-          </section>
-
-          <section id="collection-list" className="ott-movies-grid">
-            {movies.length === 0 ? (
-              <div className="ott-movies-empty">{collection.emptyMessage || 'No IMDb-rated Telugu OTT movies match this collection right now.'}</div>
-            ) : (
-              movies.map((movie, index) => {
-                const movieSlug = generateUniqueSlug(movie.movie_name, movie.id);
-                const posterUrl = movie.poster_path
-                  ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
-                  : '/images/default_poster.png';
-
-                return (
-                  <Link key={movie.id || movieSlug} href={`/movie/${movieSlug}`} className="ott-movie-card-link">
-                    <article className="ott-movie-card-v2">
-                      <div className="ott-movie-card-v2__poster-wrap">
+            <p className="nf-collection-copy">{collection.sectionText || description}</p>
+            <div className="nf-collection__grid">
+              {movies.length === 0 ? (
+                <p className="nf-status">{collection.emptyMessage || 'No IMDb-rated Telugu OTT movies in this genre right now.'}</p>
+              ) : (
+                movies.map((movie, index) => {
+                  const movieSlug = generateUniqueSlug(movie.movie_name, movie.id);
+                  return (
+                    <Link key={movie.id || movieSlug} href={`/movie/${movieSlug}`} className="nf-card">
+                      <div className="nf-card__poster">
                         <Image
-                          src={posterUrl}
+                          src={toPosterUrl(movie)}
                           alt={`${movie.movie_name || 'Movie'} poster`}
-                          className="ott-movie-card-v2__poster"
                           fill
-                          sizes="(max-width: 400px) 100vw, (max-width: 640px) 50vw, (max-width: 1200px) 25vw, 200px"
+                          sizes="(max-width: 640px) 44vw, (max-width: 980px) 24vw, 15vw"
+                          className="nf-card__image"
                         />
-                        <span className="ott-movie-card-v2__platform-badge">
-                          {movie.streaming_partner || 'TBA'}
+                        <span className="nf-card__rating">
+                          {(movie.imdbRating || 0) > 0 ? movie.imdbRating.toFixed(1) : 'NR'}
                         </span>
-                        <span className="ott-movie-card-v2__rating-badge">{movie.imdbRating.toFixed(1)}</span>
-                        <span className="ott-collection-rank-badge">#{index + 1}</span>
+                        <span className="nf-collection-rank">#{index + 1}</span>
                       </div>
-                      <div className="ott-movie-card-v2__info">
-                        <h3 className="ott-movie-card-v2__title">{movie.movie_name || 'Untitled'}</h3>
-                        <div className="ott-movie-card-v2__meta-row">
-                          <span className="ott-movie-card-v2__date">{formatReleaseDate(movie.digital_release_date)}</span>
-                          <span className="ott-movie-card-v2__divider" />
-                          <span className="ott-movie-card-v2__lang">{movie.language || movie.movie_language || 'Telugu'}</span>
-                        </div>
+                      <div className="nf-card__meta">
+                        <h3>{movie.movie_name || 'Untitled'}</h3>
+                        <p>{movie.streaming_partner || 'OTT'} - {formatReleaseDate(movie.digital_release_date)}</p>
                       </div>
-                    </article>
-                  </Link>
-                );
-              })
-            )}
+                    </Link>
+                  );
+                })
+              )}
+            </div>
           </section>
 
           {relatedCollections.length > 0 ? (
-            <section className="ott-section ott-genre-discovery">
-              <div className="section-heading">
-                <p className="eyebrow">More Genres</p>
-                <h2>Explore more Telugu OTT genres</h2>
+            <section className="nf-genre">
+              <div className="nf-genre__header">
+                <h2>Explore More Genres</h2>
               </div>
-              <div className="ott-genre-discovery__grid">
+              <div className="nf-genre__grid">
                 {relatedCollections.map((item) => (
-                  <Link key={item.slug} href={item.href} className="ott-genre-discovery__card">
-                    <span className="ott-genre-discovery__badge">{item.shortLabel}</span>
+                  <Link key={item.slug} href={item.href} className="nf-genre__card">
+                    <span>{item.shortLabel}</span>
                     <h3>{item.title}</h3>
                     <p>{item.movieCount} IMDb-rated OTT movies available right now.</p>
                   </Link>
@@ -262,7 +254,7 @@ export default function BestTeluguOttCollectionPage({
               </div>
             </section>
           ) : null}
-        </div>
+        </section>
       </main>
     </Layout>
   );
