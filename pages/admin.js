@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Seo from '../components/Seo';
 import { supabase } from '../lib/supabaseClient';
 import { getOmdbRatingValue } from '../lib/utils/ratings';
@@ -41,6 +41,8 @@ export default function AdminPage() {
   const [omdbSyncMovieId, setOmdbSyncMovieId] = useState(null);
   const [omdbSyncStatus, setOmdbSyncStatus] = useState('');
   const [omdbSyncError, setOmdbSyncError] = useState(false);
+  const [showOmdbNotUpdatedOnly, setShowOmdbNotUpdatedOnly] = useState(false);
+  const [showTmdbNotUpdatedOnly, setShowTmdbNotUpdatedOnly] = useState(false);
   const [activeTab, setActiveTab] = useState('add');
   const [csvFile, setCsvFile] = useState(null);
   const [csvStatus, setCsvStatus] = useState('');
@@ -958,6 +960,28 @@ export default function AdminPage() {
     setCsvStatusError(false);
   };
 
+  const filteredMovies = useMemo(
+    () =>
+      movies.filter((movie) => {
+        if (showOmdbNotUpdatedOnly && movie.omdb_last_sync) {
+          return false;
+        }
+        if (showTmdbNotUpdatedOnly && movie.tmdb_last_sync) {
+          return false;
+        }
+        return true;
+      }),
+    [movies, showOmdbNotUpdatedOnly, showTmdbNotUpdatedOnly],
+  );
+  const omdbNotUpdatedCount = useMemo(
+    () => movies.filter((movie) => !movie.omdb_last_sync).length,
+    [movies],
+  );
+  const tmdbNotUpdatedCount = useMemo(
+    () => movies.filter((movie) => !movie.tmdb_last_sync).length,
+    [movies],
+  );
+
   return (
     <main className="admin-page">
       <Seo
@@ -1137,15 +1161,37 @@ export default function AdminPage() {
                       <p className="admin-management-card__subtitle">Edit or delete releases from your Supabase table.</p>
                     </div>
                   </div>
+                  <fieldset className="admin-checkbox-group" aria-label="Sync status filters">
+                    <label className="admin-checkbox-item" htmlFor="filter-omdb-not-updated">
+                      <input
+                        id="filter-omdb-not-updated"
+                        type="checkbox"
+                        checked={showOmdbNotUpdatedOnly}
+                        onChange={(event) => setShowOmdbNotUpdatedOnly(event.target.checked)}
+                      />
+                      OMDB Not Updated ({omdbNotUpdatedCount})
+                    </label>
+                    <label className="admin-checkbox-item" htmlFor="filter-tmdb-not-updated">
+                      <input
+                        id="filter-tmdb-not-updated"
+                        type="checkbox"
+                        checked={showTmdbNotUpdatedOnly}
+                        onChange={(event) => setShowTmdbNotUpdatedOnly(event.target.checked)}
+                      />
+                      TMDB Not Updated ({tmdbNotUpdatedCount})
+                    </label>
+                  </fieldset>
 
                   {moviesLoading ? (
                     <p className="admin-status">Loading movies…</p>
                   ) : movies.length === 0 ? (
                     <p className="admin-status">No movies found. Add your first OTT release.</p>
+                  ) : filteredMovies.length === 0 ? (
+                    <p className="admin-status">No movies match the selected sync filters.</p>
                   ) : (
                     <>
                       <div className="admin-movie-grid">
-                        {movies.map((movie) => (
+                        {filteredMovies.map((movie) => (
                           <div className="admin-movie-card" key={movie.id || `${movie.movie_name}-${movie.digital_release_date}`}>
                             <div className="admin-movie-card__content">
                               <h3 className="admin-movie-card__title">{movie.movie_name || 'Untitled'}</h3>
