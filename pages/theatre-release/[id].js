@@ -10,6 +10,7 @@ import { formatCompactVoteCount } from '../../lib/utils/ratings';
 
 const TMDB_POSTER_BASE = 'https://image.tmdb.org/t/p/w500';
 const TMDB_BACKDROP_BASE = 'https://image.tmdb.org/t/p/original';
+const TMDB_PROFILE_BASE = 'https://image.tmdb.org/t/p/w185';
 const YOUTUBE_SEARCH_URL_BASE = 'https://www.youtube.com/results?search_query=';
 const CACHE_KEY = 'theatreReleaseMoviesCache';
 const CACHE_TTL = 1000 * 60 * 60;
@@ -100,6 +101,13 @@ function toBackdropUrl(movie) {
   if (!path) return FALLBACK_POSTER;
   if (String(path).startsWith('http')) return path;
   return `${TMDB_BACKDROP_BASE}${path}`;
+}
+
+function toProfileUrl(person) {
+  const profilePath = person?.profile_path;
+  if (!profilePath) return null;
+  if (String(profilePath).startsWith('http')) return profilePath;
+  return `${TMDB_PROFILE_BASE}${profilePath}`;
 }
 
 function getGenreNames(movie) {
@@ -421,6 +429,17 @@ export default function MovieDetailsPage() {
                   <div className="theatre-detail-people-grid">
                     {castMembers.map((member, index) => (
                       <article key={`${member.id || member.name}-${index}`} className="theatre-detail-person-card">
+                        {toProfileUrl(member) ? (
+                          <div className="theatre-detail-person-card__image-wrap">
+                            <Image
+                              src={toProfileUrl(member)}
+                              alt={member.name || 'Cast member'}
+                              width={88}
+                              height={88}
+                              className="theatre-detail-person-card__image"
+                            />
+                          </div>
+                        ) : null}
                         <h3>{member.name}</h3>
                         {member.character ? <p>{member.character}</p> : null}
                       </article>

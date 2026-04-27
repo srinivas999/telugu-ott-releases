@@ -13,6 +13,7 @@ import {
 } from '../../lib/utils/ratings';
 
 const TMDB_IMAGE_BASE = 'https://image.tmdb.org/t/p/w780';
+const TMDB_PROFILE_BASE = 'https://image.tmdb.org/t/p/w185';
 const FALLBACK_IMAGE = '/images/default_poster.png';
 
 function formatDate(dateString) {
@@ -70,6 +71,20 @@ function getTopCrew(movie) {
 
   const uniqueCrew = [...new Map([...prioritized, ...movie.crew].map((member) => [`${member.name}-${member.job}`, member])).values()];
   return uniqueCrew.slice(0, 6);
+}
+
+function getProfileImageUrl(person) {
+  const profilePath = person?.profile_path;
+
+  if (!profilePath) {
+    return null;
+  }
+
+  if (String(profilePath).startsWith('http')) {
+    return profilePath;
+  }
+
+  return `${TMDB_PROFILE_BASE}${profilePath}`;
 }
 
 function isPresentOmdbValue(value) {
@@ -424,6 +439,17 @@ export default function MovieDetails({ movie, loading = false, error = null }) {
             <div className={styles.castGrid}>
               {cast.map((actor, index) => (
                 <article key={`${actor.id || actor.name || actor}-${index}`} className={styles.personCard}>
+                  {typeof actor === 'object' && getProfileImageUrl(actor) ? (
+                    <div className={styles.personImageWrap}>
+                      <Image
+                        src={getProfileImageUrl(actor)}
+                        alt={actor.name || 'Cast member'}
+                        width={88}
+                        height={88}
+                        className={styles.personImage}
+                      />
+                    </div>
+                  ) : null}
                   <h3 className={styles.personName}>{actor.name || actor}</h3>
                   {actor.character ? (
                     <p className={styles.personMeta}>{actor.character}</p>
