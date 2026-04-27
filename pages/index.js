@@ -17,6 +17,7 @@ import {
   useRecentlyAdded,
 } from '../lib/hooks/useMovies';
 import { getPreferredMovieRating, withPreferredMovieRating } from '../lib/utils/ratings';
+import { getAvailableEditorialCollections } from '../lib/utils/editorialCollections';
 import { generateUniqueSlug } from '../lib/utils/slug';
 
 
@@ -263,6 +264,10 @@ export default function HomePage() {
     return sortMovies(filtered, sortOrder);
   }, [ottMovies, selectedPlatform, sortOrder]);
   const featuredUpcoming = filteredMovies[0];
+  const editorialCollections = useMemo(
+    () => getAvailableEditorialCollections(ottMovies, 10).slice(0, 6),
+    [ottMovies]
+  );
 
   const assetBasePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
   const shareUrl = `https://svteluguott.in${router.asPath}`;
@@ -462,6 +467,29 @@ export default function HomePage() {
               </Link>
             </div>
           </section>
+
+          {editorialCollections.length > 0 ? (
+            <section className="ott-section ott-genre-discovery">
+              <div className="section-heading">
+                <p className="eyebrow">Popular Genres</p>
+                <h2>Explore Telugu OTT Movies by Genre</h2>
+              </div>
+              <p className="ott-genre-discovery__intro">
+                Find Action, Comedy, Drama &amp; more streaming across Netflix, Aha, Prime Video &amp; more
+              </p>
+              <div className="ott-genre-discovery__grid">
+                {editorialCollections.map((collection) => (
+                  <Link key={collection.slug} href={collection.href} className="ott-genre-discovery__card">
+                    <span className="ott-genre-discovery__badge">{collection.shortLabel}</span>
+                    <h3>{collection.title}</h3>
+                    <p>
+                      {collection.movieCount} IMDb-rated movies. Updated automatically as your OTT database changes.
+                    </p>
+                  </Link>
+                ))}
+              </div>
+            </section>
+          ) : null}
 
           <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0.25rem 1rem 1.5rem' }}>
             <ReleasingThisWeekend movies={weekendReleases} />

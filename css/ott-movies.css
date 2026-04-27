@@ -235,6 +235,13 @@
   margin-bottom: 2rem;
 }
 
+.ott-hero.ott-collection-hero {
+  display: block;
+  grid-template-columns: none;
+  gap: 0;
+  padding: 1.5rem;
+}
+
 .ott-hero__visual {
   grid-column: 1;
   position: relative;
@@ -967,6 +974,10 @@
     gap: 1rem;
   }
 
+  .ott-hero.ott-collection-hero {
+    padding: 1.25rem 1rem;
+  }
+
   .eyebrow {
     width: 100%;
     justify-content: center;
@@ -1008,6 +1019,10 @@
 }
 
 @media (max-width: 640px) {
+  .ott-hero.ott-collection-hero {
+    padding: 1rem 0.9rem;
+  }
+
   .ott-hero,
   .ott-section {
     width: 100%;

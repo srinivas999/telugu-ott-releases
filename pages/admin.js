@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import Seo from '../components/Seo';
 import { supabase } from '../lib/supabaseClient';
-import { getOmdbRatingValue } from '../lib/utils/ratings';
+import { getOmdbRatingValue, getTmdbRatingValue } from '../lib/utils/ratings';
 import { getTmdbDetails } from '../lib/utils/tmdb';
 
 const EMPTY_MOVIE = {
@@ -677,12 +677,23 @@ export default function AdminPage() {
         poster_path: storedDetails.poster_path || bestMatch.poster_path || '',
         backdrop_path: storedDetails.backdrop_path || bestMatch.backdrop_path || '',
         overview: storedDetails.overview || bestMatch.overview || '',
-        rating:
-          typeof storedDetails.vote_average === 'number'
-            ? Number(storedDetails.vote_average.toFixed(1))
-            : typeof bestMatch.vote_average === 'number'
-              ? Number(bestMatch.vote_average.toFixed(1))
-              : null,
+        rating: getTmdbRatingValue({
+          rating:
+            typeof storedDetails.vote_average === 'number'
+              ? Number(storedDetails.vote_average.toFixed(1))
+              : typeof bestMatch.vote_average === 'number'
+                ? Number(bestMatch.vote_average.toFixed(1))
+                : null,
+          vote_average:
+            typeof storedDetails.vote_average === 'number'
+              ? storedDetails.vote_average
+              : bestMatch.vote_average,
+          vote_count:
+            typeof storedDetails.vote_count === 'number'
+              ? storedDetails.vote_count
+              : bestMatch.vote_count,
+          TMDB_Details: detailsPayload,
+        }),
         release_date:
           storedDetails.release_date ||
           storedDetails.first_air_date ||
