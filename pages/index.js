@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useRouter } from 'next/router';
 import Layout from '../components/Layout';
 import Seo from '../components/Seo';
 import Breadcrumb from '../components/common/Breadcrumb';
@@ -85,6 +84,14 @@ function toBackdropUrl(movie) {
   return `${TMDB_BACKDROP_BASE}${backdropPath}`;
 }
 
+function getCardBadge(movie, type = 'ott') {
+  if (type === 'theatre') return 'In Theatres';
+  if (!movie?.poster_path) return 'Poster Soon';
+  const rating = getPreferredMovieRating(movie) || movie.vote_average || 0;
+  if (rating >= 8) return 'Top Rated';
+  return 'Streaming';
+}
+
 function sortByReleaseDate(movies, sortOrder) {
   return [...movies].sort((a, b) => {
     const firstTime = new Date(`${a.digital_release_date || ''}T00:00:00`).getTime();
@@ -130,9 +137,13 @@ function MovieRail({ title, movies, type = 'ott', viewAllHref = '' }) {
                   sizes="(max-width: 640px) 38vw, (max-width: 980px) 22vw, 16vw"
                   className="nf-card__image"
                 />
+                <span className="nf-card__badge">{getCardBadge(movie, type)}</span>
                 {rating > 0 ? (
                   <span className="nf-card__rating">{Number(rating).toFixed(1)}</span>
                 ) : null}
+                <div className="nf-card__overlay">
+                  <span className="nf-card__overlay-cta">View Details</span>
+                </div>
               </div>
               <div className="nf-card__meta">
                 <h3>{movie.movie_name || movie.title || 'Untitled'}</h3>
@@ -147,7 +158,6 @@ function MovieRail({ title, movies, type = 'ott', viewAllHref = '' }) {
 }
 
 export default function HomePage() {
-  const router = useRouter();
   const [ottMovies, setOttMovies] = useState([]);
   const [theatreMovies, setTheatreMovies] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -284,8 +294,11 @@ export default function HomePage() {
               ) : null}
             </div>
             <div className="nf-hero__actions">
-              <Link href="/telugu-ott-releases-this-week" className="nf-btn nf-btn--ghost">
-                This Week
+              <Link href="/telugu-ott-releases-this-week" className="nf-btn nf-btn--primary">
+                Explore This Week
+              </Link>
+              <Link href="/browse/trending-now" className="nf-btn nf-btn--ghost">
+                View Top Picks
               </Link>
             </div>
           </div>
@@ -392,7 +405,7 @@ export default function HomePage() {
                   {filteredMovies.length === 0 ? (
                     <tr>
                       <td colSpan="5" className="nf-table__empty">
-                        {loading ? 'Loading OTT releases...' : 'No releases match your filter.'}
+                        {loading ? 'Loading OTT releases...' : 'No results here yet. Fresh Telugu OTT releases are coming soon.'}
                       </td>
                     </tr>
                   ) : (
@@ -401,19 +414,11 @@ export default function HomePage() {
                       return (
                       <tr
                         key={movie.id || `${movie.movie_name}-${movie.digital_release_date}`}
-                        className="nf-table__row-link"
-                        role="link"
-                        tabIndex={0}
-                        onClick={() => router.push(movieUrl)}
-                        onKeyDown={(event) => {
-                          if (event.key === 'Enter' || event.key === ' ') {
-                            event.preventDefault();
-                            router.push(movieUrl);
-                          }
-                        }}
                       >
                         <td>
-                          <span className="nf-table__movie">{movie.movie_name || 'Untitled'}</span>
+                          <Link href={movieUrl} className="nf-table__movie">
+                            {movie.movie_name || 'Untitled'}
+                          </Link>
                         </td>
                         <td>{formatReleaseDate(movie.digital_release_date)}</td>
                         <td>{movie.streaming_partner || 'TBA'}</td>

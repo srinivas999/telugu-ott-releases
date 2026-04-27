@@ -32,6 +32,12 @@ function toBackdropUrl(item) {
   return `${TMDB_BACKDROP_BASE}${path}`;
 }
 
+function getSeriesBadge(item) {
+  if (!item?.poster_path) return 'Poster Soon';
+  if ((item.vote_average || 0) >= 7.5) return 'Top Series';
+  return 'Streaming';
+}
+
 export default function WebSeriesPage() {
   const [series, setSeries] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -103,8 +109,8 @@ export default function WebSeriesPage() {
               {featured?.vote_average > 0 ? <span>{featured.vote_average.toFixed(1)}/10</span> : null}
             </div>
             <div className="nf-hero__actions">
-              <Link href="/ott-movies" className="nf-btn nf-btn--primary">OTT Movies</Link>
-              <Link href="/theatre-release" className="nf-btn nf-btn--ghost">Theatre Releases</Link>
+              <Link href="/ott-movies" className="nf-btn nf-btn--primary">Explore Movies</Link>
+              <Link href="/theatre-release" className="nf-btn nf-btn--ghost">View Theatre Picks</Link>
             </div>
           </div>
         </section>
@@ -119,7 +125,7 @@ export default function WebSeriesPage() {
             ) : error ? (
               <p className="nf-status nf-status--error">{error}</p>
             ) : list.length === 0 && !featured ? (
-              <p className="nf-status">No web series found.</p>
+              <p className="nf-status">No web series here yet. New Telugu series will land soon.</p>
             ) : (
               <div className="nf-collection__grid webseries-grid">
                 {(featured ? [featured, ...list] : list).map((item) => (
@@ -132,9 +138,13 @@ export default function WebSeriesPage() {
                         sizes="(max-width: 640px) 44vw, (max-width: 980px) 22vw, 15vw"
                         className="nf-card__image"
                       />
+                      <span className="nf-card__badge">{getSeriesBadge(item)}</span>
                       {item.vote_average > 0 ? (
                         <span className="nf-card__rating">{item.vote_average.toFixed(1)}</span>
                       ) : null}
+                      <div className="nf-card__overlay">
+                        <span className="nf-card__overlay-cta">Latest Telugu Series</span>
+                      </div>
                     </div>
                     <div className="nf-card__meta">
                       <h3>{item.name || 'Untitled'}</h3>

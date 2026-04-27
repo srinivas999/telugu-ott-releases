@@ -58,6 +58,12 @@ function toBackdropUrl(movie) {
   return `${TMDB_BACKDROP_BASE}${path}`;
 }
 
+function getTheatreBadge(movie) {
+  if (!movie?.poster_path) return 'Poster Soon';
+  if ((movie.vote_average || 0) >= 7.5) return 'Critics Pick';
+  return 'Now Showing';
+}
+
 export default function TheatreReleasePage() {
   const [movies, setMovies] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -166,9 +172,12 @@ export default function TheatreReleasePage() {
             <div className="nf-hero__actions">
               {featuredMovie ? (
                 <Link href={`/theatre-release/${featuredMovie.id}`} className="nf-btn nf-btn--primary">
-                  Featured Details
+                  Watch Spotlight
                 </Link>
               ) : null}
+              <Link href="/top-rated-telugu-ott-movies" className="nf-btn nf-btn--ghost">
+                View Top Picks
+              </Link>
             </div>
           </div>
         </section>
@@ -211,7 +220,7 @@ export default function TheatreReleasePage() {
             ) : error ? (
               <p className="nf-status nf-status--error">{error}</p>
             ) : gridMovies.length === 0 ? (
-              <p className="nf-status">No theatre release movies found.</p>
+              <p className="nf-status">No theatre titles right now. Fresh big-screen releases are coming soon.</p>
             ) : (
               <div className="nf-collection__grid">
                 {gridMovies.map((movie) => (
@@ -224,9 +233,13 @@ export default function TheatreReleasePage() {
                         sizes="(max-width: 640px) 44vw, (max-width: 980px) 22vw, 15vw"
                         className="nf-card__image"
                       />
+                      <span className="nf-card__badge">{getTheatreBadge(movie)}</span>
                       <span className="nf-card__rating">
                         {movie.vote_average ? movie.vote_average.toFixed(1) : 'NR'}
                       </span>
+                      <div className="nf-card__overlay">
+                        <span className="nf-card__overlay-cta">View Details</span>
+                      </div>
                     </div>
                     <div className="nf-card__meta">
                       <h3>{movie.title || movie.original_title || 'Untitled'}</h3>
