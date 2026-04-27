@@ -21,7 +21,11 @@ export default function Nav() {
     router.pathname.startsWith('/best-telugu-ott-movies') ||
     router.pathname.startsWith('/theatre-release') ||
     router.pathname.startsWith('/web-series') ||
-    router.pathname.startsWith('/blog');
+    router.pathname.startsWith('/blog') ||
+    router.pathname.startsWith('/telugu-ott-releases-this-week') ||
+    router.pathname.startsWith('/top-rated-telugu-ott-movies') ||
+    router.pathname.startsWith('/movie') ||
+    router.pathname.startsWith('/platform');
 
   const isLinkActive = useCallback(
     (href) => (href === '/' ? router.pathname === href : router.pathname.startsWith(href)),

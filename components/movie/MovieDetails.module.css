@@ -622,3 +622,59 @@
     font-size: 0.75rem;
   }
 }
+
+/* Dark theme overrides for redesigned pages */
+.container {
+  color: #f4f4f4;
+}
+
+.section {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.02) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: none;
+}
+
+.sectionEyebrow {
+  color: #ff7a7a;
+}
+
+.sectionTitle {
+  color: #ffffff;
+}
+
+.overview,
+.omdbPlot {
+  color: rgba(255, 255, 255, 0.84);
+}
+
+.omdbFactCard,
+.personCard {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.omdbFactLabel {
+  color: #ff8f8f;
+}
+
+.omdbFactValue,
+.personName {
+  color: #ffffff;
+}
+
+.personMeta {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.watchDetails {
+  background: rgba(255, 255, 255, 0.03);
+  border-left: 4px solid #e50914;
+}
+
+.watchDetails p {
+  color: rgba(255, 255, 255, 0.84);
+}
+
+.releaseInfo {
+  color: #ff8f8f;
+}

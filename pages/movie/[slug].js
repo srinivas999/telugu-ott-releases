@@ -137,23 +137,25 @@ export default function MovieDetailPage({ movie: initialMovie }) {
       <SchemaMarkup schema={movieSchema} />
       {faqSchema && <SchemaMarkup schema={faqSchema} />}
 
-      {/* Breadcrumb */}
-      <Breadcrumb items={breadcrumbs} />
-
-      {/* Movie Details */}
-      <MovieDetails
-        movie={mergedMovie || actualMovie}
-        loading={loading}
-        error={error}
-      />
-
-      {/* Similar Movies */}
-      {similarMovies && similarMovies.length > 0 && (
-        <div style={{ marginTop: '3rem' }}>
-          <h2>Similar Movies</h2>
-          <SimilarMovies movies={similarMovies} />
+      <main className="netflix-home movie-detail-page-shell">
+        <div className="nf-breadcrumb-wrap">
+          <Breadcrumb items={breadcrumbs} />
         </div>
-      )}
+
+        <section className="nf-content movie-detail-page-shell__content">
+          <MovieDetails
+            movie={mergedMovie || actualMovie}
+            loading={loading}
+            error={error}
+          />
+
+          {similarMovies && similarMovies.length > 0 && (
+            <section className="movie-detail-page-shell__similar">
+              <SimilarMovies movies={similarMovies} />
+            </section>
+          )}
+        </section>
+      </main>
     </Layout>
   );
 }
