@@ -6,23 +6,23 @@ import Breadcrumb from '../components/common/Breadcrumb';
 const values = [
   {
     title: 'Clarity Over Noise',
-    body: 'This site exists to reduce the time Telugu OTT fans spend hunting across social posts, rumor threads, and platform apps just to answer one simple question: what is releasing, where, and when?',
+    body: 'This site exists to reduce the time Telugu OTT fans spend hunting across social posts and apps just to know what is releasing, where, and when.',
   },
   {
     title: 'Useful, Not Bloated',
-    body: 'Every page should help you decide faster. Release dates, platforms, ratings, and direct movie pages matter more here than filler, celebrity gossip, or empty listicles.',
+    body: 'Release dates, platforms, ratings, and direct movie pages matter more here than filler updates and low-value listicles.',
   },
   {
     title: 'Telugu-First Discovery',
-    body: 'The site is built for people who specifically want Telugu movie discovery. That means spotlighting Telugu OTT launches, theatre crossover titles, and platform-wise browsing with less friction.',
+    body: 'The experience is designed for Telugu OTT discovery with less friction and faster decisions.',
   },
 ];
 
 const promises = [
   'Track Telugu OTT releases in a way that feels fast and practical.',
-  'Keep movie pages connected so users can jump from one useful page to the next.',
-  'Make platform, weekly, and top-rated discovery easy for both people and search engines.',
-  'Keep improving the site structure so the best content gets to the user faster.',
+  'Keep pages interconnected so discovery does not dead-end.',
+  'Make weekly, platform, and quality-based browsing easy.',
+  'Continuously improve structure so users get useful answers faster.',
 ];
 
 const pathways = [
@@ -33,22 +33,49 @@ const pathways = [
     body: 'A focused page for the next 7 days of streaming launches.',
   },
   {
-    href: '/top-rated-telugu-ott-movies',
-    label: 'Top Rated',
-    title: 'Browse the best rated Telugu OTT movies',
-    body: 'Useful when you want quality first instead of newest first.',
+    href: '/browse/trending-now',
+    label: 'Trending',
+    title: 'Browse what is buzzing now',
+    body: 'A quick way to jump to currently trending OTT titles.',
   },
   {
     href: '/ott-movies',
     label: 'Full Archive',
-    title: 'Explore the entire OTT release database',
-    body: 'Filter by platform and browse all recorded Telugu OTT launches.',
+    title: 'Explore the complete OTT release database',
+    body: 'Browse all recorded Telugu OTT launches in one place.',
   },
   {
     href: '/theatre-release',
     label: 'Theatres',
-    title: 'Track what is happening beyond OTT',
-    body: 'Theatre releases add context to the overall Telugu release landscape.',
+    title: 'Track releases beyond OTT',
+    body: 'Theatre releases add context to the full Telugu movie cycle.',
+  },
+];
+
+const exploreNow = [
+  {
+    href: '/ott-movies',
+    label: 'OTT Movies',
+    title: 'Browse the full Telugu OTT release list',
+    body: 'Search across the whole release database with platform filters.',
+  },
+  {
+    href: '/telugu-ott-releases-this-week',
+    label: 'This Week',
+    title: 'Focus only on the next 7 days',
+    body: 'Perfect if you want the quickest possible answer.',
+  },
+  {
+    href: '/top-rated-telugu-ott-movies',
+    label: 'Top Rated',
+    title: 'Discover stronger picks faster',
+    body: 'Useful when you care more about quality than release order.',
+  },
+  {
+    href: '/theatre-release',
+    label: 'Theatres',
+    title: 'Track the Telugu ecosystem beyond OTT',
+    body: 'See what is arriving in cinemas alongside streaming launches.',
   },
 ];
 
@@ -62,40 +89,48 @@ export default function BlogPage() {
         keywords="about Telugu OTT Releases, Telugu OTT website, Telugu OTT blog, Telugu movie release tracker"
       />
 
-      <Breadcrumb items={[{ name: 'Home', url: '/' }, { name: 'Blog' }]} />
+      <main className="netflix-home blog-page">
+        <div className="nf-breadcrumb-wrap">
+          <Breadcrumb items={[{ name: 'Home', url: '/' }, { name: 'Blog' }]} />
+        </div>
 
-      <section className="page-projects page-ott">
-        <div className="projects-page-inner">
-          <section className="ott-hero blog-manifesto">
-            <div className="ott-hero__panel">
-              <p className="eyebrow">The Heart</p>
-              <h1>Why Telugu OTT Releases exists</h1>
-              <p className="ott-hero__tagline">
-                This website is built around one idea: Telugu movie discovery should feel simple, trustworthy, and fast. Users should not have to dig through scattered updates to understand what is releasing on OTT and where to watch it.
-              </p>
+        <section className="nf-hero blog-hero">
+          <div className="nf-hero__overlay" />
+          <div className="nf-hero__content">
+            <p className="nf-hero__kicker">Editorial</p>
+            <h1>Why Telugu OTT Releases Exists</h1>
+            <p className="nf-hero__desc">
+              This website is built around one idea: Telugu movie discovery should feel simple, trustworthy, and fast.
+            </p>
+            <div className="nf-hero__actions">
+              <Link href="/ott-movies" className="nf-btn nf-btn--primary">Browse OTT Movies</Link>
+              <Link href="/telugu-ott-releases-this-week" className="nf-btn nf-btn--ghost">This Week</Link>
             </div>
+          </div>
+        </section>
+
+        <section className="nf-content">
+          <section className="nf-rail">
+            <div className="nf-rail__header">
+              <h2>The Problem This Site Solves</h2>
+            </div>
+            <p className="nf-collection-copy">
+              Telugu OTT information often lives in too many places at once: platform apps, social posts, announcement posters, and scattered coverage.
+              Telugu OTT Releases is designed to bring clean answers into one place with meaningful navigation between related pages.
+            </p>
+            <p className="nf-collection-copy">
+              The goal is to make the first visit useful and every follow-up visit faster, with practical release intelligence instead of noise.
+            </p>
           </section>
 
-          <section className="ott-section ott-seo-copy">
-            <div className="section-heading">
-              <h2>The Problem This Site Tries To Solve</h2>
+          <section className="nf-genre">
+            <div className="nf-genre__header">
+              <h2>Core Values</h2>
             </div>
-            <p>
-              Telugu OTT information often lives in too many places at once: platform apps, social media posts, poster announcements, comments, and scattered entertainment coverage. That creates friction for users who only want a clean answer.
-            </p>
-            <p>
-              Telugu OTT Releases is meant to become that clean answer. It brings together OTT release dates, movie pages, platform data, ratings, and related discovery paths in one place so the site feels useful on the first visit and on every visit after that.
-            </p>
-          </section>
-
-          <section className="ott-section blog-grid-section">
-            <div className="section-heading">
-              <p className="eyebrow">Core Values</p>
-              <h2>What guides the website</h2>
-            </div>
-            <div className="blog-manifesto__grid">
+            <div className="nf-genre__grid">
               {values.map((item) => (
-                <article key={item.title} className="blog-manifesto__card">
+                <article key={item.title} className="nf-genre__card nf-genre__card--static">
+                  <span>{item.title}</span>
                   <h3>{item.title}</h3>
                   <p>{item.body}</p>
                 </article>
@@ -103,26 +138,24 @@ export default function BlogPage() {
             </div>
           </section>
 
-          <section className="ott-section ott-seo-copy">
-            <div className="section-heading">
-              <p className="eyebrow">Editorial Promise</p>
-              <h2>What users should expect from this site</h2>
+          <section className="nf-rail">
+            <div className="nf-rail__header">
+              <h2>Editorial Promise</h2>
             </div>
-            <div className="blog-manifesto__list">
+            <div className="blog-promise">
               {promises.map((item) => (
                 <p key={item}>{item}</p>
               ))}
             </div>
           </section>
 
-          <section className="ott-section blog-grid-section">
-            <div className="section-heading">
-              <p className="eyebrow">Best Ways To Use It</p>
-              <h2>Choose your path into Telugu OTT discovery</h2>
+          <section className="nf-genre">
+            <div className="nf-genre__header">
+              <h2>Best Ways To Use It</h2>
             </div>
-            <div className="blog-manifesto__grid">
+            <div className="nf-genre__grid">
               {pathways.map((item) => (
-                <Link key={item.href} href={item.href} className="blog-manifesto__card blog-manifesto__card--link">
+                <Link key={item.href} href={item.href} className="nf-genre__card">
                   <span>{item.label}</span>
                   <h3>{item.title}</h3>
                   <p>{item.body}</p>
@@ -131,49 +164,36 @@ export default function BlogPage() {
             </div>
           </section>
 
-          <section className="ott-section ott-seo-copy">
-            <div className="section-heading">
-              <p className="eyebrow">Long-Term Vision</p>
-              <h2>Where this website is headed</h2>
+          <section className="nf-rail">
+            <div className="nf-rail__header">
+              <h2>Long-Term Vision</h2>
             </div>
-            <p>
-              The long-term goal is not just to list release dates. It is to build a Telugu entertainment discovery layer that helps users move naturally between OTT releases, theatre releases, platform catalogs, and quality-based picks without confusion.
-            </p>
-            <p>
-              That means better page structure, stronger internal linking, richer movie detail pages, clearer weekly updates, and category pages that feel genuinely helpful. The best version of this site should feel like a home base for Telugu streaming discovery.
-            </p>
+            <div className="blog-longread">
+              <p>
+                The long-term goal is not just to list release dates. It is to build a Telugu entertainment discovery layer that helps users move naturally between OTT releases, theatre releases, platform catalogs, and quality-first picks.
+              </p>
+              <p>
+                That means better page structure, stronger internal linking, richer movie pages, and clearer weekly updates so this site becomes a true home base for Telugu streaming discovery.
+              </p>
+            </div>
           </section>
 
-          <section className="ott-section ott-home-links">
-            <div className="section-heading">
-              <p className="eyebrow">Explore Now</p>
-              <h2>Start with the pages people use most</h2>
+          <section className="nf-genre">
+            <div className="nf-genre__header">
+              <h2>Explore Now</h2>
             </div>
-            <div className="ott-home-links__grid">
-              <Link href="/ott-movies" className="ott-home-links__card">
-                <span>OTT Movies</span>
-                <h3>Browse the full Telugu OTT release list</h3>
-                <p>Search across the whole release database with platform filters.</p>
-              </Link>
-              <Link href="/telugu-ott-releases-this-week" className="ott-home-links__card">
-                <span>This Week</span>
-                <h3>Focus only on the next 7 days</h3>
-                <p>Perfect if you want the quickest possible answer.</p>
-              </Link>
-              <Link href="/top-rated-telugu-ott-movies" className="ott-home-links__card">
-                <span>Top Rated</span>
-                <h3>Discover stronger picks faster</h3>
-                <p>Useful when you care more about quality than release order.</p>
-              </Link>
-              <Link href="/theatre-release" className="ott-home-links__card">
-                <span>Theatres</span>
-                <h3>Track the Telugu movie ecosystem beyond OTT</h3>
-                <p>See what is arriving in cinemas alongside streaming launches.</p>
-              </Link>
+            <div className="nf-genre__grid">
+              {exploreNow.map((item) => (
+                <Link key={item.href} href={item.href} className="nf-genre__card">
+                  <span>{item.label}</span>
+                  <h3>{item.title}</h3>
+                  <p>{item.body}</p>
+                </Link>
+              ))}
             </div>
           </section>
-        </div>
-      </section>
+        </section>
+      </main>
     </Layout>
   );
 }

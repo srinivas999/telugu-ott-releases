@@ -5782,6 +5782,87 @@ html[data-hide-contact="true"] #contact {
   padding-bottom: 1.2rem;
 }
 
+.theatre-browse-page .nf-hero {
+  min-height: clamp(360px, 60vh, 620px);
+}
+
+.theatre-browse-page .nf-hero__content {
+  max-width: 700px;
+}
+
+.theatre-browse-page .nf-hero__desc {
+  max-width: 62ch;
+}
+
+.theatre-browse-page .nf-collection__grid {
+  gap: 1rem;
+}
+
+.webseries-page .nf-hero,
+.blog-page .nf-hero {
+  min-height: clamp(320px, 52vh, 520px);
+}
+
+.blog-hero {
+  background:
+    radial-gradient(circle at 12% 15%, rgba(229, 9, 20, 0.2), transparent 36%),
+    radial-gradient(circle at 80% 75%, rgba(255, 255, 255, 0.08), transparent 38%),
+    #141414;
+}
+
+.nf-card--static {
+  display: flex;
+  flex-direction: column;
+}
+
+.webseries-grid .nf-card__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.webseries-card__overview {
+  margin-top: 0.25rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.nf-genre__card--static {
+  cursor: default;
+}
+
+.blog-promise {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.blog-promise p {
+  margin: 0;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 6px;
+  color: rgba(255, 255, 255, 0.84);
+  background: rgba(255, 255, 255, 0.03);
+  line-height: 1.5;
+}
+
+.blog-longread {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.blog-longread p {
+  margin: 0;
+  padding: 0.75rem 0.85rem;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 6px;
+  color: rgba(255, 255, 255, 0.84);
+  background: rgba(255, 255, 255, 0.03);
+  line-height: 1.6;
+}
+
 .nf-rail {
   margin-top: 1.3rem;
 }
@@ -6008,6 +6089,25 @@ html[data-hide-contact="true"] #contact {
 
   .nf-card__meta p {
     font-size: 0.68rem;
+  }
+
+  .theatre-browse-page .nf-hero {
+    min-height: 420px;
+    padding-top: 2.8rem;
+  }
+
+  .theatre-browse-page .nf-collection__grid {
+    gap: 0.8rem;
+  }
+
+  .webseries-page .nf-hero,
+  .blog-page .nf-hero {
+    min-height: 380px;
+    padding-top: 2.8rem;
+  }
+
+  .webseries-card__overview {
+    -webkit-line-clamp: 2;
   }
 }
 

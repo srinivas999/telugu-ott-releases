@@ -284,11 +284,6 @@ export default function HomePage() {
               ) : null}
             </div>
             <div className="nf-hero__actions">
-              {heroMovie ? (
-                <Link href={`/movie/${generateUniqueSlug(heroMovie.movie_name, heroMovie.id)}`} className="nf-btn nf-btn--primary">
-                  Play
-                </Link>
-              ) : null}
               <Link href="/telugu-ott-releases-this-week" className="nf-btn nf-btn--ghost">
                 This Week
               </Link>
@@ -342,11 +337,6 @@ export default function HomePage() {
             </section>
           ) : null}
 
-          <MovieRail
-            title={`Latest on ${selectedPlatform === 'all' ? 'OTT' : selectedPlatform}`}
-            movies={filteredMovies.slice(0, 20)}
-            viewAllHref="/browse/latest-ott"
-          />
           <MovieRail
             title="Trending Now"
             movies={moduleTrendingMovies.slice(0, 20).map(withDisplayFields)}
