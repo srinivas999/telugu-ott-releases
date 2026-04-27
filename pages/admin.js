@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Seo from '../components/Seo';
 import { supabase } from '../lib/supabaseClient';
 import { getOmdbRatingValue } from '../lib/utils/ratings';
@@ -41,11 +41,58 @@ export default function AdminPage() {
   const [omdbSyncMovieId, setOmdbSyncMovieId] = useState(null);
   const [omdbSyncStatus, setOmdbSyncStatus] = useState('');
   const [omdbSyncError, setOmdbSyncError] = useState(false);
+  const [showOmdbNotUpdatedOnly, setShowOmdbNotUpdatedOnly] = useState(false);
+  const [showTmdbNotUpdatedOnly, setShowTmdbNotUpdatedOnly] = useState(false);
   const [activeTab, setActiveTab] = useState('add');
   const [csvFile, setCsvFile] = useState(null);
   const [csvStatus, setCsvStatus] = useState('');
   const [csvStatusError, setCsvStatusError] = useState(false);
   const [csvLoading, setCsvLoading] = useState(false);
+  const [toasts, setToasts] = useState([]);
+
+  const dismissToast = (toastId) => {
+    setToasts((current) => current.filter((toast) => toast.id !== toastId));
+  };
+
+  const showErrorToast = (message) => {
+    const trimmedMessage = String(message || '').trim();
+    if (!trimmedMessage) return;
+
+    const toastId = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    setToasts((current) => [...current, { id: toastId, message: trimmedMessage }].slice(-4));
+
+    setTimeout(() => {
+      dismissToast(toastId);
+    }, 7000);
+  };
+
+  const extractApiErrorMessage = async (response, fallbackMessage) => {
+    const rawBody = await response.text();
+    if (!rawBody) {
+      return `${fallbackMessage} (${response.status})`;
+    }
+
+    try {
+      const parsed = JSON.parse(rawBody);
+      const parsedMessage =
+        parsed?.error ||
+        parsed?.message ||
+        parsed?.status_message ||
+        parsed?.details?.error ||
+        parsed?.details?.message ||
+        parsed?.details?.status_message ||
+        parsed?.details?.Error ||
+        parsed?.data?.Error;
+
+      if (parsedMessage) {
+        return `${fallbackMessage} (${response.status}): ${parsedMessage}`;
+      }
+    } catch (_error) {
+      // The API may return plain text/HTML on failure; keep the raw body fallback below.
+    }
+
+    return `${fallbackMessage} (${response.status}): ${rawBody.slice(0, 240)}`;
+  };
 
   useEffect(() => {
     if (!supabase) return undefined;
@@ -157,6 +204,7 @@ export default function AdminPage() {
         noReleaseDate: 0,
         failedRequests: 0,
       };
+      let firstFailedRequestMessage = '';
 
       for (const movie of moviesToSync) {
         const title = movie.movie_name.trim();
@@ -167,6 +215,9 @@ export default function AdminPage() {
         );
 
         if (!response.ok) {
+          if (!firstFailedRequestMessage) {
+            firstFailedRequestMessage = await extractApiErrorMessage(response, 'TMDb search failed');
+          }
           stats.failedRequests += 1;
           continue;
         }
@@ -201,7 +252,16 @@ export default function AdminPage() {
         }
       }
 
-      await fetchMovies();
+      if (updates.length > 0) {
+        const updatesById = new Map(updates.map((item) => [item.id, item]));
+        setMovies((currentMovies) =>
+          currentMovies.map((currentMovie) =>
+            updatesById.has(currentMovie.id)
+              ? { ...currentMovie, ...updatesById.get(currentMovie.id) }
+              : currentMovie,
+          ),
+        );
+      }
 
       let statusMessage = `${stats.updated} movie release date(s) synced from TMDb.`;
       if (stats.noMatch > 0) {
@@ -212,6 +272,9 @@ export default function AdminPage() {
       }
       if (stats.failedRequests > 0) {
         statusMessage += ` ${stats.failedRequests} request(s) failed.`;
+        if (firstFailedRequestMessage) {
+          showErrorToast(firstFailedRequestMessage);
+        }
       }
       if (stats.updated === 0 && stats.noMatch === 0 && stats.noReleaseDate === 0 && stats.failedRequests === 0) {
         statusMessage = 'TMDb search completed, but no updateable titles were found.';
@@ -219,8 +282,10 @@ export default function AdminPage() {
 
       setTmdbSyncStatus(statusMessage);
     } catch (error) {
-      setTmdbSyncStatus(error?.message || 'Unable to sync TMDb metadata.');
+      const errorMessage = error?.message || 'Unable to sync TMDb metadata.';
+      setTmdbSyncStatus(errorMessage);
       setTmdbSyncError(true);
+      showErrorToast(errorMessage);
     } finally {
       setTmdbSyncLoading(false);
     }
@@ -240,8 +305,7 @@ export default function AdminPage() {
     try {
       const response = await fetch('/api/tmdb/latest');
       if (!response.ok) {
-        const errorBody = await response.text();
-        throw new Error(`TMDb request failed (${response.status}): ${errorBody}`);
+        throw new Error(await extractApiErrorMessage(response, 'TMDb request failed'));
       }
 
       const payload = await response.json();
@@ -253,8 +317,10 @@ export default function AdminPage() {
 
       setTmdbFetchStatus(`Fetched ${results.length} Tollywood movie(s) from TMDb. They were not saved to the database.`);
     } catch (error) {
-      setTmdbFetchStatus(error?.message || 'Unable to fetch latest Tollywood movies from TMDb.');
+      const errorMessage = error?.message || 'Unable to fetch latest Tollywood movies from TMDb.';
+      setTmdbFetchStatus(errorMessage);
       setTmdbFetchError(true);
+      showErrorToast(errorMessage);
     } finally {
       setTmdbFetchLoading(false);
     }
@@ -337,6 +403,16 @@ export default function AdminPage() {
 
   const handleMovieFormChange = (field, value) => {
     setMovieForm((current) => ({ ...current, [field]: value }));
+  };
+
+  const patchMovieInState = (movieId, updates) => {
+    setMovies((currentMovies) =>
+      currentMovies.map((currentMovie) =>
+        currentMovie.id === movieId
+          ? { ...currentMovie, ...updates }
+          : currentMovie
+      ),
+    );
   };
 
   const handleMovieSave = async (event) => {
@@ -498,7 +574,7 @@ export default function AdminPage() {
     const rating = getOmdbRatingValue({ OMTB_Details: payload });
     let result = await supabase
       .from('ott_movies')
-      .update({ OMTB_Details: payload, rating })
+      .update({ OMTB_Details: payload, rating, omdb_last_sync: new Date().toISOString() })
       .eq('id', movieId);
 
     if (!result.error) {
@@ -511,7 +587,7 @@ export default function AdminPage() {
 
     result = await supabase
       .from('ott_movies')
-      .update({ omtb_details: payload, rating })
+      .update({ omtb_details: payload, rating, omdb_last_sync: new Date().toISOString() })
       .eq('id', movieId);
 
     return result.error || null;
@@ -520,7 +596,7 @@ export default function AdminPage() {
   const saveTmdbDetails = async (movieId, payload) => {
     let result = await supabase
       .from('ott_movies')
-      .update({ TMDB_Details: payload })
+      .update({ TMDB_Details: payload, tmdb_last_sync: new Date().toISOString() })
       .eq('id', movieId);
 
     if (!result.error) {
@@ -533,7 +609,7 @@ export default function AdminPage() {
 
     result = await supabase
       .from('ott_movies')
-      .update({ tmdb_details: payload })
+      .update({ tmdb_details: payload, tmdb_last_sync: new Date().toISOString() })
       .eq('id', movieId);
 
     return result.error || null;
@@ -570,8 +646,7 @@ export default function AdminPage() {
         `/api/tmdb/search?query=${encodeURIComponent(searchQuery)}&y=${encodeURIComponent(syncYear)}&mediaType=${encodeURIComponent(mediaType)}`
       );
       if (!searchResponse.ok) {
-        const errorBody = await searchResponse.text();
-        throw new Error(`TMDB search failed (${searchResponse.status}): ${errorBody}`);
+        throw new Error(await extractApiErrorMessage(searchResponse, 'TMDB search failed'));
       }
 
       const searchPayload = await searchResponse.json();
@@ -585,8 +660,7 @@ export default function AdminPage() {
         `/api/tmdb/details?id=${encodeURIComponent(bestMatch.id)}&mediaType=${encodeURIComponent(mediaType)}`
       );
       if (!detailsResponse.ok) {
-        const errorBody = await detailsResponse.text();
-        throw new Error(`TMDB details failed (${detailsResponse.status}): ${errorBody}`);
+        throw new Error(await extractApiErrorMessage(detailsResponse, 'TMDB details failed'));
       }
 
       const detailsPayload = await detailsResponse.json();
@@ -644,11 +718,19 @@ export default function AdminPage() {
         throw tmdbDetailsError;
       }
 
-      await fetchMovies();
+      const tmdbSyncedAt = new Date().toISOString();
+      patchMovieInState(movie.id, {
+        ...payload,
+        TMDB_Details: detailsPayload,
+        tmdb_details: detailsPayload,
+        tmdb_last_sync: tmdbSyncedAt,
+      });
       setLiveSyncStatus(`Live TMDB data synced for "${movieTitle}".`);
     } catch (error) {
+      const errorMessage = error?.message || 'Unable to sync live TMDB data.';
       setLiveSyncError(true);
-      setLiveSyncStatus(error?.message || 'Unable to sync live TMDB data.');
+      setLiveSyncStatus(errorMessage);
+      showErrorToast(errorMessage);
     } finally {
       setLiveSyncMovieId(null);
     }
@@ -686,8 +768,7 @@ export default function AdminPage() {
 
       const response = await fetch(`/api/omdb?${query.toString()}`);
       if (!response.ok) {
-        const errorBody = await response.text();
-        throw new Error(`OMDb sync failed (${response.status}): ${errorBody}`);
+        throw new Error(await extractApiErrorMessage(response, 'OMDb sync failed'));
       }
 
       const payload = await response.json();
@@ -699,11 +780,19 @@ export default function AdminPage() {
         );
       }
 
-      await fetchMovies();
+      const omdbSyncedAt = new Date().toISOString();
+      patchMovieInState(movie.id, {
+        OMTB_Details: payload,
+        omtb_details: payload,
+        rating: getOmdbRatingValue({ OMTB_Details: payload }),
+        omdb_last_sync: omdbSyncedAt,
+      });
       setOmdbSyncStatus(`OMDb details synced for "${movieTitle}".`);
     } catch (error) {
+      const errorMessage = error?.message || 'Unable to sync OMDb details.';
       setOmdbSyncError(true);
-      setOmdbSyncStatus(error?.message || 'Unable to sync OMDb details.');
+      setOmdbSyncStatus(errorMessage);
+      showErrorToast(errorMessage);
     } finally {
       setOmdbSyncMovieId(null);
     }
@@ -870,6 +959,28 @@ export default function AdminPage() {
     setCsvStatus('');
     setCsvStatusError(false);
   };
+
+  const filteredMovies = useMemo(
+    () =>
+      movies.filter((movie) => {
+        if (showOmdbNotUpdatedOnly && movie.omdb_last_sync) {
+          return false;
+        }
+        if (showTmdbNotUpdatedOnly && movie.tmdb_last_sync) {
+          return false;
+        }
+        return true;
+      }),
+    [movies, showOmdbNotUpdatedOnly, showTmdbNotUpdatedOnly],
+  );
+  const omdbNotUpdatedCount = useMemo(
+    () => movies.filter((movie) => !movie.omdb_last_sync).length,
+    [movies],
+  );
+  const tmdbNotUpdatedCount = useMemo(
+    () => movies.filter((movie) => !movie.tmdb_last_sync).length,
+    [movies],
+  );
 
   return (
     <main className="admin-page">
@@ -1050,67 +1161,90 @@ export default function AdminPage() {
                       <p className="admin-management-card__subtitle">Edit or delete releases from your Supabase table.</p>
                     </div>
                   </div>
+                  <fieldset className="admin-checkbox-group" aria-label="Sync status filters">
+                    <label className="admin-checkbox-item" htmlFor="filter-omdb-not-updated">
+                      <input
+                        id="filter-omdb-not-updated"
+                        type="checkbox"
+                        checked={showOmdbNotUpdatedOnly}
+                        onChange={(event) => setShowOmdbNotUpdatedOnly(event.target.checked)}
+                      />
+                      OMDB Not Updated ({omdbNotUpdatedCount})
+                    </label>
+                    <label className="admin-checkbox-item" htmlFor="filter-tmdb-not-updated">
+                      <input
+                        id="filter-tmdb-not-updated"
+                        type="checkbox"
+                        checked={showTmdbNotUpdatedOnly}
+                        onChange={(event) => setShowTmdbNotUpdatedOnly(event.target.checked)}
+                      />
+                      TMDB Not Updated ({tmdbNotUpdatedCount})
+                    </label>
+                  </fieldset>
 
                   {moviesLoading ? (
                     <p className="admin-status">Loading movies…</p>
                   ) : movies.length === 0 ? (
                     <p className="admin-status">No movies found. Add your first OTT release.</p>
+                  ) : filteredMovies.length === 0 ? (
+                    <p className="admin-status">No movies match the selected sync filters.</p>
                   ) : (
                     <>
-                      <div className="admin-table-wrapper">
-                        <table className="admin-table">
-                          <thead>
-                            <tr>
-                              <th>Movie</th>
-                              <th>Year</th>
-                              <th>Partner</th>
-                              <th>Release date</th>
-                              <th>Language</th>
-                              <th>Category</th>
-                              <th aria-label="Actions" />
-                            </tr>
-                          </thead>
-                          <tbody>
-                          {movies.map((movie) => (
-                            <tr key={movie.id || `${movie.movie_name}-${movie.digital_release_date}`}>
-                              <td>{movie.movie_name || 'Untitled'}</td>
-                              <td>{movie.year || 'TBA'}</td>
-                              <td>{movie.streaming_partner || 'TBA'}</td>
-                              <td>{movie.digital_release_date || 'TBA'}</td>
-                              <td>{movie.language || 'Telugu'}</td>
-                              <td>{movie.category || 'Film'}</td>
-                              <td>
-                                <button type="button" className="admin-action-button" onClick={() => handleEditMovie(movie)}>
-                                  Edit
-                                </button>
-                                <button
-                                  type="button"
-                                  className="admin-action-button"
-                                  onClick={() => handleSyncLiveData(movie)}
-                                  disabled={liveSyncMovieId === movie.id}
-                                >
-                                  {liveSyncMovieId === movie.id ? 'Syncing…' : 'Sync live data'}
-                                </button>
-                                <button
-                                  type="button"
-                                  className="admin-action-button"
-                                  onClick={() => handleSyncOmdbData(movie)}
-                                  disabled={omdbSyncMovieId === movie.id}
-                                >
-                                  {omdbSyncMovieId === movie.id
-                                    ? 'Syncing OMDb...'
-                                    : movie.OMTB_Details || movie.omtb_details
-                                      ? 'Refresh OMDb'
-                                      : 'Sync OMDb'}
-                                </button>
-                                <button type="button" className="admin-action-button admin-action-button--danger" onClick={() => handleDeleteMovie(movie.id)}>
-                                  Delete
-                                </button>
-                              </td>
-                            </tr>
-                          ))}
-                          </tbody>
-                        </table>
+                      <div className="admin-movie-grid">
+                        {filteredMovies.map((movie) => (
+                          <div className="admin-movie-card" key={movie.id || `${movie.movie_name}-${movie.digital_release_date}`}>
+                            <div className="admin-movie-card__content">
+                              <h3 className="admin-movie-card__title">{movie.movie_name || 'Untitled'}</h3>
+                              <div className="admin-movie-card__meta">
+                                <span className="admin-badge admin-badge--year">{movie.year || 'TBA'}</span>
+                                <span className="admin-badge admin-badge--partner">{movie.streaming_partner || 'TBA'}</span>
+                                <span className="admin-badge admin-badge--date">{movie.digital_release_date || 'TBA'}</span>
+                                <span className="admin-badge admin-badge--lang">{movie.language || 'Telugu'}</span>
+                                <span className="admin-badge admin-badge--category">{movie.category || 'Film'}</span>
+                              </div>
+                              <div className="admin-movie-card__meta admin-movie-card__meta--sync">
+                                {movie.tmdb_last_sync && (
+                                  <span className="admin-badge admin-badge--sync" title={`TMDB Last Sync: ${new Date(movie.tmdb_last_sync).toLocaleString()}`}>
+                                    TMDB: {new Date(movie.tmdb_last_sync).toLocaleDateString()}
+                                  </span>
+                                )}
+                                {movie.omdb_last_sync && (
+                                  <span className="admin-badge admin-badge--sync" title={`OMDB Last Sync: ${new Date(movie.omdb_last_sync).toLocaleString()}`}>
+                                    OMDB: {new Date(movie.omdb_last_sync).toLocaleDateString()}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                            <div className="admin-movie-card__actions">
+                              <button type="button" className="admin-action-button" onClick={(e) => { e.preventDefault(); handleEditMovie(movie); }}>
+                                Edit
+                              </button>
+                              <button
+                                type="button"
+                                className="admin-action-button"
+                                onClick={(e) => { e.preventDefault(); handleSyncLiveData(movie); }}
+                                disabled={liveSyncMovieId === movie.id}
+                              >
+                                {liveSyncMovieId === movie.id ? 'Syncing…' : 'Sync TMDB'}
+                              </button>
+                              <button
+                                type="button"
+                                className="admin-action-button"
+                                onClick={(e) => { e.preventDefault(); handleSyncOmdbData(movie); }}
+                                disabled={omdbSyncMovieId === movie.id}
+                              >
+                                {omdbSyncMovieId === movie.id
+                                  ? 'Syncing OMDb...'
+                                  : movie.OMTB_Details || movie.omtb_details
+                                    ? 'Refresh OMDb'
+                                    : 'Sync OMDb'}
+                              </button>
+                              <button type="button" className="admin-action-button admin-action-button--danger" onClick={(e) => { e.preventDefault(); handleDeleteMovie(movie.id); }}>
+                                Delete
+                              </button>
+                            </div>
+                          </div>
+                        ))}
                       </div>
                       {liveSyncStatus ? (
                         <p className={`admin-status ${liveSyncError ? 'admin-status--error' : ''}`}>
@@ -1222,6 +1356,24 @@ export default function AdminPage() {
               </div>
             </div>
           )}
+
+          {toasts.length > 0 ? (
+            <div className="admin-toast-stack" role="status" aria-live="polite">
+              {toasts.map((toast) => (
+                <div className="admin-toast admin-toast--error" key={toast.id}>
+                  <p className="admin-toast__message">{toast.message}</p>
+                  <button
+                    type="button"
+                    className="admin-toast__close"
+                    onClick={() => dismissToast(toast.id)}
+                    aria-label="Dismiss notification"
+                  >
+                    Close
+                  </button>
+                </div>
+              ))}
+            </div>
+          ) : null}
 
           {status ? <p className="admin-status">{status}</p> : null}
         </div>

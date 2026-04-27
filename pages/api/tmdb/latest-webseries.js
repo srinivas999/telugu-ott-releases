@@ -31,9 +31,9 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const apiKey = process.env.NEXT_PUBLIC_TMDB_API_KEY;
+  const apiKey = process.env.TMDB_API_KEY || process.env.NEXT_PUBLIC_TMDB_API_KEY;
   if (!apiKey) {
-    return res.status(500).json({ error: 'TMDb API key is not configured. Set NEXT_PUBLIC_TMDB_API_KEY.' });
+    return res.status(500).json({ error: 'TMDb API key is not configured. Set TMDB_API_KEY.' });
   }
 
   const page = String(req.query.page || '1');

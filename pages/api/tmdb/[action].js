@@ -1,6 +1,6 @@
 export default async function handler(req, res) {
   const { action } = req.query;
-  const apiKey = process.env.NEXT_PUBLIC_TMDB_API_KEY;
+  const apiKey = process.env.TMDB_API_KEY || process.env.NEXT_PUBLIC_TMDB_API_KEY;
   const readAccessToken = process.env.TMDB_API_READ_ACCESS_TOKEN;
 
   if (req.method !== 'GET') {
@@ -9,7 +9,9 @@ export default async function handler(req, res) {
   }
 
   if (!apiKey && !readAccessToken) {
-    return res.status(500).json({ error: 'TMDb API key is not configured. Set TMDB_API_KEY.' });
+    return res.status(500).json({
+      error: 'TMDb credentials are not configured. Set TMDB_API_KEY or TMDB_API_READ_ACCESS_TOKEN.',
+    });
   }
 
   let url;
@@ -55,8 +57,8 @@ export default async function handler(req, res) {
       res.setHeader('ETag', clientETag);
     }
 
-    const tmdbUrl = `${url}${readAccessToken ? '' : `${url.includes('?') ? '&' : '?'}api_key=${encodeURIComponent(apiKey)}`}`;
-    const tmdbResponse = await fetch(tmdbUrl, {
+    const apiKeyQuery = `${url.includes('?') ? '&' : '?'}api_key=${encodeURIComponent(apiKey)}`;
+    let tmdbResponse = await fetch(`${url}${readAccessToken ? '' : apiKeyQuery}`, {
       headers: readAccessToken
         ? {
             Authorization: `Bearer ${readAccessToken}`,
@@ -64,6 +66,10 @@ export default async function handler(req, res) {
           }
         : undefined,
     });
+
+    if ((tmdbResponse.status === 401 || tmdbResponse.status === 403) && readAccessToken && apiKey) {
+      tmdbResponse = await fetch(`${url}${apiKeyQuery}`);
+    }
 
     // TMDB returns 304 when data unchanged
     if (tmdbResponse.status === 304) {

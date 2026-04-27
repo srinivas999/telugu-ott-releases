@@ -155,12 +155,48 @@ function buildTmdbUrl({ mediaType, query, year }) {
   return baseUrl;
 }
 
+function getTmdbCredentials() {
+  return {
+    apiKey: process.env.TMDB_API_KEY || process.env.NEXT_PUBLIC_TMDB_API_KEY,
+    readAccessToken: process.env.TMDB_API_READ_ACCESS_TOKEN,
+  };
+}
+
+function parseTmdbError(error) {
+  const message = String(error?.message || '');
+  const match = message.match(/TMDb returned (\d{3}):\s*([\s\S]*)$/i);
+  if (!match) {
+    return null;
+  }
+
+  const status = Number(match[1]);
+  let details = match[2] || '';
+  try {
+    details = JSON.parse(details);
+  } catch {
+    // Keep raw body text when TMDb response body is not valid JSON.
+  }
+
+  return { status, details };
+}
+
+function isAuthErrorStatus(status) {
+  return status === 401 || status === 403;
+}
+
 async function fetchWithAuth(url, { apiKey, readAccessToken }) {
   if (readAccessToken) {
-    return fetchJsonFromUrl(url, {
-      Authorization: `Bearer ${readAccessToken}`,
-      'Content-Type': 'application/json;charset=utf-8',
-    });
+    try {
+      return await fetchJsonFromUrl(url, {
+        Authorization: `Bearer ${readAccessToken}`,
+        'Content-Type': 'application/json;charset=utf-8',
+      });
+    } catch (error) {
+      const tmdbError = parseTmdbError(error);
+      if (!apiKey || !isAuthErrorStatus(tmdbError?.status)) {
+        throw error;
+      }
+    }
   }
 
   return fetchJsonFromUrl(`${url}${url.includes('?') ? '&' : '?'}api_key=${encodeURIComponent(apiKey)}`);
@@ -184,11 +220,12 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Invalid mediaType. Use "movie" or "tv".' });
   }
 
-  const apiKey = process.env.NEXT_PUBLIC_TMDB_API_KEY;
-  const readAccessToken = process.env.TMDB_API_READ_ACCESS_TOKEN;
+  const { apiKey, readAccessToken } = getTmdbCredentials();
 
   if (!apiKey && !readAccessToken) {
-    return res.status(500).json({ error: 'TMDb API key or read access token is not configured.' });
+    return res.status(500).json({
+      error: 'TMDb credentials are not configured. Set TMDB_API_KEY or TMDB_API_READ_ACCESS_TOKEN.',
+    });
   }
 
   try {
@@ -242,6 +279,16 @@ export default async function handler(req, res) {
         : 'No TMDb match found after all fallback strategies.',
     });
   } catch (error) {
+    const tmdbError = parseTmdbError(error);
+    if (tmdbError) {
+      return res.status(tmdbError.status || 502).json({
+        error: 'TMDb request failed.',
+        details: tmdbError.details,
+        results: [],
+        bestMatch: null,
+      });
+    }
+
     return res.status(500).json({
       error: `Unable to fetch TMDb data. ${error?.message || ''}`,
       results: [],
