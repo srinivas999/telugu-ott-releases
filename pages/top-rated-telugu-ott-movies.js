@@ -47,6 +47,13 @@ function toBackdropUrl(movie) {
   return `${TMDB_BACKDROP_BASE}${path}`;
 }
 
+function getTopRatedBadge(movie) {
+  if (!movie?.poster_path) return 'Poster Soon';
+  const rating = getPreferredMovieRating(movie) || 0;
+  if (rating >= 8.5) return 'Must Watch';
+  return 'Top Rated';
+}
+
 export async function getStaticProps() {
   if (!supabase) {
     return { props: { movies: [] }, revalidate: 3600 };
@@ -140,6 +147,14 @@ export default function TopRatedTeluguOttMoviesPage({ movies = [] }) {
                 <span>{getPreferredMovieRating(featured).toFixed(1)}/10</span>
               ) : null}
             </div>
+            <div className="nf-hero__actions">
+              <Link href="/browse/trending-now" className="nf-btn nf-btn--primary">
+                Watch Top Picks
+              </Link>
+              <Link href="/telugu-ott-releases-this-week" className="nf-btn nf-btn--ghost">
+                Explore New Releases
+              </Link>
+            </div>
           </div>
         </section>
 
@@ -149,7 +164,7 @@ export default function TopRatedTeluguOttMoviesPage({ movies = [] }) {
               <h2>All Top Rated ({movies.length})</h2>
             </div>
             {movies.length === 0 ? (
-              <p className="nf-status">No rated Telugu OTT movies are available right now.</p>
+              <p className="nf-status">No rated titles yet. Fresh top picks will appear here soon.</p>
             ) : (
               <div className="nf-collection__grid">
                 {movies.map((movie) => {
@@ -164,9 +179,13 @@ export default function TopRatedTeluguOttMoviesPage({ movies = [] }) {
                           sizes="(max-width: 640px) 44vw, (max-width: 980px) 22vw, 15vw"
                           className="nf-card__image"
                         />
+                        <span className="nf-card__badge">{getTopRatedBadge(movie)}</span>
                         {(getPreferredMovieRating(movie) || 0) > 0 ? (
                           <span className="nf-card__rating">{getPreferredMovieRating(movie).toFixed(1)}</span>
                         ) : null}
+                        <div className="nf-card__overlay">
+                          <span className="nf-card__overlay-cta">View Details</span>
+                        </div>
                       </div>
                       <div className="nf-card__meta">
                         <h3>{movie.movie_name || 'Untitled'}</h3>

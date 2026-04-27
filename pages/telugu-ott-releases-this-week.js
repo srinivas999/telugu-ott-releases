@@ -46,6 +46,12 @@ function toBackdropUrl(movie) {
   return `${TMDB_BACKDROP_BASE}${path}`;
 }
 
+function getWeekBadge(movie, hasWeekMovies) {
+  if (!movie?.poster_path) return 'Poster Soon';
+  if (hasWeekMovies) return 'New This Week';
+  return 'This Month';
+}
+
 function toLocalDateKey(date) {
   const year = date.getFullYear();
   const month = `${date.getMonth() + 1}`.padStart(2, '0');
@@ -194,6 +200,14 @@ export default function TeluguOttReleasesThisWeekPage({
                 <span>{formatReleaseDate(monthRange.start)} - {formatReleaseDate(monthRange.end)}</span>
               ) : null}
             </div>
+            <div className="nf-hero__actions">
+              <Link href="/browse/trending-now" className="nf-btn nf-btn--primary">
+                Explore Movies
+              </Link>
+              <Link href="/top-rated-telugu-ott-movies" className="nf-btn nf-btn--ghost">
+                View Top Picks
+              </Link>
+            </div>
           </div>
         </section>
 
@@ -243,7 +257,7 @@ export default function TeluguOttReleasesThisWeekPage({
             </div>
 
             {displayMovies.length === 0 ? (
-              <p className="nf-status">No Telugu OTT movies are scheduled right now.</p>
+              <p className="nf-status">No releases yet. New Telugu OTT drops will show up here soon.</p>
             ) : (
               <div className="nf-collection__grid week-grid">
                 {displayMovies.map((movie) => {
@@ -258,6 +272,10 @@ export default function TeluguOttReleasesThisWeekPage({
                           sizes="(max-width: 640px) 44vw, (max-width: 980px) 22vw, 15vw"
                           className="nf-card__image"
                         />
+                        <span className="nf-card__badge">{getWeekBadge(movie, hasWeekMovies)}</span>
+                        <div className="nf-card__overlay">
+                          <span className="nf-card__overlay-cta">View Details</span>
+                        </div>
                       </div>
                       <div className="nf-card__meta">
                         <h3>{movie.movie_name || 'Untitled'}</h3>
