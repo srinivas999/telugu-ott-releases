@@ -11,6 +11,13 @@ import {
   useReleasingThisWeek,
   useRecentlyAdded,
 } from '../lib/hooks/useMovies';
+import {
+  buildPlatformSpotlights,
+  getKnownPlatformNames,
+  getPlatformFilterOptions,
+  getPlatformHref,
+  normalizePlatform,
+} from '../lib/utils/platforms';
 import { formatCompactVoteCount, getPreferredMovieRating, getTmdbVoteCountValue } from '../lib/utils/ratings';
 import { getAvailableEditorialCollections } from '../lib/utils/editorialCollections';
 import { generateUniqueSlug } from '../lib/utils/slug';
@@ -21,33 +28,8 @@ const TMDB_BACKDROP_BASE = 'https://image.tmdb.org/t/p/w1280';
 const FALLBACK_POSTER = '/images/default_poster.png';
 const SITE_URL = 'https://svteluguott.in';
 
-const platformOptions = [
-  { value: 'all', label: 'All' },
-  { value: 'Netflix', label: 'Netflix' },
-  { value: 'Aha', label: 'Aha' },
-  { value: 'Prime Video', label: 'Prime Video' },
-  { value: 'JioHotstar', label: 'JioHotstar' },
-  { value: 'Zee5', label: 'Zee5' },
-  { value: 'Sun NXT', label: 'Sun NXT' },
-  { value: 'ETV Win', label: 'ETV Win' },
-  { value: 'other', label: 'Other' },
-];
-
 const defaultSeoDescription =
   'Telugu OTT release schedule for upcoming Telugu OTT movies, streaming dates, and platform availability across Netflix, Aha, Prime Video, JioHotstar, Zee5, Sun NXT, and ETV Win.';
-
-function normalizePlatform(value) {
-  if (!value) return '';
-  const lower = String(value).toLowerCase();
-  if (lower.includes('prime')) return 'Prime Video';
-  if (lower.includes('netflix')) return 'Netflix';
-  if (lower.includes('aha')) return 'Aha';
-  if (lower.includes('hotstar')) return 'JioHotstar';
-  if (lower.includes('zee')) return 'Zee5';
-  if (lower.includes('sun nxt') || lower.includes('sun')) return 'Sun NXT';
-  if (lower.includes('etv')) return 'ETV Win';
-  return String(value).trim();
-}
 
 function formatReleaseDate(value) {
   if (!value) return 'TBA';
@@ -177,6 +159,7 @@ function MovieRail({ title, movies, type = 'ott', viewAllHref = '', signal = '' 
 }
 
 export default function HomePage() {
+  const platformOptions = useMemo(() => getPlatformFilterOptions(), []);
   const [ottMovies, setOttMovies] = useState([]);
   const [theatreMovies, setTheatreMovies] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -232,11 +215,12 @@ export default function HomePage() {
   }, []);
 
   const filteredMovies = useMemo(() => {
+    const knownPlatformNames = getKnownPlatformNames();
     const filtered = ottMovies.filter((movie) => {
       const normalized = normalizePlatform(movie.streaming_partner);
       if (selectedPlatform === 'all') return true;
       if (selectedPlatform === 'other') {
-        return !['Netflix', 'Aha', 'Prime Video', 'JioHotstar', 'Zee5', 'Sun NXT', 'ETV Win'].includes(normalized);
+        return !knownPlatformNames.includes(normalized);
       }
       return normalized === selectedPlatform;
     });
@@ -281,12 +265,14 @@ export default function HomePage() {
     ].filter((section) => section.movies.length > 0),
     [ottMovies]
   );
+  const platformSpotlights = useMemo(() => buildPlatformSpotlights(ottMovies, 6), [ottMovies]);
 
   const heroMovie = filteredMovies[0] || moduleTrendingMovies[0] || recentlyAddedMovies[0] || null;
   const heroTitle = heroMovie?.movie_name || heroMovie?.title || 'Telugu OTT Releases';
   const heroDescription =
     heroMovie?.overview ||
     'Discover the latest Telugu OTT drops, trending movies, and this week releases across every major streaming platform.';
+  const heroPlatformHref = heroMovie?.streaming_partner ? getPlatformHref(heroMovie.streaming_partner, '') : '';
   const retentionItems = [
     {
       href: '/browse/trending-now',
@@ -398,14 +384,49 @@ export default function HomePage() {
               <Link href="/telugu-ott-releases-this-week" className="nf-btn nf-btn--primary">
                 Explore This Week
               </Link>
-              <Link href="/browse/trending-now" className="nf-btn nf-btn--ghost">
-                View Top Picks
-              </Link>
+              {heroPlatformHref ? (
+                <Link href={heroPlatformHref} className="nf-btn nf-btn--ghost">
+                  What&apos;s New on {heroMovie?.streaming_partner}
+                </Link>
+              ) : (
+                <Link href="/browse/trending-now" className="nf-btn nf-btn--ghost">
+                  View Top Picks
+                </Link>
+              )}
             </div>
           </div>
         </section>
 
         <div className="nf-content">
+          {platformSpotlights.length > 0 ? (
+            <section className="nf-platform-hub">
+              <div className="nf-platform-hub__header">
+                <h2>Browse by Platform</h2>
+                <p>
+                  Start with the service you already open first. Check what&apos;s new on Netflix, Aha, Prime Video, JioHotstar, and more without backing into genre filters.
+                </p>
+              </div>
+              <div className="nf-platform-hub__grid">
+                {platformSpotlights.map((platform) => (
+                  <Link
+                    key={platform.slug}
+                    href={platform.href}
+                    className="nf-platform-hub__card"
+                    style={{ '--platform-accent': platform.color }}
+                  >
+                    <span className="nf-platform-hub__eyebrow">Platform First</span>
+                    <h3>What&apos;s New on {platform.name}?</h3>
+                    <p>
+                      {platform.movieCount} Telugu release{platform.movieCount !== 1 ? 's' : ''} tracked
+                      {platform.latestMovie?.digital_release_date ? ` · latest ${formatReleaseDate(platform.latestMovie.digital_release_date)}` : ''}.
+                    </p>
+                    <strong>{platform.latestMovie?.movie_name || `Open ${platform.name}`}</strong>
+                  </Link>
+                ))}
+              </div>
+            </section>
+          ) : null}
+
           <section className="nf-explore">
             <div className="nf-explore__header">
               <h2>Explore More</h2>

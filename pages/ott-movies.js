@@ -6,46 +6,18 @@ import Layout from '../components/Layout';
 import Seo from '../components/Seo';
 import Breadcrumb from '../components/common/Breadcrumb';
 import { supabase } from '../lib/supabaseClient';
+import {
+  buildPlatformSpotlights,
+  getKnownPlatformNames,
+  getPlatformColor,
+  getPlatformFilterOptions,
+  normalizePlatform,
+} from '../lib/utils/platforms';
 import { getPreferredMovieRating, withPreferredMovieRating } from '../lib/utils/ratings';
 import { generateUniqueSlug } from '../lib/utils/slug';
 
-const platformOptions = [
-  { value: 'all', label: 'All' },
-  { value: 'Netflix', label: 'Netflix', color: '#E50914' },
-  { value: 'Aha', label: 'Aha', color: '#FF6B00' },
-  { value: 'Prime Video', label: 'Prime', color: '#00A8E1' },
-  { value: 'JioHotstar', label: 'Hotstar', color: '#1F80E0' },
-  { value: 'Zee5', label: 'Zee5', color: '#6C2E7C' },
-  { value: 'Sun NXT', label: 'Sun NXT', color: '#E31837' },
-  { value: 'ETV Win', label: 'ETV Win', color: '#0066CC' },
-  { value: 'other', label: 'Other', color: '#64748b' },
-];
-
-const platformColorMap = {
-  Netflix: '#E50914',
-  'Prime Video': '#00A8E1',
-  Aha: '#FF6B00',
-  JioHotstar: '#1F80E0',
-  Zee5: '#6C2E7C',
-  'Sun NXT': '#E31837',
-  'ETV Win': '#0066CC',
-};
-
 const defaultSeoDescription =
   'Telugu OTT release schedule for upcoming Telugu OTT movies, streaming dates, and platform availability across Netflix, Aha, Prime Video, JioHotstar, Zee5, Sun NXT, and ETV Win.';
-
-function normalizePlatform(value) {
-  if (!value) return '';
-  const lower = String(value).toLowerCase();
-  if (lower.includes('prime')) return 'Prime Video';
-  if (lower.includes('netflix')) return 'Netflix';
-  if (lower.includes('aha')) return 'Aha';
-  if (lower.includes('hotstar')) return 'JioHotstar';
-  if (lower.includes('zee')) return 'Zee5';
-  if (lower.includes('sun nxt') || lower.includes('sun')) return 'Sun NXT';
-  if (lower.includes('etv')) return 'ETV Win';
-  return String(value).trim();
-}
 
 function formatReleaseDate(value) {
   if (!value) return 'TBA';
@@ -77,10 +49,6 @@ function sortMovies(movies, sortOrder) {
   });
 }
 
-function getPlatformColor(platform) {
-  return platformColorMap[normalizePlatform(platform)] || '#64748b';
-}
-
 function SkeletonCard() {
   return (
     <article className="ott-movie-card ott-movie-card--skeleton">
@@ -97,6 +65,7 @@ function SkeletonCard() {
 export default function OttMoviesPage({ home = false, initialMovies = [] }) {
   const router = useRouter();
   const assetBasePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+  const platformOptions = useMemo(() => getPlatformFilterOptions(), []);
   const [ottMovies, setOttMovies] = useState(initialMovies);
   const [loading, setLoading] = useState(initialMovies.length === 0);
   const [error, setError] = useState('');
@@ -146,11 +115,12 @@ export default function OttMoviesPage({ home = false, initialMovies = [] }) {
   }, [initialMovies]);
 
   const filteredMovies = useMemo(() => {
+    const knownPlatformNames = getKnownPlatformNames();
     const filtered = ottMovies.filter((movie) => {
       const normalized = normalizePlatform(movie.streaming_partner);
       if (selectedPlatform === 'all') return true;
       if (selectedPlatform === 'other') {
-        return !['Netflix', 'Aha', 'Prime Video', 'JioHotstar', 'Zee5', 'Sun NXT', 'ETV Win'].includes(normalized);
+        return !knownPlatformNames.includes(normalized);
       }
       return normalized === selectedPlatform;
     });
@@ -158,6 +128,7 @@ export default function OttMoviesPage({ home = false, initialMovies = [] }) {
   }, [ottMovies, selectedPlatform, sortOrder]);
 
   const trendingMovies = useMemo(() => sortMovies(ottMovies, 'desc').slice(0, 6), [ottMovies]);
+  const platformSpotlights = useMemo(() => buildPlatformSpotlights(ottMovies, 6), [ottMovies]);
   const latestMovie = filteredMovies[0];
 
   const shareUrl = `https://svteluguott.in${router.asPath}`;
@@ -278,6 +249,35 @@ export default function OttMoviesPage({ home = false, initialMovies = [] }) {
                   className="ott-movies-featured__glow"
                   style={{ background: `radial-gradient(circle at center, ${getPlatformColor(latestMovie.streaming_partner)}33, transparent 70%)` }}
                 />
+              </div>
+            </section>
+          )}
+
+          {platformSpotlights.length > 0 && (
+            <section className="ott-platform-discovery">
+              <div className="ott-platform-discovery__header">
+                <p className="ott-platform-discovery__eyebrow">Platform Discovery</p>
+                <h2>Pick a platform first</h2>
+                <p className="ott-platform-discovery__copy">
+                  Most visitors already know the app they want to open. Jump straight into that platform&apos;s Telugu release feed instead of starting with a broad archive.
+                </p>
+              </div>
+              <div className="ott-platform-discovery__grid">
+                {platformSpotlights.map((platform) => (
+                  <Link
+                    key={platform.slug}
+                    href={platform.href}
+                    className="ott-platform-discovery__card"
+                    style={{ '--platform-color': platform.color }}
+                  >
+                    <span className="ott-platform-discovery__label">What&apos;s new on {platform.name}?</span>
+                    <strong>{platform.latestMovie?.movie_name || platform.name}</strong>
+                    <p>
+                      {platform.movieCount} Telugu release{platform.movieCount !== 1 ? 's' : ''} tracked
+                      {platform.latestMovie?.digital_release_date ? ` · latest ${formatReleaseDate(platform.latestMovie.digital_release_date)}` : ''}.
+                    </p>
+                  </Link>
+                ))}
               </div>
             </section>
           )}
