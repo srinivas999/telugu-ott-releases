@@ -4,13 +4,14 @@ import Link from 'next/link';
 import Layout from '../components/Layout';
 import Seo from '../components/Seo';
 import Breadcrumb from '../components/common/Breadcrumb';
+import ContinueBrowsing from '../components/common/ContinueBrowsing';
 import { supabase } from '../lib/supabaseClient';
 import {
   useTrendingMovies,
   useReleasingThisWeek,
   useRecentlyAdded,
 } from '../lib/hooks/useMovies';
-import { getPreferredMovieRating } from '../lib/utils/ratings';
+import { formatCompactVoteCount, getPreferredMovieRating, getTmdbVoteCountValue } from '../lib/utils/ratings';
 import { getAvailableEditorialCollections } from '../lib/utils/editorialCollections';
 import { generateUniqueSlug } from '../lib/utils/slug';
 import { withStoredTmdbDetails } from '../lib/utils/tmdb';
@@ -18,6 +19,7 @@ import { withStoredTmdbDetails } from '../lib/utils/tmdb';
 const TMDB_POSTER_BASE = 'https://image.tmdb.org/t/p/w500';
 const TMDB_BACKDROP_BASE = 'https://image.tmdb.org/t/p/w1280';
 const FALLBACK_POSTER = '/images/default_poster.png';
+const SITE_URL = 'https://svteluguott.in';
 
 const platformOptions = [
   { value: 'all', label: 'All' },
@@ -84,12 +86,23 @@ function toBackdropUrl(movie) {
   return `${TMDB_BACKDROP_BASE}${backdropPath}`;
 }
 
-function getCardBadge(movie, type = 'ott') {
-  if (type === 'theatre') return 'In Theatres';
-  if (!movie?.poster_path) return 'Poster Soon';
+function getCardBadge(movie, type = 'ott', signal = '') {
+  if (signal === 'trending') return 'Popular This Week';
+  if (signal === 'week') return 'Trending Release';
+  if (signal === 'recent') return 'Hot Pick';
+  if (type === 'theatre') return 'Popular This Week';
+  if (!movie?.poster_path) return '';
   const rating = getPreferredMovieRating(movie) || movie.vote_average || 0;
   if (rating >= 8) return 'Top Rated';
   return 'Streaming';
+}
+
+function getTrustSignal(signal = '', type = 'ott') {
+  if (signal === 'trending') return 'Popular this week';
+  if (signal === 'week') return 'Trending now';
+  if (signal === 'recent') return 'Fresh pick';
+  if (type === 'theatre') return 'Audience buzz';
+  return 'Viewer trust';
 }
 
 function sortByReleaseDate(movies, sortOrder) {
@@ -102,7 +115,7 @@ function sortByReleaseDate(movies, sortOrder) {
   });
 }
 
-function MovieRail({ title, movies, type = 'ott', viewAllHref = '' }) {
+function MovieRail({ title, movies, type = 'ott', viewAllHref = '', signal = '' }) {
   if (!movies || movies.length === 0) return null;
 
   return (
@@ -122,7 +135,9 @@ function MovieRail({ title, movies, type = 'ott', viewAllHref = '' }) {
           const href = isTheatre
             ? `/theatre-release/${movie.id}`
             : `/movie/${generateUniqueSlug(movie.movie_name || movie.title, movie.id)}`;
+          const badge = getCardBadge(movie, type, signal);
           const rating = getPreferredMovieRating(movie) || movie.vote_average || 0;
+          const voteCountLabel = formatCompactVoteCount(getTmdbVoteCountValue(movie));
           const label = isTheatre
             ? formatReleaseDate(movie.release_date)
             : formatReleaseDate(movie.digital_release_date);
@@ -137,7 +152,7 @@ function MovieRail({ title, movies, type = 'ott', viewAllHref = '' }) {
                   sizes="(max-width: 640px) 38vw, (max-width: 980px) 22vw, 16vw"
                   className="nf-card__image"
                 />
-                <span className="nf-card__badge">{getCardBadge(movie, type)}</span>
+                {badge ? <span className="nf-card__badge">{badge}</span> : null}
                 {rating > 0 ? (
                   <span className="nf-card__rating">{Number(rating).toFixed(1)}</span>
                 ) : null}
@@ -148,6 +163,10 @@ function MovieRail({ title, movies, type = 'ott', viewAllHref = '' }) {
               <div className="nf-card__meta">
                 <h3>{movie.movie_name || movie.title || 'Untitled'}</h3>
                 <p>{isTheatre ? 'Theatre' : movie.streaming_partner || 'OTT'} - {label}</p>
+                <div className="nf-card__trust">
+                  <span>{voteCountLabel || 'New audience signal'}</span>
+                  <span>{getTrustSignal(signal, type)}</span>
+                </div>
               </div>
             </Link>
           );
@@ -229,35 +248,114 @@ export default function HomePage() {
     () => getAvailableEditorialCollections(ottMovies, 10).slice(0, 6),
     [ottMovies]
   );
+  const topGenresText = useMemo(
+    () => editorialCollections.slice(0, 3).map((collection) => collection.shortLabel).join(', '),
+    [editorialCollections]
+  );
+  const platformSections = useMemo(
+    () => [
+      {
+        title: 'Netflix Releases',
+        viewAllHref: '/platform/netflix',
+        movies: sortByReleaseDate(
+          ottMovies.filter((movie) => normalizePlatform(movie.streaming_partner) === 'Netflix'),
+          'desc'
+        ).slice(0, 18),
+      },
+      {
+        title: 'Aha Releases',
+        viewAllHref: '/platform/aha',
+        movies: sortByReleaseDate(
+          ottMovies.filter((movie) => normalizePlatform(movie.streaming_partner) === 'Aha'),
+          'desc'
+        ).slice(0, 18),
+      },
+      {
+        title: 'Prime Video Releases',
+        viewAllHref: '/platform/prime-video',
+        movies: sortByReleaseDate(
+          ottMovies.filter((movie) => normalizePlatform(movie.streaming_partner) === 'Prime Video'),
+          'desc'
+        ).slice(0, 18),
+      },
+    ].filter((section) => section.movies.length > 0),
+    [ottMovies]
+  );
 
   const heroMovie = filteredMovies[0] || moduleTrendingMovies[0] || recentlyAddedMovies[0] || null;
   const heroTitle = heroMovie?.movie_name || heroMovie?.title || 'Telugu OTT Releases';
   const heroDescription =
     heroMovie?.overview ||
     'Discover the latest Telugu OTT drops, trending movies, and this week releases across every major streaming platform.';
+  const retentionItems = [
+    {
+      href: '/browse/trending-now',
+      eyebrow: 'Trending Now',
+      title: 'Because you are browsing new Telugu OTT releases',
+      description: 'Jump into the hottest titles people are likely to click next.',
+      cta: 'Open Trending',
+    },
+    {
+      href: '/top-rated-telugu-ott-movies',
+      eyebrow: 'Top Rated',
+      title: 'Stay with the strongest picks',
+      description: 'Move from fresh releases into the best-rated Telugu OTT movies.',
+      cta: 'View Top Picks',
+    },
+    {
+      href: '/telugu-ott-releases-this-week',
+      eyebrow: 'This Week',
+      title: 'Keep the release loop going',
+      description: 'See what is dropping over the next 7 days across OTT platforms.',
+      cta: 'See This Week',
+    },
+    {
+      href: '/theatre-release',
+      eyebrow: 'Beyond OTT',
+      title: 'Continue into theatre releases',
+      description: 'Switch from streaming to the latest big-screen Telugu movies.',
+      cta: 'Browse Theatres',
+    },
+  ];
 
-  const jsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'ItemList',
-    name: 'Latest Telugu OTT Releases',
-    itemListElement: filteredMovies.slice(0, 10).map((movie, index) => ({
-      '@type': 'ListItem',
-      position: index + 1,
-      item: {
-        '@type': 'Movie',
-        name: movie.movie_name || 'Untitled',
-        datePublished: movie.digital_release_date || '',
-        description: movie.streaming_partner ? `Streaming on ${movie.streaming_partner}` : 'Telugu OTT movie release',
-        url: `https://svteluguott.in/movie/${generateUniqueSlug(movie.movie_name, movie.id)}`,
-      },
-    })),
-  };
+  const seoDescription = [
+    'Track Telugu OTT releases with streaming dates, platform updates, and direct movie pages.',
+    topGenresText ? `Browse ${topGenresText} collections, top-rated picks, and this week releases.` : '',
+  ].filter(Boolean).join(' ');
+  const jsonLd = [
+    {
+      '@context': 'https://schema.org',
+      '@type': 'WebPage',
+      name: 'Latest Telugu OTT Releases',
+      url: `${SITE_URL}/`,
+      description: seoDescription,
+    },
+    {
+      '@context': 'https://schema.org',
+      '@type': 'ItemList',
+      name: 'Latest Telugu OTT Releases',
+      numberOfItems: filteredMovies.slice(0, 10).length,
+      itemListElement: filteredMovies.slice(0, 10).map((movie, index) => ({
+        '@type': 'ListItem',
+        position: index + 1,
+        item: {
+          '@type': 'Movie',
+          name: movie.movie_name || 'Untitled',
+          description: movie.streaming_partner ? `Streaming on ${movie.streaming_partner}` : 'Telugu OTT movie release',
+          datePublished: movie.digital_release_date || '',
+          inLanguage: movie.language || movie.movie_language || 'te',
+          image: toPosterUrl(movie),
+          url: `${SITE_URL}/movie/${generateUniqueSlug(movie.movie_name, movie.id)}`,
+        },
+      })),
+    },
+  ];
 
   return (
     <Layout>
       <Seo
-        title="Telugu OTT releases this week | OTT Movies"
-        description={defaultSeoDescription}
+        title="Latest Telugu OTT releases, streaming dates and movie updates"
+        description={seoDescription}
         url="/"
         keywords="Telugu OTT releases this week, upcoming OTT movies Telugu, Netflix Telugu, Aha Telugu, Prime Video Telugu, JioHotstar Telugu, Zee5 Telugu, Sun NXT Telugu, ETV Win Telugu"
         jsonLd={jsonLd}
@@ -292,6 +390,9 @@ export default function HomePage() {
               {heroMovie && (getPreferredMovieRating(heroMovie) || 0) > 0 ? (
                 <span>{getPreferredMovieRating(heroMovie).toFixed(1)}/10</span>
               ) : null}
+              {heroMovie ? (
+                <span>{formatCompactVoteCount(getTmdbVoteCountValue(heroMovie)) || 'Popular pick'}</span>
+              ) : null}
             </div>
             <div className="nf-hero__actions">
               <Link href="/telugu-ott-releases-this-week" className="nf-btn nf-btn--primary">
@@ -309,6 +410,11 @@ export default function HomePage() {
             <div className="nf-explore__header">
               <h2>Explore More</h2>
             </div>
+            <p className="nf-collection-copy">
+              Start with the <Link href="/telugu-ott-releases-this-week" className="nf-inline-link">Telugu OTT releases this week</Link> page,
+              compare it with <Link href="/top-rated-telugu-ott-movies" className="nf-inline-link">top rated Telugu OTT movies</Link>,
+              or jump into <Link href="/browse/trending-now" className="nf-inline-link">trending Telugu OTT movies</Link> when you want the fastest discovery path.
+            </p>
             <div className="nf-explore__grid">
               <Link href="/telugu-ott-releases-this-week" className="nf-explore__card">
                 <span>This Week</span>
@@ -354,13 +460,28 @@ export default function HomePage() {
             title="Trending Now"
             movies={moduleTrendingMovies.slice(0, 20).map(withDisplayFields)}
             viewAllHref="/browse/trending-now"
+            signal="trending"
           />
-          <MovieRail title="Coming This Week" movies={weekendReleases.slice(0, 20).map(withDisplayFields)} />
+          <MovieRail
+            title="Coming This Week"
+            movies={weekendReleases.slice(0, 20).map(withDisplayFields)}
+            signal="week"
+          />
           <MovieRail
             title="Recently Added"
             movies={recentlyAddedMovies.slice(0, 20).map(withDisplayFields)}
             viewAllHref="/browse/recently-added"
+            signal="recent"
           />
+
+          {platformSections.map((section) => (
+            <MovieRail
+              key={section.title}
+              title={section.title}
+              movies={section.movies}
+              viewAllHref={section.viewAllHref}
+            />
+          ))}
 
           <section className="nf-table">
             <section className="nf-controls" aria-label="Browse filters">
@@ -437,6 +558,13 @@ export default function HomePage() {
             movies={theatreMovies.slice(0, 20)}
             type="theatre"
             viewAllHref="/theatre-release"
+            signal="trending"
+          />
+
+          <ContinueBrowsing
+            title="Continue Browsing"
+            description="Every section should lead to the next watchlist. Pick where you want to go next."
+            items={retentionItems}
           />
         </div>
 

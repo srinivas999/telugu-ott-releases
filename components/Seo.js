@@ -14,6 +14,7 @@ export default function Seo({
   const defaultImage = `https://svteluguott.in${assetBasePath}/images/default_poster.png`;
   const pageUrl = url ? `https://svteluguott.in${url}` : 'https://svteluguott.in';
   const ogImage = image || defaultImage;
+  const schemas = Array.isArray(jsonLd) ? jsonLd.filter(Boolean) : jsonLd ? [jsonLd] : [];
 
   return (
     <Head>
@@ -34,9 +35,13 @@ export default function Seo({
       <meta name="twitter:site" content="@Srinivas" />
       <meta name="twitter:creator" content="@Srinivas" />
       <meta name="robots" content={robots} />
-      {jsonLd ? (
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-      ) : null}
+      {schemas.map((schema, index) => (
+        <script
+          key={`jsonld-${index}`}
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+        />
+      ))}
     </Head>
   );
 }

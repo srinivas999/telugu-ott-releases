@@ -3,8 +3,14 @@ import Link from 'next/link';
 import Layout from '../components/Layout';
 import Seo from '../components/Seo';
 import Breadcrumb from '../components/common/Breadcrumb';
+import ContinueBrowsing from '../components/common/ContinueBrowsing';
 import { supabase } from '../lib/supabaseClient';
-import { getPreferredMovieRating, withPreferredMovieRating } from '../lib/utils/ratings';
+import {
+  formatCompactVoteCount,
+  getPreferredMovieRating,
+  getTmdbVoteCountValue,
+  withPreferredMovieRating,
+} from '../lib/utils/ratings';
 import { generateUniqueSlug } from '../lib/utils/slug';
 
 const TMDB_POSTER_BASE = 'https://image.tmdb.org/t/p/w500';
@@ -48,7 +54,8 @@ function toBackdropUrl(movie) {
 }
 
 function getTopRatedBadge(movie) {
-  if (!movie?.poster_path) return 'Poster Soon';
+  if (!movie?.poster_path) return '';
+  if ((movie.popularity || 0) >= 20) return 'Popular This Week';
   const rating = getPreferredMovieRating(movie) || 0;
   if (rating >= 8.5) return 'Must Watch';
   return 'Top Rated';
@@ -80,6 +87,36 @@ export default function TopRatedTeluguOttMoviesPage({ movies = [] }) {
   const title = 'Top Rated Telugu OTT Movies';
   const description = 'Browse highest rated Telugu OTT movies from the Telugu OTT database.';
   const featured = movies[0] || null;
+  const retentionItems = [
+    {
+      href: '/browse/trending-now',
+      eyebrow: 'Because You Liked Top Picks',
+      title: 'Move into what is trending now',
+      description: 'After the highest-rated titles, jump into what is currently getting attention.',
+      cta: 'Open Trending',
+    },
+    {
+      href: '/browse/recently-added',
+      eyebrow: 'Recently Added',
+      title: 'Continue with fresh library additions',
+      description: 'Keep browsing with newer entries added to the Telugu OTT database.',
+      cta: 'See New Additions',
+    },
+    {
+      href: '/telugu-ott-releases-this-week',
+      eyebrow: 'Release Loop',
+      title: 'From best picks to newest drops',
+      description: 'Switch from top-rated picks into this week OTT release calendar.',
+      cta: 'See This Week',
+    },
+    {
+      href: '/theatre-release',
+      eyebrow: 'Big Screen',
+      title: 'Keep going with theatre releases',
+      description: 'Step out of OTT and into the latest Telugu movies playing in theatres.',
+      cta: 'Browse Theatres',
+    },
+  ];
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'ItemList',
@@ -146,6 +183,9 @@ export default function TopRatedTeluguOttMoviesPage({ movies = [] }) {
               {featured && (getPreferredMovieRating(featured) || 0) > 0 ? (
                 <span>{getPreferredMovieRating(featured).toFixed(1)}/10</span>
               ) : null}
+              {featured ? (
+                <span>{formatCompactVoteCount(getTmdbVoteCountValue(featured)) || 'Popular this week'}</span>
+              ) : null}
             </div>
             <div className="nf-hero__actions">
               <Link href="/browse/trending-now" className="nf-btn nf-btn--primary">
@@ -169,6 +209,7 @@ export default function TopRatedTeluguOttMoviesPage({ movies = [] }) {
               <div className="nf-collection__grid">
                 {movies.map((movie) => {
                   const movieSlug = generateUniqueSlug(movie.movie_name, movie.id);
+                  const badge = getTopRatedBadge(movie);
                   return (
                     <Link key={movie.id || movieSlug} href={`/movie/${movieSlug}`} className="nf-card">
                       <div className="nf-card__poster">
@@ -179,7 +220,7 @@ export default function TopRatedTeluguOttMoviesPage({ movies = [] }) {
                           sizes="(max-width: 640px) 44vw, (max-width: 980px) 22vw, 15vw"
                           className="nf-card__image"
                         />
-                        <span className="nf-card__badge">{getTopRatedBadge(movie)}</span>
+                        {badge ? <span className="nf-card__badge">{badge}</span> : null}
                         {(getPreferredMovieRating(movie) || 0) > 0 ? (
                           <span className="nf-card__rating">{getPreferredMovieRating(movie).toFixed(1)}</span>
                         ) : null}
@@ -190,6 +231,10 @@ export default function TopRatedTeluguOttMoviesPage({ movies = [] }) {
                       <div className="nf-card__meta">
                         <h3>{movie.movie_name || 'Untitled'}</h3>
                         <p>{movie.streaming_partner || 'OTT'} - {formatReleaseDate(movie.digital_release_date)}</p>
+                        <div className="nf-card__trust">
+                          <span>{formatCompactVoteCount(getTmdbVoteCountValue(movie)) || 'Audience building'}</span>
+                          <span>{(movie.popularity || 0) >= 20 ? 'Popular this week' : 'Viewer favorite'}</span>
+                        </div>
                       </div>
                     </Link>
                   );
@@ -197,6 +242,12 @@ export default function TopRatedTeluguOttMoviesPage({ movies = [] }) {
               </div>
             )}
           </section>
+
+          <ContinueBrowsing
+            title="Keep Watching"
+            description="Top-rated pages should never be the end of the journey. Here is where to go next."
+            items={retentionItems}
+          />
         </section>
       </main>
     </Layout>
