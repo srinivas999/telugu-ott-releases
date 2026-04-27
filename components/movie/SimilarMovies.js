@@ -10,14 +10,31 @@ import { generateUniqueSlug } from '../../lib/utils/slug';
 
 const TMDB_POSTER_BASE = 'https://image.tmdb.org/t/p/w300';
 
-export default function SimilarMovies({ movies = [] }) {
+function formatReleaseDate(dateString) {
+  if (!dateString) return '';
+
+  try {
+    return new Date(`${dateString}T00:00:00`).toLocaleDateString('en-IN', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+    });
+  } catch {
+    return dateString;
+  }
+}
+
+export default function SimilarMovies({ title = 'Related Movies', description = '', movies = [] }) {
   if (!movies || movies.length === 0) {
     return null;
   }
 
   return (
     <section className={styles.container}>
-      <h3 className={styles.title}>Related Movies</h3>
+      <div className={styles.header}>
+        <h3 className={styles.title}>{title}</h3>
+        {description ? <p className={styles.description}>{description}</p> : null}
+      </div>
       <div className={styles.scrollContainer}>
         {movies.map((movie) => {
           const slug = generateUniqueSlug(movie.movie_name || movie.title, movie.id);
@@ -42,7 +59,7 @@ export default function SimilarMovies({ movies = [] }) {
                   <p className={styles.platform}>{movie.streaming_partner}</p>
                 )}
                 {movie.digital_release_date && (
-                  <p className={styles.releaseDate}>{movie.digital_release_date}</p>
+                  <p className={styles.releaseDate}>{formatReleaseDate(movie.digital_release_date)}</p>
                 )}
               </div>
             </Link>
